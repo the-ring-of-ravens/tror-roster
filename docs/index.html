@@ -34,7 +34,7 @@
     </div>
 
     <div id="rankup-banner" style="display:none; background:#1e3626; border:1px solid #3a6b45; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.92rem; color:#6ab87a;">
-    🎉 <span id="rankup-text"></span>
+    <span id="rankup-text"></span>
     </div>
     
   <!-- ═══ SOLDIERS TAB ═══ -->
@@ -509,7 +509,7 @@ async function init() {
                 if (match) {
                     const name = match[1].trim();
                     const newRank = match[2].trim();
-                    messages.push(`Congratulations to ${name} for ranking up to ${newRank}!`);
+                    messages.push(`🎉 Congratulations to ${name} for ranking up to ${newRank}!`);
                 }
             });
         });
