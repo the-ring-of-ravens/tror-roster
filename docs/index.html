@@ -31,7 +31,7 @@
 
 <main>
     <div id="session-warning" style="display:none; background:#2a1a10; border:1px solid #7a3a1e; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; color:#c86030; font-size:0.92rem;">
-  ⚠️ <strong>Unresolved Sessions:</strong> <span id="session-warning-text"></span>  |  Instructors: Please review attendance for name mismatches.
+  ⚠️ <strong>Unresolved Sessions:</strong> <span id="session-warning-text"></span>  |  Officers: Please review attendance for name mismatches.
     </div>
 
     <div id="rankup-banner" style="display:none; background:#1e3626; border:1px solid #3a6b45; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.92rem; color:#6ab87a;">
@@ -157,6 +157,14 @@ function parseCSV(text) {
   });
 }
 
+function parseDate(val) {
+  if (!val) return null;
+  const gviz = String(val).match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (gviz) return new Date(parseInt(gviz[1]), parseInt(gviz[2]), parseInt(gviz[3]));
+  const d = new Date(val);
+  return isNaN(d) ? null : d;
+}
+
 function formatDate(val) {
   if (!val) return '—';
   const match = String(val).match(/Date\((\d+),(\d+),(\d+)\)/);
@@ -273,7 +281,27 @@ function renderSoldiers() {
     return;
   }
 
-//   const max = maxRankPts();
+  const rankOrder = [
+    'General of the Army','Brigadier General','Colonel','Lieutenant Colonel','Major',
+    'Brigadier','Captain','First Lieutenant','Lieutenant',
+    'Command Sergeant Major','Sergeant Major',
+    'Chief Warrant Officer 5','Chief Warrant Officer 4','Chief Warrant Officer 3',
+    'Chief Warrant Officer 2','Warrant Officer 1',
+    'Master Gunnery Sergeant','Gunnery Sergeant','Senior Cornet',
+    'Paladin Sergeant','Paladin Corporal','Cornet First Class','Cornet','Junior Cornet',
+    'Exarch Lieutenant','Sergeant First Class','Sergeant','Corporal','Specialist',
+    'Private First Class','Private Second Class','Private','Trainee',];
+
+    filtered.sort((a, b) => {
+    const ri = rankOrder.indexOf(getRank(a));
+    const rj = rankOrder.indexOf(getRank(b));
+    const riSafe = ri === -1 ? rankOrder.length : ri;
+    const rjSafe = rj === -1 ? rankOrder.length : rj;
+    if (riSafe !== rjSafe) return riSafe - rjSafe;
+    const ptsDiff = (parseInt(b.points) || 0) - (parseInt(a.points) || 0);
+    if (ptsDiff !== 0) return ptsDiff;
+    return (a.name || '').localeCompare(b.name || '');
+    });
 
   tbody.innerHTML = filtered.map(s => {
     const pts = parseInt(s.points) || 0;
@@ -306,6 +334,14 @@ function renderSessions() {
 
   const el = document.getElementById('session-list');
   if (!filtered.length) { el.innerHTML = '<div class="empty">No sessions found.</div>'; return; }
+
+  filtered.sort((a, b) => {
+    const da = parseDate(a['Session Date']), db = parseDate(b['Session Date']);
+    if (da && db && da.getTime() !== db.getTime()) return db - da;
+    const nameDiff = (a['Session Name'] || '').localeCompare(b['Session Name'] || '');
+    if (nameDiff !== 0) return nameDiff;
+    return (a['Host'] || '').localeCompare(b['Host'] || '');
+  });
 
   el.innerHTML = filtered.map(s => {
     const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim()).filter(Boolean);
