@@ -29,6 +29,9 @@
 </header>
 
 <main>
+    <div id="session-warning" style="display:none; background:#2a1a10; border:1px solid #7a3a1e; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; color:#c86030; font-size:0.92rem;">
+  ⚠️ <strong>Unresolved sessions:</strong> <span id="session-warning-text"></span> — check the Sheet for name mismatches.
+    </div>
 
   <!-- ═══ SOLDIERS TAB ═══ -->
   <div id="tab-soldiers" class="tab-panel active">
@@ -150,15 +153,42 @@ function parseCSV(text) {
 }
 
 // ── Fetch a CSV relative to this page ──
-async function fetchCSV(path) {
+const SHEET_ID = '12oUuTbA2wmWWEqOjKRzQhm8IOEGAp2Ja5AIFm5Yffis';
+
+async function fetchSheet(tabName) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
   try {
-    const r = await fetch(path);
+    const r = await fetch(url);
     if (!r.ok) throw new Error(r.status);
-    return parseCSV(await r.text());
+    const text = await r.text();
+    // gviz wraps response in /*O_o*/ google.visualization.Query.setResponse({...});
+    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/)[1]);
+    const cols = json.table.cols.map(c => c.label);
+    return (json.table.rows || []).map(row => {
+      const obj = {};
+      cols.forEach((col, i) => {
+        const cell = row.c[i];
+        obj[col] = cell?.v ?? cell?.f ?? '';
+      });
+      return obj;
+    });
   } catch(e) {
-    console.warn('Could not load', path, e);
+    console.warn('Could not load sheet tab:', tabName, e);
     return [];
   }
+}
+
+async function fetchCSV(path) {
+  // Map old CSV paths to sheet tab names
+  const tabMap = {
+    'data/soldiers.csv': 'soldiers',
+    'data/sessions.csv': 'sessions',
+    'data/ranks.csv':    'ranks',
+  };
+  const tab = tabMap[path];
+  if (tab) return fetchSheet(tab);
+  console.warn('No sheet tab mapped for:', path);
+  return [];
 }
 
 // ── Derive rank from soldier ──
@@ -229,7 +259,7 @@ function renderSoldiers() {
 
   tbody.innerHTML = filtered.map(s => {
     const pts = parseInt(s.points) || 0;
-    const pct = Math.min(165, Math.round((pts / max) * 100));
+    const pct = Math.min(50, Math.round((pts / max) * 100));
     const rank = getRank(s);
     const reg = s.regiment_title || s.regiment || '—';
     return `<tr onclick="openSoldier('${encodeURIComponent(s.name)}')">
@@ -416,6 +446,18 @@ async function init() {
     fetchCSV('data/sessions.csv'),
     fetchCSV('data/ranks.csv'),
   ]);
+
+  // Warn about unresolved sessions
+    const unresolved = sessions.filter(s => {
+    const counted = (s['Counted?'] || '').trim();
+    const updated = (s['updated'] || '').trim();
+    return updated !== '1';
+    });
+    if (unresolved.length) {
+    const names = unresolved.map(s => s['Session Name'] || 'Unnamed').join(', ');
+    document.getElementById('session-warning-text').textContent = names;
+    document.getElementById('session-warning').style.display = 'block';
+    }
 
   populateFilters();
   updateStats();
