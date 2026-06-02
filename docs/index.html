@@ -362,9 +362,17 @@ function openSoldier(encodedName) {
       <div class="detail-row"><span class="dk">Title</span><span class="dv">${s.regiment_title || '—'}</span></div>
     </div>
 
-    ${s.inactive_date ? `<div class="drawer-section">
-      <h3>Inactive Since</h3>
-      <div class="detail-row"><span class="dk">Date</span><span class="dv">${s.inactive_date}</span></div>
+    ${s.join_date ? `<div class="drawer-section">
+      <h3>Enlistment Details</h3>
+      <div class="detail-row"><span class="dk">Join Date</span><span class="dv">${formatDate(s.join_date)}</span></div>
+      <div class="detail-row"><span class="dk">Member Duration</span><span class="dv">${Math.floor((new Date() - new Date(s.join_date)) / (1000 * 60 * 60 * 24))} days</span></div>
+    </div>` : ''}
+
+
+    ${s.inactive_date && new Date(s.inactive_date) < new Date().setMonth(new Date().getMonth() - 6) ? `<div class="drawer-section">
+      <h3>Inactivity Details</h3>
+      <div class="detail-row"><span class="dk">Inactive Since</span><span class="dv">${formatDate(s.inactive_date)}</span></div>
+      <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${Math.floor((new Date() - new Date(s.inactive_date)) / (1000 * 60 * 60 * 24))} days</span></div>
     </div>` : ''}
 
     <div class="drawer-section">
