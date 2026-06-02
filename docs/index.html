@@ -159,11 +159,17 @@ async function fetchCSV(path) {
   }
 }
 
-// ── Derive rank from points ──
-function getRank(points) {
-  const pts = parseInt(points) || 0;
+// ── Derive rank from soldier ──
+function getRank(soldier) {
+  if (soldier.title && soldier.title.trim() !== '') {
+    const match = ranks.find(r => r.abbreviation === soldier.title.trim());
+    return match ? match.rank : soldier.title.trim();
+  }
+  const pts = parseInt(soldier.points) || 0;
   if (!ranks.length) return '—';
-  const sorted = [...ranks].sort((a,b) => parseInt(b.rank_points)-parseInt(a.rank_points));
+  const sorted = [...ranks]
+    .filter(r => r.rank_points !== '' && r.rank_points !== undefined)
+    .sort((a, b) => parseInt(b.rank_points) - parseInt(a.rank_points));
   for (const r of sorted) {
     if (pts >= parseInt(r.rank_points)) return r.rank;
   }
@@ -185,7 +191,7 @@ function badge(status) {
 // ── Sessions attended by a name ──
 function sessionsFor(name) {
   return sessions.filter(s => {
-    const attendees = (s.attendees || '').split(',').map(a => a.trim().toLowerCase());
+    const attendees = (s.attendees || '').split(';').map(a => a.trim().toLowerCase());
     return attendees.includes(name.toLowerCase());
   });
 }
@@ -221,8 +227,8 @@ function renderSoldiers() {
 
   tbody.innerHTML = filtered.map(s => {
     const pts = parseInt(s.points) || 0;
-    const pct = Math.min(100, Math.round((pts / max) * 100));
-    const rank = getRank(pts);
+    const pct = Math.min(165, Math.round((pts / max) * 100));
+    const rank = getRank(s);
     const reg = s.regiment_title || s.regiment || '—';
     return `<tr onclick="openSoldier('${encodeURIComponent(s.name)}')">
       <td class="name-cell">${s.name || '—'}</td>
@@ -256,7 +262,7 @@ function renderSessions() {
   }
 
   el.innerHTML = filtered.map(s => {
-    const attendees = (s.attendees || '').split(',').map(a => a.trim()).filter(Boolean);
+    const attendees = (s.attendees || '').split(';').map(a => a.trim()).filter(Boolean);
     return `<div class="session-card" onclick="openSession('${encodeURIComponent(s.session_id)}')">
       <div class="sc-head">
         <span class="sc-name">${s.session_name || 'Unnamed Session'}</span>
@@ -278,7 +284,7 @@ function renderRanks() {
 
   const sorted = [...ranks].sort((a,b) => parseInt(a.rank_points)-parseInt(b.rank_points));
   el.innerHTML = sorted.map((r, i) => {
-    const countAtRank = soldiers.filter(s => getRank(s.points) === r.rank).length;
+    const countAtRank = soldiers.filter(s => getRank(s) === r.rank).length;
     return `<div class="rank-row">
       <span class="rank-number">${i + 1}</span>
       <span class="rank-name">${r.rank}</span>
@@ -295,7 +301,7 @@ function openSoldier(encodedName) {
   if (!s) return;
 
   const pts = parseInt(s.points) || 0;
-  const rank = getRank(pts);
+  const rank = getRank(s);
   const attended = sessionsFor(name);
   const isTrain = s.is_trainee === 'true' || s.is_trainee === '1';
 
@@ -344,7 +350,7 @@ function openSession(encodedId) {
   const s = sessions.find(x => x.session_id === id);
   if (!s) return;
 
-  const attendees = (s.attendees || '').split(',').map(a => a.trim()).filter(Boolean);
+  const attendees = (s.attendees || '').split(';').map(a => a.trim()).filter(Boolean);
 
   const content = `
     <h2>${s.session_name || 'Session'}</h2>
