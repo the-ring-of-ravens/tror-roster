@@ -152,6 +152,16 @@ function parseCSV(text) {
   });
 }
 
+function formatDate(val) {
+  if (!val) return '—';
+  const match = String(val).match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (match) {
+    const d = new Date(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  return val;
+}
+
 // ── Fetch a CSV relative to this page ──
 const SHEET_ID = '12oUuTbA2wmWWEqOjKRzQhm8IOEGAp2Ja5AIFm5Yffis';
 
@@ -295,7 +305,7 @@ function renderSessions() {
     return `<div class="session-card" onclick="openSession('${sid}')">
       <div class="sc-head">
         <span class="sc-name">${s['Session Name'] || 'Unnamed Session'}</span>
-        <span class="sc-date">${s['Session Date'] || ''}</span>
+        <span class="sc-date">${formatDate(ss['Session Date'])}</span>
       </div>
       <div class="sc-meta">Instructor: <strong>${s['Host'] || '—'}</strong> · ${attendees.length} attendees</div>
       <div class="attendee-list">
@@ -361,7 +371,7 @@ function openSoldier(encodedName) {
       <h3>Sessions Attended (${attended.length})</h3>
       ${attended.length
         ? `<div class="attendee-list">${attended.map(ss =>
-            `<span class="session-tag">${ss.session_name} <span style="color:var(--text-muted)">${ss.date}</span></span>`
+            `<span class="session-tag">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
           ).join('')}</div>`
         : `<span style="color:var(--text-muted);font-size:0.88rem">No sessions recorded.</span>`
       }
@@ -383,7 +393,7 @@ function openSession(encodedId) {
 
   const content = `
     <h2>${s['Session Name'] || 'Session'}</h2>
-    <div class="rank-line">${s['Session Date'] || '—'}</div>
+    <div class="rank-line">${formatDate(ss['Session Date'])}</div>
     <div class="drawer-section">
       <h3>Details</h3>
       <div class="detail-row"><span class="dk">Instructor</span><span class="dv">${s['Host'] || '—'}</span></div>
