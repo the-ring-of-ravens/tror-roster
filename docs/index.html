@@ -33,6 +33,10 @@
   ⚠️ <strong>Unresolved Sessions:</strong> <span id="session-warning-text"></span>  |  Instructors: Please review attendance for name mismatches.
     </div>
 
+    <div id="rankup-banner" style="display:none; background:#1e3626; border:1px solid #3a6b45; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.92rem; color:#6ab87a;">
+    🎉 <span id="rankup-text"></span>
+    </div>
+    
   <!-- ═══ SOLDIERS TAB ═══ -->
   <div id="tab-soldiers" class="tab-panel active">
     <div class="page-heading">
@@ -486,6 +490,33 @@ async function init() {
         const names = unresolved.map(s => s['Session Name'] || 'Unnamed').join(', ');
         document.getElementById('session-warning-text').textContent = names;
         document.getElementById('session-warning').style.display = 'block';
+    }
+
+    // Celebrate recent rankups
+    // We will only look at the last training session and get the Rankups column for that session, which contains "Name (New Rank)".
+    const rankups = sessions.filter(s => {
+        const rankup = String(s['Rankups'] ?? '').trim();
+        return rankup;
+    });
+    // We want to output a message that says "Congratulations to Name for ranking up to New Rank!"
+    if (rankups.length) {
+        const messages = [];
+        rankups.forEach(s => {
+            const rankup = String(s['Rankups'] ?? '').trim();
+            const parts = rankup.split('\n').map(r => r.trim()).filter(Boolean);
+            parts.forEach(p => {
+                const match = p.match(/^(.+)\s+\((.+)\)$/);
+                if (match) {
+                    const name = match[1].trim();
+                    const newRank = match[2].trim();
+                    messages.push(`Congratulations to ${name} for ranking up to ${newRank}!`);
+                }
+            });
+        });
+        if (messages.length) {
+            document.getElementById('rankup-text').innerHTML = messages.join('<br>');
+            document.getElementById('rankup-banner').style.display = 'block';
+        }
     }
 
   populateFilters();
