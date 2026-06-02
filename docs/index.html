@@ -454,8 +454,8 @@ async function init() {
 
   // Warn about unresolved sessions
     const unresolved = sessions.filter(s => {
-    const updated = String(s['updated'] ?? '').trim();
-    return updated !== '1';
+        const updated = String(s['updated'] ?? '').trim();
+        return updated === '0';
     });
     if (unresolved.length) {
         const names = unresolved.map(s => s['Session Name'] || 'Unnamed').join(', ');
