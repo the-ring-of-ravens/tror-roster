@@ -503,16 +503,23 @@ async function init() {
     if (rankups.length) {
         const messages = [];
         rankups.forEach(s => {
-            const rankup = String(s['Rankups'] ?? '').trim();
-            const parts = rankup.split('\n').map(r => r.trim()).filter(Boolean);
-            parts.forEach(p => {
-                const match = p.match(/^(.+)\s+\((.+)\)$/);
-                if (match) {
-                    const name = match[1].trim();
-                    const newRank = match[2].trim();
-                    messages.push(`🎉 Congratulations to ${name} for ranking up to ${newRank}!`);
-                }
-            });
+            if (s !== sessions[sessions.length - 1]) return;
+            
+            //find the last row
+            const lastSession = sessions[sessions.length - 1];
+            
+            if(lastSession && lastSession['Rankups']) {
+                const parts = lastSession['Rankups'].split('\n').map(r => r.trim()).filter(Boolean);
+                
+                parts.forEach(p => {
+                    const match = p.match(/^(.+)\s+\((.+)\)$/);
+                    if (match) {
+                        const name = match[1].trim();
+                        const newRank = match[2].trim();
+                        messages.push(`🎉 Congratulations to ${name} for ranking up to ${newRank}!`);
+                    }
+                });
+            }
         });
         if (messages.length) {
             document.getElementById('rankup-text').innerHTML = messages.join('<br>');
