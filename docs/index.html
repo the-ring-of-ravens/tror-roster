@@ -377,8 +377,12 @@ function openSoldier(encodedName) {
       })()} days</span></div>
     </div>` : ''}
 
+// make this section appear only if inactive for more than 6 months
 
-    ${s.inactive_date && new Date(s.inactive_date) < new Date().setMonth(new Date().getMonth() - 6) ? `<div class="drawer-section">
+    ${s.inactive_date && new Date(
+        parseInt(String(s.inactive_date).match(/Date\((\d+),(\d+),(\d+)\)/)[1], 10), 
+        parseInt(String(s.inactive_date).match(/Date\((\d+),(\d+),(\d+)\)/)[2], 10), 
+        parseInt(String(s.inactive_date).match(/Date\((\d+),(\d+),(\d+)\)/)[3], 10)) < new Date().setMonth(new Date().getMonth() - 6) ? `<div class="drawer-section">
       <h3>Inactivity Details</h3>
       <div class="detail-row"><span class="dk">Inactive Since</span><span class="dv">${formatDate(s.inactive_date)}</span></div>
       <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${(() => {
