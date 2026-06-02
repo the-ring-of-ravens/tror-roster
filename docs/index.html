@@ -223,7 +223,7 @@ function badge(status) {
 // ── Sessions attended by a name ──
 function sessionsFor(name) {
   return sessions.filter(s => {
-    const attendees = (s.attendees || '').split(';').map(a => a.trim().toLowerCase());
+    const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim().toLowerCase());
     return attendees.includes(name.toLowerCase());
   });
 }
@@ -282,25 +282,22 @@ function renderSessions() {
   const q = (document.getElementById('session-search').value || '').toLowerCase();
   const filtered = sessions.filter(s =>
     !q
-    || (s.session_name || '').toLowerCase().includes(q)
-    || (s.instructor_name || '').toLowerCase().includes(q)
+    || (s['Session Name'] || '').toLowerCase().includes(q)
+    || (s['Host'] || '').toLowerCase().includes(q)
   );
 
   const el = document.getElementById('session-list');
-
-  if (!filtered.length) {
-    el.innerHTML = '<div class="empty">No sessions found.</div>';
-    return;
-  }
+  if (!filtered.length) { el.innerHTML = '<div class="empty">No sessions found.</div>'; return; }
 
   el.innerHTML = filtered.map(s => {
-    const attendees = (s.attendees || '').split(';').map(a => a.trim()).filter(Boolean);
-    return `<div class="session-card" onclick="openSession('${encodeURIComponent(s.session_id)}')">
+    const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim()).filter(Boolean);
+    const sid = encodeURIComponent(s['Timestamp'] || s['Session Name']);
+    return `<div class="session-card" onclick="openSession('${sid}')">
       <div class="sc-head">
-        <span class="sc-name">${s.session_name || 'Unnamed Session'}</span>
-        <span class="sc-date">${s.date || ''}</span>
+        <span class="sc-name">${s['Session Name'] || 'Unnamed Session'}</span>
+        <span class="sc-date">${s['Session Date'] || ''}</span>
       </div>
-      <div class="sc-meta">Instructor: <strong>${s.instructor_name || '—'}</strong> · ${attendees.length} attendees</div>
+      <div class="sc-meta">Instructor: <strong>${s['Host'] || '—'}</strong> · ${attendees.length} attendees</div>
       <div class="attendee-list">
         ${attendees.slice(0,8).map(a => `<span class="session-tag">${a}</span>`).join('')}
         ${attendees.length > 8 ? `<span class="session-tag">+${attendees.length - 8} more</span>` : ''}
@@ -379,21 +376,19 @@ function openSoldier(encodedName) {
 // ── Drawer: open session ──
 function openSession(encodedId) {
   const id = decodeURIComponent(encodedId);
-  const s = sessions.find(x => x.session_id === id);
+  const s = sessions.find(x => encodeURIComponent(x['Timestamp'] || x['Session Name']) === encodeURIComponent(id));
   if (!s) return;
 
-  const attendees = (s.attendees || '').split(';').map(a => a.trim()).filter(Boolean);
+  const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim()).filter(Boolean);
 
   const content = `
-    <h2>${s.session_name || 'Session'}</h2>
-    <div class="rank-line">${s.date || '—'}</div>
-
+    <h2>${s['Session Name'] || 'Session'}</h2>
+    <div class="rank-line">${s['Session Date'] || '—'}</div>
     <div class="drawer-section">
       <h3>Details</h3>
-      <div class="detail-row"><span class="dk">Instructor</span><span class="dv">${s.instructor_name || '—'}</span></div>
+      <div class="detail-row"><span class="dk">Instructor</span><span class="dv">${s['Host'] || '—'}</span></div>
       <div class="detail-row"><span class="dk">Attendees</span><span class="dv">${attendees.length}</span></div>
     </div>
-
     <div class="drawer-section">
       <h3>Attendee List</h3>
       <div class="attendee-list">
@@ -449,14 +444,13 @@ async function init() {
 
   // Warn about unresolved sessions
     const unresolved = sessions.filter(s => {
-    const counted = (s['Counted?'] || '').trim();
-    const updated = (s['updated'] || '').trim();
+    const updated = String(s['updated'] ?? '').trim();
     return updated !== '1';
     });
     if (unresolved.length) {
-    const names = unresolved.map(s => s['Session Name'] || 'Unnamed').join(', ');
-    document.getElementById('session-warning-text').textContent = names;
-    document.getElementById('session-warning').style.display = 'block';
+        const names = unresolved.map(s => s['Session Name'] || 'Unnamed').join(', ');
+        document.getElementById('session-warning-text').textContent = names;
+        document.getElementById('session-warning').style.display = 'block';
     }
 
   populateFilters();
