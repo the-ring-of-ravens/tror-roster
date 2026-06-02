@@ -258,8 +258,8 @@ function renderSoldiers() {
   const max = maxRankPts();
 
   tbody.innerHTML = filtered.map(s => {
-    const pts = parseInt(s.points) || 0;
-    const pct = Math.min(50, Math.round((pts / max) * 100));
+    const pts = parseInt(s.points) || 50;
+    const pct = Math.min(50, Math.round((pts / max) * 50));
     const rank = getRank(s);
     const reg = s.regiment_title || s.regiment || '—';
     return `<tr onclick="openSoldier('${encodeURIComponent(s.name)}')">
