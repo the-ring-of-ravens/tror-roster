@@ -366,10 +366,27 @@ function openSoldier(encodedName) {
       <h3>Enlistment Details</h3>
       <div class="detail-row"><span class="dk">Join Date</span><span class="dv">${formatDate(s.join_date)}</span></div>
       <div class="detail-row"><span class="dk">Debugging: Current Date</span><span class="dv">${formatDate(new Date())}</span></div>
-      <div class="detail-row"><span class="dk">Debugging: Join Date</span><span class="dv">${formatDate(new Date(s.join_date))}</span></div>
-      <div class="detail-row"><span class="dk">Debugging: Member Duration</span><span class="dv">${new Date().getTime() - new Date(s.join_date).getTime()}</span></div>
-      <div class="detail-row"><span class="dk">Debugging: Member Duration (without turning to days</span><span class="dv">${Math.floor((new Date().getTime() - new Date(s.join_date).getTime()))}</span></div>
-      <div class="detail-row"><span class="dk">Member Duration</span><span class="dv">${Math.floor((new Date().getTime() - new Date(s.join_date).getTime()) / (1000 * 60 * 60 * 24))} days</span></div>
+      <div class="detail-row"><span class="dk">Debugging: Member Duration</span><span class="dv">${(() => {
+        const match = String(s.join_date).match(/Date\((\d+),(\d+),(\d+)\)/);
+        if (match) {
+          const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
+          return new Date().getTime() - d.getTime();
+        }
+      })()}</span></div>
+      <div class="detail-row"><span class="dk">Debugging: Member Duration Floor (without turning to days</span><span class="dv">${(() => {
+        const match = String(s.join_date).match(/Date\((\d+),(\d+),(\d+)\)/);
+        if (match) {
+          const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
+          return Math.floor((new Date().getTime() - d.getTime()));
+        }
+      })()}</span></div>
+      <div class="detail-row"><span class="dk">Member Duration</span><span class="dv">${(() => {
+        const match = String(s.join_date).match(/Date\((\d+),(\d+),(\d+)\)/);
+        if (match) {
+          const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
+          return Math.floor((new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+        }
+      })()} days</span></div>
     </div>` : ''}
 
 
