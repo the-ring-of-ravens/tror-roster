@@ -44,22 +44,24 @@
       <div class="stat-card"><div class="label">Retired</div><div class="value" id="stat-retired">—</div></div>
     </div>
 
-    <div class="search-row">
-      <div class="search-wrap">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input type="text" id="soldier-search" placeholder="Search by name…" oninput="renderSoldiers()">
-      </div>
-      <select id="filter-regiment" onchange="renderSoldiers()">
-        <option value="">All Regiments</option>
-      </select>
-      <select id="filter-status" onchange="renderSoldiers()">
-        <option value="">All Statuses</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-        <option value="retired">Retired</option>
-      </select>
+    <div class="search-row" style="display:flex; gap:0.75rem; margin-bottom:1.5rem;">
+        <div class="search-wrap" style="position:relative; flex:2; min-width:0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="soldier-search" placeholder="Search by name…" oninput="renderSoldiers()"
+                style="width:100%; padding:0.55rem 0.9rem 0.55rem 2.5rem;">
+        </div>
+        <select id="filter-regiment" onchange="renderSoldiers()" style="flex:1; min-width:0;">
+            <option value="">All Regiments</option>
+        </select>
+        <select id="filter-status" onchange="renderSoldiers()" style="flex:1; min-width:0;">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="retired">Retired</option>
+        </select>
     </div>
 
     <div class="table-wrap">
