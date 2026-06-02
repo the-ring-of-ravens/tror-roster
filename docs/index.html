@@ -233,6 +233,9 @@ function badge(status) {
 // ── Sessions attended by a name ──
 function sessionsFor(name) {
   return sessions.filter(s => {
+    // handle instructor names
+    if (s['Host'] && s['Host'].toLowerCase() === name.toLowerCase()) return true;
+    // handle attendee lists
     const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim().toLowerCase());
     return attendees.includes(name.toLowerCase());
   });
@@ -365,21 +368,6 @@ function openSoldier(encodedName) {
     ${s.join_date ? `<div class="drawer-section">
       <h3>Enlistment Details</h3>
       <div class="detail-row"><span class="dk">Join Date</span><span class="dv">${formatDate(s.join_date)}</span></div>
-      <div class="detail-row"><span class="dk">Debugging: Current Date</span><span class="dv">${formatDate(new Date())}</span></div>
-      <div class="detail-row"><span class="dk">Debugging: Member Duration</span><span class="dv">${(() => {
-        const match = String(s.join_date).match(/Date\((\d+),(\d+),(\d+)\)/);
-        if (match) {
-          const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
-          return new Date().getTime() - d.getTime();
-        }
-      })()}</span></div>
-      <div class="detail-row"><span class="dk">Debugging: Member Duration Floor (without turning to days</span><span class="dv">${(() => {
-        const match = String(s.join_date).match(/Date\((\d+),(\d+),(\d+)\)/);
-        if (match) {
-          const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
-          return Math.floor((new Date().getTime() - d.getTime()));
-        }
-      })()}</span></div>
       <div class="detail-row"><span class="dk">Member Duration</span><span class="dv">${(() => {
         const match = String(s.join_date).match(/Date\((\d+),(\d+),(\d+)\)/);
         if (match) {
@@ -393,7 +381,13 @@ function openSoldier(encodedName) {
     ${s.inactive_date && new Date(s.inactive_date) < new Date().setMonth(new Date().getMonth() - 6) ? `<div class="drawer-section">
       <h3>Inactivity Details</h3>
       <div class="detail-row"><span class="dk">Inactive Since</span><span class="dv">${formatDate(s.inactive_date)}</span></div>
-      <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${Math.floor((new Date().getTime() - new Date(s.inactive_date).getTime()) / (1000 * 60 * 60 * 24))} days</span></div>
+      <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${(() => {
+        const match = String(s.inactive_date).match(/Date\((\d+),(\d+),(\d+)\)/);
+        if (match) {
+          const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
+          return Math.floor((new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+        }
+      })()} days</span></div>
     </div>` : ''}
 
     <div class="drawer-section">
