@@ -294,9 +294,9 @@
     }
 
     .badge-semi-active {
-        background: #2a2f3a;
-        color: #7890b0;
-        border: 1px solid #333a55;
+        background: #3a392a;
+        color: #cac45b;
+        border: 1px solid #5c5b2f;
     }
 
     .badge-inactive {
@@ -306,9 +306,9 @@
     }
 
     .badge-on-break {
-        background: #2a2835;
-        color: #7880a0;
-        border: 1px solid #333a55;
+        background: #333239;
+        color: #9295a1;
+        border: 1px solid #3c3e48;
     }
 
     .badge-retired {
