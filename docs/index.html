@@ -1,318 +1,377 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Ring of Ravens — Roster</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="flag.png">
-  <style>
-    @import url('style.css');
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ring of Ravens — Roster</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="flag.png">
+    <style>
+        @import url('style.css');
+    </style>
 </head>
+
 <body>
 
-<header>
-  <div class="logo">
-    <img src="flag.png" alt="[flag icon]" style="height: 22px; width: auto; object-fit: contain;">
-    The Ring of Ravens
-    <span class="logo-sep"></span>
-    <span style="font-size:0.7rem;font-weight:400;letter-spacing:0.06em;color:var(--text-muted)">SkyWing Military</span>
-  </div>
-
-  <nav>
-    <button class="active" onclick="switchTab('soldiers')">Soldiers</button>
-    <button onclick="switchTab('sessions')">Sessions</button>
-    <button onclick="switchTab('ranks')">Ranks</button>
-  </nav>
-</header>
-
-<main>
-    <div id="session-warning" style="display:none; background:#2a1a10; border:1px solid #7a3a1e; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; color:#c86030; font-size:0.92rem;">
-  ⚠️ <strong>Unresolved Sessions:</strong> <span id="session-warning-text"></span>  |  Officers: Please review attendance for name mismatches.
-    </div>
-
-    <div id="rankup-banner" style="display:none; background:#1e3626; border:1px solid #3a6b45; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.92rem; color:#6ab87a;">
-    <span id="rankup-text"></span>
-    </div>
-    
-  <!-- ═══ SOLDIERS TAB ═══ -->
-  <div id="tab-soldiers" class="tab-panel active">
-    <div class="page-heading">
-      <h1>Soldier Roster</h1>
-      <div class="amber-line"></div>
-    </div>
-
-    <div class="stat-row" id="soldier-stats">
-      <div class="stat-card"><div class="label">Total</div><div class="value" id="stat-total">—</div></div>
-      <div class="stat-card"><div class="label">Active</div><div class="value" id="stat-active">—</div></div>
-      <div class="stat-card"><div class="label">Semi-Active</div><div class="value" id="stat-semi-active">—</div></div>
-      <div class="stat-card"><div class="label">Inactive</div><div class="value" id="stat-inactive">—</div></div>
-      <div class ="stat-card"><div class="label">On Break</div><div class="value" id="stat-on-break">—</div></div>
-      <div class="stat-card"><div class="label">Retired</div><div class="value" id="stat-retired">—</div></div>
-    </div>
-
-    <div class="search-row" style="display:flex; gap:0.75rem; margin-bottom:1.5rem;">
-        <div class="search-wrap" style="position:relative; flex:2; min-width:0;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input type="text" id="soldier-search" placeholder="Search by name…" oninput="renderSoldiers()"
-                style="width:100%; padding:0.55rem 0.9rem 0.55rem 2.5rem;">
+    <header>
+        <div class="logo">
+            <img src="flag.png" alt="[flag icon]" style="height: 22px; width: auto; object-fit: contain;">
+            The Ring of Ravens
+            <span class="logo-sep"></span>
+            <span style="font-size:0.7rem;font-weight:400;letter-spacing:0.06em;color:var(--text-muted)">SkyWing
+                Military</span>
         </div>
-        <select id="filter-regiment" onchange="renderSoldiers()" style="flex:1; min-width:0;">
-            <option value="">All Regiments</option>
-        </select>
-        <select id="filter-status" onchange="renderSoldiers()" style="flex:1; min-width:0;">
-            <option value="">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="semi-active">Semi-Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="on-break">On Break</option>
-            <option value="retired">Retired</option>
-        </select>
+
+        <nav>
+            <button class="active" onclick="switchTab('soldiers')">Soldiers</button>
+            <button onclick="switchTab('sessions')">Sessions</button>
+            <button onclick="switchTab('ranks')">Ranks</button>
+        </nav>
+    </header>
+
+    <main>
+        <div id="session-warning"
+            style="display:none; background:#2a1a10; border:1px solid #7a3a1e; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; color:#c86030; font-size:0.92rem;">
+            ⚠️ <strong>Unresolved Sessions:</strong> <span id="session-warning-text"></span> | Officers: Please review
+            attendance for name mismatches.
+        </div>
+
+        <div id="rankup-banner"
+            style="display:none; background:#1e3626; border:1px solid #3a6b45; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; font-size:0.92rem; color:#6ab87a;">
+            <span id="rankup-text"></span>
+        </div>
+
+        <!-- ═══ SOLDIERS TAB ═══ -->
+        <div id="tab-soldiers" class="tab-panel active">
+            <div class="page-heading">
+                <h1>Soldier Roster</h1>
+                <div class="amber-line"></div>
+            </div>
+
+            <div class="stat-row" id="soldier-stats">
+                <div class="stat-card">
+                    <div class="label">Total</div>
+                    <div class="value" id="stat-total">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Active</div>
+                    <div class="value" id="stat-active">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Semi-Active</div>
+                    <div class="value" id="stat-semi-active">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Inactive</div>
+                    <div class="value" id="stat-inactive">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">On Break</div>
+                    <div class="value" id="stat-on-break">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Retired</div>
+                    <div class="value" id="stat-retired">—</div>
+                </div>
+            </div>
+
+            <div class="search-row" style="display:flex; gap:0.75rem; margin-bottom:1.5rem;">
+                <div class="search-wrap" style="position:relative; flex:2; min-width:0;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input type="text" id="soldier-search" placeholder="Search by name…" oninput="renderSoldiers()"
+                        style="width:100%; padding:0.55rem 0.9rem 0.55rem 2.5rem;">
+                </div>
+                <select id="filter-regiment" onchange="renderSoldiers()" style="flex:1; min-width:0;">
+                    <option value="">All Regiments</option>
+                </select>
+                <select id="filter-status" onchange="renderSoldiers()" style="flex:1; min-width:0;">
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="semi-active">Semi-Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="on-break">On Break</option>
+                    <option value="retired">Retired</option>
+                </select>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Rank</th>
+                            <th>Regiment</th>
+                            <th>Points</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="soldier-tbody">
+                        <tr>
+                            <td colspan="5" class="loading">Loading roster…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══ SESSIONS TAB ═══ -->
+        <div id="tab-sessions" class="tab-panel">
+            <div class="page-heading">
+                <h1>Training Sessions</h1>
+                <div class="amber-line"></div>
+            </div>
+
+            <div class="search-row">
+                <div class="search-wrap">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input type="text" id="session-search" placeholder="Search by session name or instructor…"
+                        oninput="renderSessions()">
+                </div>
+            </div>
+
+            <div id="session-list">
+                <div class="loading">Loading sessions…</div>
+            </div>
+        </div>
+
+        <!-- ═══ RANKS TAB ═══ -->
+        <div id="tab-ranks" class="tab-panel">
+            <div class="page-heading">
+                <h1>Military Ranks</h1>
+                <div class="amber-line"></div>
+                <p>Points required for each rank in the Ravens.</p>
+            </div>
+
+            <div id="rank-list">
+                <div class="loading">Loading ranks…</div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Detail drawer -->
+    <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+    <div class="drawer" id="drawer">
+        <button class="drawer-close" onclick="closeDrawer()">✕ Close</button>
+        <div id="drawer-content"></div>
     </div>
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Rank</th>
-            <th>Regiment</th>
-            <th>Points</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="soldier-tbody">
-          <tr><td colspan="5" class="loading">Loading roster…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <script>
+        // ── Data stores ──
+        let soldiers = [], sessions = [], ranks = [];
 
-  <!-- ═══ SESSIONS TAB ═══ -->
-  <div id="tab-sessions" class="tab-panel">
-    <div class="page-heading">
-      <h1>Training Sessions</h1>
-      <div class="amber-line"></div>
-    </div>
+        // ── CSV parser (handles quoted fields) ──
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            return lines.slice(1).map(line => {
+                const vals = [];
+                let cur = '', inQ = false;
+                for (let i = 0; i < line.length; i++) {
+                    const c = line[i];
+                    if (c === '"') { inQ = !inQ; }
+                    else if (c === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+                    else { cur += c; }
+                }
+                vals.push(cur.trim());
+                const obj = {};
+                headers.forEach((h, i) => obj[h] = vals[i] ?? '');
+                return obj;
+            });
+        }
 
-    <div class="search-row">
-      <div class="search-wrap">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input type="text" id="session-search" placeholder="Search by session name or instructor…" oninput="renderSessions()">
-      </div>
-    </div>
+        function parseDate(val) {
+            if (!val) return null;
+            const gviz = String(val).match(/Date\((\d+),(\d+),(\d+)\)/);
+            if (gviz) return new Date(parseInt(gviz[1]), parseInt(gviz[2]), parseInt(gviz[3]));
+            const d = new Date(val);
+            return isNaN(d) ? null : d;
+        }
 
-    <div id="session-list">
-      <div class="loading">Loading sessions…</div>
-    </div>
-  </div>
+        function formatDate(val) {
+            if (!val) return '—';
+            const match = String(val).match(/Date\((\d+),(\d+),(\d+)\)/);
+            if (match) {
+                const d = new Date(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
+                return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+            }
+            return val;
+        }
 
-  <!-- ═══ RANKS TAB ═══ -->
-  <div id="tab-ranks" class="tab-panel">
-    <div class="page-heading">
-      <h1>Military Ranks</h1>
-      <div class="amber-line"></div>
-      <p>Points required for each rank in the Ravens.</p>
-    </div>
+        // ── Fetch a CSV relative to this page ──
+        const SHEET_ID = '12oUuTbA2wmWWEqOjKRzQhm8IOEGAp2Ja5AIFm5Yffis';
 
-    <div id="rank-list">
-      <div class="loading">Loading ranks…</div>
-    </div>
-  </div>
+        async function fetchSheet(tabName) {
+            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+            try {
+                const r = await fetch(url);
+                if (!r.ok) throw new Error(r.status);
+                const text = await r.text();
+                // gviz wraps response in /*O_o*/ google.visualization.Query.setResponse({...});
+                const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/)[1]);
+                const cols = json.table.cols.map(c => c.label);
+                return (json.table.rows || []).map(row => {
+                    const obj = {};
+                    cols.forEach((col, i) => {
+                        const cell = row.c[i];
+                        obj[col] = cell?.v ?? cell?.f ?? '';
+                    });
+                    return obj;
+                });
+            } catch (e) {
+                console.warn('Could not load sheet tab:', tabName, e);
+                return [];
+            }
+        }
 
-</main>
+        async function fetchCSV(path) {
+            // Map old CSV paths to sheet tab names
+            const tabMap = {
+                'data/soldiers.csv': 'soldiers',
+                'data/sessions.csv': 'sessions',
+                'data/ranks.csv': 'ranks',
+            };
+            const tab = tabMap[path];
+            if (tab) return fetchSheet(tab);
+            console.warn('No sheet tab mapped for:', path);
+            return [];
+        }
 
-<!-- Detail drawer -->
-<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer">
-  <button class="drawer-close" onclick="closeDrawer()">✕ Close</button>
-  <div id="drawer-content"></div>
-</div>
+        // ── Derive rank from soldier ──
+        function getRank(soldier) {
+            if (soldier.title && soldier.title.trim() !== '') {
+                const match = ranks.find(r => r.abbreviation === soldier.title.trim());
+                return match ? match.rank : soldier.title.trim();
+            }
+            const pts = parseInt(soldier.points) || 0;
+            if (!ranks.length) return '—';
+            const sorted = [...ranks]
+                .filter(r => r.rank_points !== '' && r.rank_points !== undefined)
+                .sort((a, b) => parseInt(b.rank_points) - parseInt(a.rank_points));
+            for (const r of sorted) {
+                if (pts >= parseInt(r.rank_points)) return r.rank;
+            }
+            return ranks[0]?.rank ?? '—';
+        }
 
-<script>
-// ── Data stores ──
-let soldiers = [], sessions = [], ranks = [];
+        // ── Max rank points (for bar scaling) ──
+        function maxRankPts() {
+            return Math.max(...ranks.map(r => parseInt(r.rank_points) || 0), 100);
+        }
 
-// ── CSV parser (handles quoted fields) ──
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim());
-  return lines.slice(1).map(line => {
-    const vals = [];
-    let cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"') { inQ = !inQ; }
-      else if (c === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
-      else { cur += c; }
-    }
-    vals.push(cur.trim());
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = vals[i] ?? '');
-    return obj;
-  });
-}
+        // ── Badge HTML ──
+        function badge(status) {
+            const s = status;
+            const cls = { active: 'badge-active', semiActive: 'badge-semi-active', inactive: 'badge-inactive', onBreak: 'badge-on-break', retired: 'badge-retired' }[s];
+            return `<span class="badge ${cls}">${s}</span>`;
+        }
 
-function parseDate(val) {
-  if (!val) return null;
-  const gviz = String(val).match(/Date\((\d+),(\d+),(\d+)\)/);
-  if (gviz) return new Date(parseInt(gviz[1]), parseInt(gviz[2]), parseInt(gviz[3]));
-  const d = new Date(val);
-  return isNaN(d) ? null : d;
-}
+        // ── Sessions attended by a name ──
+        function sessionsFor(name) {
+            return sessions.filter(s => {
+                // handle instructor names
+                if (s['Host'] && s['Host'].toLowerCase() === name.toLowerCase()) return true;
+                // handle attendee lists
+                const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim().toLowerCase());
+                return attendees.includes(name.toLowerCase());
+            });
+        }
 
-function formatDate(val) {
-  if (!val) return '—';
-  const match = String(val).match(/Date\((\d+),(\d+),(\d+)\)/);
-  if (match) {
-    const d = new Date(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  }
-  return val;
-}
+        // ── determine inactivity based on last session or join date ──
+        function createStatus(soldier) {
+            // manual override if status is set to retired or on break
+            if (soldier.status && ['retired', 'on break'].includes(soldier.status.toLowerCase())) {
+                return soldier.status.toLowerCase();
+            }
 
-// ── Fetch a CSV relative to this page ──
-const SHEET_ID = '12oUuTbA2wmWWEqOjKRzQhm8IOEGAp2Ja5AIFm5Yffis';
+            // get the join date & last session date, keep the most recent
+            let lastActive = soldier.join_date;
+            lastActive = soldier.inactive_date > lastActive ? soldier.inactive_date : lastActive;
 
-async function fetchSheet(tabName) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
-  try {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(r.status);
-    const text = await r.text();
-    // gviz wraps response in /*O_o*/ google.visualization.Query.setResponse({...});
-    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/)[1]);
-    const cols = json.table.cols.map(c => c.label);
-    return (json.table.rows || []).map(row => {
-      const obj = {};
-      cols.forEach((col, i) => {
-        const cell = row.c[i];
-        obj[col] = cell?.v ?? cell?.f ?? '';
-      });
-      return obj;
-    });
-  } catch(e) {
-    console.warn('Could not load sheet tab:', tabName, e);
-    return [];
-  }
-}
+            // 6 months of no session = semi-active, 12 months = inactive
+            if (lastActive) {
+                const lastActiveDate = parseDate(lastActive);
+                const now = new Date();
+                const diffMonths = (now.getFullYear() - lastActiveDate.getFullYear()) * 12 + (now.getMonth() - lastActiveDate.getMonth());
+                console.log('Creating status for soldier:', soldier.name);
+                console.log('status: ', soldier.status);
+                console.log('Last active date:', lastActiveDate);
+                console.log('Current date:', now);
+                console.log('Difference in months:', diffMonths);
 
-async function fetchCSV(path) {
-  // Map old CSV paths to sheet tab names
-  const tabMap = {
-    'data/soldiers.csv': 'soldiers',
-    'data/sessions.csv': 'sessions',
-    'data/ranks.csv':    'ranks',
-  };
-  const tab = tabMap[path];
-  if (tab) return fetchSheet(tab);
-  console.warn('No sheet tab mapped for:', path);
-  return [];
-}
+                if (diffMonths >= 12) return 'inactive';
+                if (diffMonths >= 6) return 'semi-active';
+            }
+            return 'active';
+        }
 
-// ── Derive rank from soldier ──
-function getRank(soldier) {
-  if (soldier.title && soldier.title.trim() !== '') {
-    const match = ranks.find(r => r.abbreviation === soldier.title.trim());
-    return match ? match.rank : soldier.title.trim();
-  }
-  const pts = parseInt(soldier.points) || 0;
-  if (!ranks.length) return '—';
-  const sorted = [...ranks]
-    .filter(r => r.rank_points !== '' && r.rank_points !== undefined)
-    .sort((a, b) => parseInt(b.rank_points) - parseInt(a.rank_points));
-  for (const r of sorted) {
-    if (pts >= parseInt(r.rank_points)) return r.rank;
-  }
-  return ranks[0]?.rank ?? '—';
-}
+        // ── Render soldiers table ──
+        function renderSoldiers() {
+            const q = (document.getElementById('soldier-search').value || '').toLowerCase();
+            const reg = document.getElementById('filter-regiment').value.toLowerCase();
+            const st = document.getElementById('filter-status').value.toLowerCase();
 
-// ── Max rank points (for bar scaling) ──
-function maxRankPts() {
-  return Math.max(...ranks.map(r => parseInt(r.rank_points) || 0), 100);
-}
+            const filtered = soldiers.filter(s => {
+                const nm = (s.name || '').toLowerCase();
+                const regiment = (s.regiment || '').toLowerCase();
+                const status = createStatus(s).toLowerCase();
+                return (!q || nm.includes(q))
+                    && (!reg || regiment === reg)
+                    && (!st || status === st);
+            });
 
-// ── Badge HTML ──
-function badge(status) {
-  const s = status;
-  const cls = { active:'badge-active', semiActive: 'badge-semi-active', inactive:'badge-inactive', onBreak: 'badge-on-break', retired:'badge-retired' }[s] || 'badge-active';
-  return `<span class="badge ${cls}">${s}</span>`;
-}
+            const tbody = document.getElementById('soldier-tbody');
 
-// ── Sessions attended by a name ──
-function sessionsFor(name) {
-  return sessions.filter(s => {
-    // handle instructor names
-    if (s['Host'] && s['Host'].toLowerCase() === name.toLowerCase()) return true;
-    // handle attendee lists
-    const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim().toLowerCase());
-    return attendees.includes(name.toLowerCase());
-  });
-}
-
-// ── Render soldiers table ──
-function renderSoldiers() {
-  const q = (document.getElementById('soldier-search').value || '').toLowerCase();
-  const reg = document.getElementById('filter-regiment').value.toLowerCase();
-  const st = document.getElementById('filter-status').value.toLowerCase();
-
-  const filtered = soldiers.filter(s => {
-    const nm = (s.name || '').toLowerCase();
-    const regiment = (s.regiment || '').toLowerCase();
-    const status = createStatus(s) || (s.status || 'not working').toLowerCase();
-    return (!q || nm.includes(q))
-      && (!reg || regiment === reg)
-      && (!st || status === st);
-  });
-
-  const tbody = document.getElementById('soldier-tbody');
-
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="5" class="empty">
+            if (!filtered.length) {
+                tbody.innerHTML = `<tr><td colspan="5" class="empty">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
       No soldiers found.
     </td></tr>`;
-    return;
-  }
+                return;
+            }
 
-  const rankOrder = [
-    'General of the Army','Brigadier General','Colonel','Lieutenant Colonel','Major',
-    'Brigadier','Captain','First Lieutenant','Lieutenant',
-    'Command Sergeant Major','Sergeant Major',
-    'Chief Warrant Officer 5','Chief Warrant Officer 4','Chief Warrant Officer 3',
-    'Chief Warrant Officer 2','Warrant Officer 1',
-    'Master Gunnery Sergeant','Gunnery Sergeant','Senior Cornet',
-    'Paladin Sergeant','Paladin Corporal','Cornet First Class','Cornet','Junior Cornet',
-    'Exarch Lieutenant','Sergeant First Class','Sergeant','Corporal','Specialist',
-    'Private First Class','Private Second Class','Private','Trainee',];
+            const rankOrder = [
+                'General of the Army', 'Brigadier General', 'Colonel', 'Lieutenant Colonel', 'Major',
+                'Brigadier', 'Captain', 'First Lieutenant', 'Lieutenant',
+                'Command Sergeant Major', 'Sergeant Major',
+                'Chief Warrant Officer 5', 'Chief Warrant Officer 4', 'Chief Warrant Officer 3',
+                'Chief Warrant Officer 2', 'Warrant Officer 1',
+                'Master Gunnery Sergeant', 'Gunnery Sergeant', 'Senior Cornet',
+                'Paladin Sergeant', 'Paladin Corporal', 'Cornet First Class', 'Cornet', 'Junior Cornet',
+                'Exarch Lieutenant', 'Sergeant First Class', 'Sergeant', 'Corporal', 'Specialist',
+                'Private First Class', 'Private Second Class', 'Private', 'Trainee',];
 
-    filtered.sort((a, b) => {
-    const ri = rankOrder.indexOf(getRank(a));
-    const rj = rankOrder.indexOf(getRank(b));
-    const riSafe = ri === -1 ? rankOrder.length : ri;
-    const rjSafe = rj === -1 ? rankOrder.length : rj;
-    if (riSafe !== rjSafe) return riSafe - rjSafe;
-    const ptsDiff = (parseInt(b.points) || 0) - (parseInt(a.points) || 0);
-    if (ptsDiff !== 0) return ptsDiff;
-    return (a.name || '').localeCompare(b.name || '');
-    });
+            filtered.sort((a, b) => {
+                const ri = rankOrder.indexOf(getRank(a));
+                const rj = rankOrder.indexOf(getRank(b));
+                const riSafe = ri === -1 ? rankOrder.length : ri;
+                const rjSafe = rj === -1 ? rankOrder.length : rj;
+                if (riSafe !== rjSafe) return riSafe - rjSafe;
+                const ptsDiff = (parseInt(b.points) || 0) - (parseInt(a.points) || 0);
+                if (ptsDiff !== 0) return ptsDiff;
+                return (a.name || '').localeCompare(b.name || '');
+            });
 
-  tbody.innerHTML = filtered.map(s => {
-    const pts = parseInt(s.points) || 0;
-    const pct = Math.min(100, Math.round((pts / 50) * 100));
-    const rank = getRank(s);
-    const reg = s.regiment || '—';
-    return `<tr onclick="openSoldier('${encodeURIComponent(s.name)}')">
+            tbody.innerHTML = filtered.map(s => {
+                const pts = parseInt(s.points) || 0;
+                const pct = Math.min(100, Math.round((pts / 50) * 100));
+                const rank = getRank(s);
+                const reg = s.regiment || '—';
+                return `<tr onclick="openSoldier('${encodeURIComponent(s.name)}')">
       <td class="name-cell">${s.name || '—'}</td>
       <td>${rank}</td>
       <td>${reg}</td>
@@ -324,96 +383,75 @@ function renderSoldiers() {
       </td>
       <td>${badge(s.status)}</td>
     </tr>`;
-  }).join('');
-}
+            }).join('');
+        }
 
-// ── Render sessions list ──
-function renderSessions() {
-  const q = (document.getElementById('session-search').value || '').toLowerCase();
-  const filtered = sessions.filter(s =>
-    !q
-    || (s['Session Name'] || '').toLowerCase().includes(q)
-    || (s['Host'] || '').toLowerCase().includes(q)
-  );
+        // ── Render sessions list ──
+        function renderSessions() {
+            const q = (document.getElementById('session-search').value || '').toLowerCase();
+            const filtered = sessions.filter(s =>
+                !q
+                || (s['Session Name'] || '').toLowerCase().includes(q)
+                || (s['Host'] || '').toLowerCase().includes(q)
+            );
 
-  const el = document.getElementById('session-list');
-  if (!filtered.length) { el.innerHTML = '<div class="empty">No sessions found.</div>'; return; }
+            const el = document.getElementById('session-list');
+            if (!filtered.length) { el.innerHTML = '<div class="empty">No sessions found.</div>'; return; }
 
-  filtered.sort((a, b) => {
-    const da = parseDate(a['Session Date']), db = parseDate(b['Session Date']);
-    if (da && db && da.getTime() !== db.getTime()) return db - da;
-    const nameDiff = (a['Session Name'] || '').localeCompare(b['Session Name'] || '');
-    if (nameDiff !== 0) return nameDiff;
-    return (a['Host'] || '').localeCompare(b['Host'] || '');
-  });
+            filtered.sort((a, b) => {
+                const da = parseDate(a['Session Date']), db = parseDate(b['Session Date']);
+                if (da && db && da.getTime() !== db.getTime()) return db - da;
+                const nameDiff = (a['Session Name'] || '').localeCompare(b['Session Name'] || '');
+                if (nameDiff !== 0) return nameDiff;
+                return (a['Host'] || '').localeCompare(b['Host'] || '');
+            });
 
-  el.innerHTML = filtered.map(s => {
-    const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim()).filter(Boolean);
-    const sid = encodeURIComponent(s['Timestamp'] || s['Session Name']);
-    return `<div class="session-card" onclick="openSession('${sid}')">
+            el.innerHTML = filtered.map(s => {
+                const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim()).filter(Boolean);
+                const sid = encodeURIComponent(s['Timestamp'] || s['Session Name']);
+                return `<div class="session-card" onclick="openSession('${sid}')">
       <div class="sc-head">
         <span class="sc-name">${s['Session Name'] || 'Unnamed Session'}</span>
         <span class="sc-date">${formatDate(s['Session Date'])}</span>
       </div>
       <div class="sc-meta">Instructor: <strong>${s['Host'] || '—'}</strong> · ${attendees.length} attendees</div>
       <div class="attendee-list">
-        ${attendees.slice(0,8).map(a => `<span class="session-tag">${a}</span>`).join('')}
+        ${attendees.slice(0, 8).map(a => `<span class="session-tag">${a}</span>`).join('')}
         ${attendees.length > 8 ? `<span class="session-tag">+${attendees.length - 8} more</span>` : ''}
       </div>
     </div>`;
-  }).join('');
-}
+            }).join('');
+        }
 
-// ── Render ranks list ──
-function renderRanks() {
-  const el = document.getElementById('rank-list');
-  if (!ranks.length) { el.innerHTML = '<div class="empty">No rank data.</div>'; return; }
+        // ── Render ranks list ──
+        function renderRanks() {
+            const el = document.getElementById('rank-list');
+            if (!ranks.length) { el.innerHTML = '<div class="empty">No rank data.</div>'; return; }
 
-  const sorted = [...ranks].sort((a,b) => parseInt(a.rank_points)-parseInt(b.rank_points));
-  el.innerHTML = sorted.map((r, i) => {
-    const countAtRank = soldiers.filter(s => getRank(s) === r.rank).length;
-    return `<div class="rank-row">
+            const sorted = [...ranks].sort((a, b) => parseInt(a.rank_points) - parseInt(b.rank_points));
+            el.innerHTML = sorted.map((r, i) => {
+                const countAtRank = soldiers.filter(s => getRank(s) === r.rank).length;
+                return `<div class="rank-row">
       <span class="rank-number">${i + 1}</span>
       <span class="rank-name">${r.rank}</span>
       <span class="rank-pts">${r.rank_points} pts</span>
       <span style="color:var(--text-muted);font-size:0.85rem">${countAtRank} soldier${countAtRank !== 1 ? 's' : ''}</span>
     </div>`;
-  }).join('');
-}
+            }).join('');
+        }
 
-function createStatus(soldier) {
-    // determine inactivity based on last session or join date
-    // manual override if status is set to retired or on break
-    if (soldier.status && ['retired', 'on break'].includes(soldier.status.toLowerCase())) {
-        return soldier.status.toLowerCase();
-    }
+        // ── Drawer: open soldier ──
+        function openSoldier(encodedName) {
+            const name = decodeURIComponent(encodedName);
+            const s = soldiers.find(x => x.name === name);
+            if (!s) return;
 
-    // get the join date & last session date, keep the most recent
-    let lastActive = soldier.join_date;
-    lastActive = soldier.inactive_date > lastActive ? soldier.inactive_date : lastActive;
+            const pts = parseInt(s.points) || 0;
+            const rank = getRank(s);
+            const attended = sessionsFor(name);
+            const isTrain = s.is_trainee === 'true' || s.is_trainee === '1';
 
-    // 6 months of no session = semi-active, 12 months = inactive
-    if (lastActive) {
-        const lastActiveDate = parseDate(lastActive);
-        const now = new Date();
-        const diffMonths = (now.getFullYear() - lastActiveDate.getFullYear()) * 12 + (now.getMonth() - lastActiveDate.getMonth());
-        if (diffMonths >= 12) return 'inactive';
-        if (diffMonths >= 6) return 'semi-active';
-    }
-}
-
-// ── Drawer: open soldier ──
-function openSoldier(encodedName) {
-  const name = decodeURIComponent(encodedName);
-  const s = soldiers.find(x => x.name === name);
-  if (!s) return;
-
-  const pts = parseInt(s.points) || 0;
-  const rank = getRank(s);
-  const attended = sessionsFor(name);
-  const isTrain = s.is_trainee === 'true' || s.is_trainee === '1';
-
-  const content = `
+            const content = `
     <h2>${s.name}</h2>
     <div class="rank-line">${rank} · ${s.regiment || 'GA'}</div>
     ${badge(s.status)} ${isTrain ? '<span class="badge badge-trainee">Trainee</span>' : ''}
@@ -435,75 +473,75 @@ function openSoldier(encodedName) {
       <h3>Enlistment Details</h3>
       <div class="detail-row"><span class="dk">Join Date</span><span class="dv">${formatDate(s.join_date)}</span></div>
       <div class="detail-row"><span class="dk">Member Duration</span><span class="dv">${(() => {
-        const match = String(s.join_date).match(/Date\((\d+),(\d+),(\d+)\)/);
-        if (match) {
-          const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
-          let days = Math.floor((new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-          const years = Math.floor(days / 365);
-          days -= years * 365;
-          const months = Math.floor(days / 30);
-          days -= months * 30;
-          const weeks = Math.floor(days / 7);
-          days -= weeks * 7;
-          let parts = [];
-          if (years) parts.push(`${years} year${years !== 1 ? 's' : ''}`);
-          if (months) parts.push(`${months} month${months !== 1 ? 's' : ''}`);
-          if (weeks) parts.push(`${weeks} week${weeks !== 1 ? 's' : ''}`);
-          if (days) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
-          return parts.join(', ');
-        }
-      })()}</span></div>
+                        const match = String(s.join_date).match(/Date\((\d+),(\d+),(\d+)\)/);
+                        if (match) {
+                            const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
+                            let days = Math.floor((new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+                            const years = Math.floor(days / 365);
+                            days -= years * 365;
+                            const months = Math.floor(days / 30);
+                            days -= months * 30;
+                            const weeks = Math.floor(days / 7);
+                            days -= weeks * 7;
+                            let parts = [];
+                            if (years) parts.push(`${years} year${years !== 1 ? 's' : ''}`);
+                            if (months) parts.push(`${months} month${months !== 1 ? 's' : ''}`);
+                            if (weeks) parts.push(`${weeks} week${weeks !== 1 ? 's' : ''}`);
+                            if (days) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
+                            return parts.join(', ');
+                        }
+                    })()}</span></div>
     </div>` : ''}
 
     ${createStatus(s) === 'inactive' ? `<div class="drawer-section">
       <h3>Inactivity Details</h3>
       <div class="detail-row"><span class="dk">Inactive Since</span><span class="dv">${formatDate(s.inactive_date)}</span></div>
       <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${(() => {
-        const match = String(s.inactive_date).match(/Date\((\d+),(\d+),(\d+)\)/);
-        if (match) {
-          const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
-          let days = Math.floor((new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-          const years = Math.floor(days / 365);
-          days -= years * 365;
-          const months = Math.floor(days / 30);
-          days -= months * 30;
-          const weeks = Math.floor(days / 7);
-          days -= weeks * 7;
-          let parts = [];
-          if (years) parts.push(`${years} year${years !== 1 ? 's' : ''}`);
-          if (months) parts.push(`${months} month${months !== 1 ? 's' : ''}`);
-          if (weeks) parts.push(`${weeks} week${weeks !== 1 ? 's' : ''}`);
-          if (days) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
-          return parts.join(', ');
-        }
-      })()}</span></div>
+                        const match = String(s.inactive_date).match(/Date\((\d+),(\d+),(\d+)\)/);
+                        if (match) {
+                            const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
+                            let days = Math.floor((new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+                            const years = Math.floor(days / 365);
+                            days -= years * 365;
+                            const months = Math.floor(days / 30);
+                            days -= months * 30;
+                            const weeks = Math.floor(days / 7);
+                            days -= weeks * 7;
+                            let parts = [];
+                            if (years) parts.push(`${years} year${years !== 1 ? 's' : ''}`);
+                            if (months) parts.push(`${months} month${months !== 1 ? 's' : ''}`);
+                            if (weeks) parts.push(`${weeks} week${weeks !== 1 ? 's' : ''}`);
+                            if (days) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
+                            return parts.join(', ');
+                        }
+                    })()}</span></div>
     </div>` : ''}
 
     <div class="drawer-section">
       <h3>Sessions Attended (${attended.length})</h3>
       ${attended.length
-        ? `<div class="attendee-list">${attended.map(ss =>
-            `<span class="session-tag">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
-          ).join('')}</div>`
-        : `<span style="color:var(--text-muted);font-size:0.88rem">No sessions recorded.</span>`
-      }
+                    ? `<div class="attendee-list">${attended.map(ss =>
+                        `<span class="session-tag">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
+                    ).join('')}</div>`
+                    : `<span style="color:var(--text-muted);font-size:0.88rem">No sessions recorded.</span>`
+                }
     </div>
   `;
 
-  document.getElementById('drawer-content').innerHTML = content;
-  document.getElementById('drawer-overlay').classList.add('open');
-  document.getElementById('drawer').classList.add('open');
-}
+            document.getElementById('drawer-content').innerHTML = content;
+            document.getElementById('drawer-overlay').classList.add('open');
+            document.getElementById('drawer').classList.add('open');
+        }
 
-// ── Drawer: open session ──
-function openSession(encodedId) {
-  const id = decodeURIComponent(encodedId);
-  const s = sessions.find(x => encodeURIComponent(x['Timestamp'] || x['Session Name']) === encodeURIComponent(id));
-  if (!s) return;
+        // ── Drawer: open session ──
+        function openSession(encodedId) {
+            const id = decodeURIComponent(encodedId);
+            const s = sessions.find(x => encodeURIComponent(x['Timestamp'] || x['Session Name']) === encodeURIComponent(id));
+            if (!s) return;
 
-  const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim()).filter(Boolean);
+            const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim()).filter(Boolean);
 
-  const content = `
+            const content = `
     <h2>${s['Session Name'] || 'Session'}</h2>
     <div class="rank-line">${formatDate(s['Session Date'])}</div>
     <div class="drawer-section">
@@ -515,110 +553,111 @@ function openSession(encodedId) {
       <h3>Attendee List</h3>
       <div class="attendee-list">
         ${attendees.map(a => {
-          const found = soldiers.find(x => x.name.toLowerCase() === a.toLowerCase());
-          return `<span class="session-tag" ${found ? `onclick="openSoldier('${encodeURIComponent(found.name)}')" style="cursor:pointer;color:var(--amber)"` : ''}>${a}</span>`;
-        }).join('')}
+                const found = soldiers.find(x => x.name.toLowerCase() === a.toLowerCase());
+                return `<span class="session-tag" ${found ? `onclick="openSoldier('${encodeURIComponent(found.name)}')" style="cursor:pointer;color:var(--amber)"` : ''}>${a}</span>`;
+            }).join('')}
       </div>
     </div>
   `;
 
-  document.getElementById('drawer-content').innerHTML = content;
-  document.getElementById('drawer-overlay').classList.add('open');
-  document.getElementById('drawer').classList.add('open');
-}
+            document.getElementById('drawer-content').innerHTML = content;
+            document.getElementById('drawer-overlay').classList.add('open');
+            document.getElementById('drawer').classList.add('open');
+        }
 
-function closeDrawer() {
-  document.getElementById('drawer-overlay').classList.remove('open');
-  document.getElementById('drawer').classList.remove('open');
-}
+        function closeDrawer() {
+            document.getElementById('drawer-overlay').classList.remove('open');
+            document.getElementById('drawer').classList.remove('open');
+        }
 
-// ── Tab switching ──
-function switchTab(name) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  document.querySelectorAll('nav button')[['soldiers','sessions','ranks'].indexOf(name)].classList.add('active');
-}
+        // ── Tab switching ──
+        function switchTab(name) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
+            document.querySelectorAll('nav button')[['soldiers', 'sessions', 'ranks'].indexOf(name)].classList.add('active');
+        }
 
-// ── Populate regiment filter ──
-function populateFilters() {
-  const regSet = [...new Set(soldiers.map(s => s.regiment).filter(Boolean))].sort();
-  const sel = document.getElementById('filter-regiment');
-  sel.innerHTML = '<option value="">All Regiments</option>'
-    + regSet.map(r => `<option value="${r.toLowerCase()}">${r}</option>`).join('');
-}
+        // ── Populate regiment filter ──
+        function populateFilters() {
+            const regSet = [...new Set(soldiers.map(s => s.regiment).filter(Boolean))].sort();
+            const sel = document.getElementById('filter-regiment');
+            sel.innerHTML = '<option value="">All Regiments</option>'
+                + regSet.map(r => `<option value="${r.toLowerCase()}">${r}</option>`).join('');
+        }
 
-// ── Update stat cards ──
-function updateStats() {
-  document.getElementById('stat-total').textContent = soldiers.length;
-  document.getElementById('stat-active').textContent = soldiers.filter(s => (s.status||'active').toLowerCase() === 'active').length;
-  document.getElementById('stat-semi-active').textContent = soldiers.filter(s => (s.status||'').toLowerCase() === 'semi-active').length;
-  document.getElementById('stat-inactive').textContent = soldiers.filter(s => (s.status||'').toLowerCase() === 'inactive').length;
-  document.getElementById('stat-on-break').textContent = soldiers.filter(s => (s.status||'').toLowerCase() === 'on break').length;
-  document.getElementById('stat-retired').textContent = soldiers.filter(s => (s.status||'').toLowerCase() === 'retired').length;
-}
+        // ── Update stat cards ──
+        function updateStats() {
+            document.getElementById('stat-total').textContent = soldiers.length;
+            document.getElementById('stat-active').textContent = soldiers.filter(s => (s.status || 'active').toLowerCase() === 'active').length;
+            document.getElementById('stat-semi-active').textContent = soldiers.filter(s => (s.status || '').toLowerCase() === 'semi-active').length;
+            document.getElementById('stat-inactive').textContent = soldiers.filter(s => (s.status || '').toLowerCase() === 'inactive').length;
+            document.getElementById('stat-on-break').textContent = soldiers.filter(s => (s.status || '').toLowerCase() === 'on break').length;
+            document.getElementById('stat-retired').textContent = soldiers.filter(s => (s.status || '').toLowerCase() === 'retired').length;
+        }
 
-// ── Init ──
-async function init() {
-  [soldiers, sessions, ranks] = await Promise.all([
-    fetchCSV('data/soldiers.csv'),
-    fetchCSV('data/sessions.csv'),
-    fetchCSV('data/ranks.csv'),
-  ]);
+        // ── Init ──
+        async function init() {
+            [soldiers, sessions, ranks] = await Promise.all([
+                fetchCSV('data/soldiers.csv'),
+                fetchCSV('data/sessions.csv'),
+                fetchCSV('data/ranks.csv'),
+            ]);
 
-  // Warn about unresolved sessions
-    const unresolved = sessions.filter(s => {
-        const updated = String(s['updated'] ?? '').trim();
-        return updated === '0';
-    });
-    if (unresolved.length) {
-        const names = unresolved.map(s => s['Session Name'] || 'Unnamed').join(', ');
-        document.getElementById('session-warning-text').textContent = names;
-        document.getElementById('session-warning').style.display = 'block';
-    }
+            // Warn about unresolved sessions
+            const unresolved = sessions.filter(s => {
+                const updated = String(s['updated'] ?? '').trim();
+                return updated === '0';
+            });
+            if (unresolved.length) {
+                const names = unresolved.map(s => s['Session Name'] || 'Unnamed').join(', ');
+                document.getElementById('session-warning-text').textContent = names;
+                document.getElementById('session-warning').style.display = 'block';
+            }
 
-    // Celebrate recent rankups
-    // We will only look at the last training session and get the Rankups column for that session, which contains "Name (New Rank)".
-    const rankups = sessions.filter(s => {
-        const rankup = String(s['Rankups'] ?? '').trim();
-        return rankup;
-    });
-    // We want to output a message that says "Congratulations to Name for ranking up to New Rank!"
-    if (rankups.length) {
-        const messages = [];
-        rankups.forEach(s => {
-            if (s !== sessions[sessions.length - 1]) return;
-            
-            //find the last row
-            const lastSession = sessions[sessions.length - 1];
-            
-            if(lastSession && lastSession['Rankups']) {
-                const parts = lastSession['Rankups'].split('\n').map(r => r.trim()).filter(Boolean);
-                
-                parts.forEach(p => {
-                    const match = p.match(/^(.+)\s+\((.+)\)$/);
-                    if (match) {
-                        const name = match[1].trim();
-                        const newRank = match[2].trim();
-                        messages.push(`🎉 Congratulations to ${name} for ranking up to ${newRank}!`);
+            // Celebrate recent rankups
+            // We will only look at the last training session and get the Rankups column for that session, which contains "Name (New Rank)".
+            const rankups = sessions.filter(s => {
+                const rankup = String(s['Rankups'] ?? '').trim();
+                return rankup;
+            });
+            // We want to output a message that says "Congratulations to Name for ranking up to New Rank!"
+            if (rankups.length) {
+                const messages = [];
+                rankups.forEach(s => {
+                    if (s !== sessions[sessions.length - 1]) return;
+
+                    //find the last row
+                    const lastSession = sessions[sessions.length - 1];
+
+                    if (lastSession && lastSession['Rankups']) {
+                        const parts = lastSession['Rankups'].split('\n').map(r => r.trim()).filter(Boolean);
+
+                        parts.forEach(p => {
+                            const match = p.match(/^(.+)\s+\((.+)\)$/);
+                            if (match) {
+                                const name = match[1].trim();
+                                const newRank = match[2].trim();
+                                messages.push(`🎉 Congratulations to ${name} for ranking up to ${newRank}!`);
+                            }
+                        });
                     }
                 });
+                if (messages.length) {
+                    document.getElementById('rankup-text').innerHTML = messages.join('<br>');
+                    document.getElementById('rankup-banner').style.display = 'block';
+                }
             }
-        });
-        if (messages.length) {
-            document.getElementById('rankup-text').innerHTML = messages.join('<br>');
-            document.getElementById('rankup-banner').style.display = 'block';
+
+            populateFilters();
+            updateStats();
+            renderSoldiers();
+            renderSessions();
+            renderRanks();
         }
-    }
 
-  populateFilters();
-  updateStats();
-  renderSoldiers();
-  renderSessions();
-  renderRanks();
-}
-
-init();
-</script>
+        init();
+    </script>
 </body>
+
 </html>
