@@ -310,10 +310,9 @@
                 console.log('Last active date:', lastActiveDate);
                 console.log('Current date:', now);
                 console.log('Difference in months:', diffMonths);
-
-
-                if (diffMonths >= 12) status = 'inactive';
+                
                 if (diffMonths >= 6) status = 'semi-active';
+                if (diffMonths >= 12) status = 'inactive';
             }
             console.log('Assigned status:', status);
             console.log('---');
@@ -329,7 +328,8 @@
             const filtered = soldiers.filter(s => {
                 const nm = (s.name || '').toLowerCase();
                 const regiment = (s.regiment || '').toLowerCase();
-                const status = createStatus(s).toLowerCase();
+                const status = createStatus(s);
+                console.log('status for', s.name, ':', status);
                 return (!q || nm.includes(q))
                     && (!reg || regiment === reg)
                     && (!st || status === st);
