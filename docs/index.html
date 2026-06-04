@@ -291,6 +291,7 @@
 
         // ── determine inactivity based on last session or join date ──
         function createStatus(soldier) {
+            let status = 'active';
             // manual override if status is set to retired or on break
             if (soldier.status && ['retired', 'on break'].includes(soldier.status.toLowerCase())) {
                 return soldier.status.toLowerCase();
@@ -306,15 +307,17 @@
                 const now = new Date();
                 const diffMonths = (now.getFullYear() - lastActiveDate.getFullYear()) * 12 + (now.getMonth() - lastActiveDate.getMonth());
                 console.log('Creating status for soldier:', soldier.name);
-                console.log('status: ', soldier.status);
                 console.log('Last active date:', lastActiveDate);
                 console.log('Current date:', now);
                 console.log('Difference in months:', diffMonths);
 
-                if (diffMonths >= 12) return 'inactive';
-                if (diffMonths >= 6) return 'semi-active';
+
+                if (diffMonths >= 12) status = 'inactive';
+                if (diffMonths >= 6) status = 'semi-active';
             }
-            return 'active';
+            console.log('Assigned status:', status);
+            console.log('---');
+            return status;
         }
 
         // ── Render soldiers table ──
