@@ -326,7 +326,6 @@
                 const nm = (s.name || '').toLowerCase();
                 const regiment = (s.regiment || '').toLowerCase();
                 const status = createStatus(s);
-                console.log('status for', s.name, ':', status);
                 return (!q || nm.includes(q))
                     && (!reg || regiment === reg)
                     && (!st || status === st);
@@ -594,7 +593,6 @@
             document.getElementById('stat-inactive').textContent = soldiers.filter(s => (createStatus(s) || '').toLowerCase() === 'inactive').length;
             document.getElementById('stat-on-break').textContent = soldiers.filter(s => (createStatus(s) || '').toLowerCase() === 'on break').length;
             document.getElementById('stat-retired').textContent = soldiers.filter(s => (createStatus(s) || '').toLowerCase() === 'retired').length;
-            document.getElementById('stat-memorial').textContent = soldiers.filter(s => (createStatus(s) || '').toLowerCase() === 'memorial').length;
         }
 
         // ── Init ──
