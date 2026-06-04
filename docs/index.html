@@ -307,7 +307,7 @@ function renderSoldiers() {
     const pts = parseInt(s.points) || 0;
     const pct = Math.min(100, Math.round((pts / 50) * 100));
     const rank = getRank(s);
-    const reg = s.regiment_title || s.regiment || '—';
+    const reg = s.regiment || '—';
     return `<tr onclick="openSoldier('${encodeURIComponent(s.name)}')">
       <td class="name-cell">${s.name || '—'}</td>
       <td>${rank}</td>
