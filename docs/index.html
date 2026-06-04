@@ -242,7 +242,7 @@ function maxRankPts() {
 
 // ── Badge HTML ──
 function badge(status) {
-  const s = (status || 'active').toLowerCase();
+  const s = (status || '').toLowerCase();
   const cls = { active:'badge-active', semiActive: 'badge-semi-active', inactive:'badge-inactive', onBreak: 'badge-on-break', retired:'badge-retired' }[s] || 'badge-active';
   return `<span class="badge ${cls}">${s}</span>`;
 }
@@ -267,7 +267,7 @@ function renderSoldiers() {
   const filtered = soldiers.filter(s => {
     const nm = (s.name || '').toLowerCase();
     const regiment = (s.regiment || '').toLowerCase();
-    const status = (s.status || 'active').toLowerCase();
+    const status = (s.status || '').toLowerCase();
     return (!q || nm.includes(q))
       && (!reg || regiment === reg)
       && (!st || status === st);
