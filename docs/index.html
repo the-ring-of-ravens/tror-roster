@@ -308,7 +308,7 @@ function renderSoldiers() {
     const pct = Math.min(100, Math.round((pts / 50) * 100));
     const rank = getRank(s);
     const reg = s.regiment || '—';
-    return `<tr onclick="openSoldier('${encodeURIComponent(s.name)}')">
+    return `<tr onclick='openSoldier("${encodeURIComponent(s.name)}")'>
       <td class="name-cell">${s.name || '—'}</td>
       <td>${rank}</td>
       <td>${reg}</td>
@@ -470,7 +470,7 @@ function openSession(encodedId) {
       <div class="attendee-list">
         ${attendees.map(a => {
           const found = soldiers.find(x => x.name.toLowerCase() === a.toLowerCase());
-          return `<span class="session-tag" ${found ? `onclick="openSoldier('${encodeURIComponent(found.name)}')" style="cursor:pointer;color:var(--amber)"` : ''}>${a}</span>`;
+          return `<span class="session-tag" ${found ? `onclick='openSoldier("${encodeURIComponent(found.name)}")' style="cursor:pointer;color:var(--amber)"` : ''}>${a}</span>`;
         }).join('')}
       </div>
     </div>
