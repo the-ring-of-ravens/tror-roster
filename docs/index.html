@@ -78,6 +78,10 @@
                     <div class="label">Retired</div>
                     <div class="value" id="stat-retired">—</div>
                 </div>
+                <div class="stat-card">
+                    <div class="label">Memorial</div>
+                    <div class="value" id="stat-memorial">—</div>
+                </div>
             </div>
 
             <div class="search-row" style="display:flex; gap:0.75rem; margin-bottom:1.5rem;">
@@ -100,6 +104,7 @@
                     <option value="inactive">Inactive</option>
                     <option value="on-break">On Break</option>
                     <option value="retired">Retired</option>
+                    <option value="memorial">Memorial</option>
                 </select>
             </div>
 
@@ -274,7 +279,7 @@
         // ── Badge HTML ──
         function badge(status) {
             const s = status;
-            const cls = { 'active': 'badge-active', 'semi-active': 'badge-semi-active', 'inactive': 'badge-inactive', 'on break': 'badge-on-break', 'retired': 'badge-retired' }[s];
+            const cls = { 'active': 'badge-active', 'semi-active': 'badge-semi-active', 'inactive': 'badge-inactive', 'on break': 'badge-on-break', 'retired': 'badge-retired', 'memorial': 'badge-memorial' }[s];
             return `<span class="badge ${cls}">${s}</span>`;
         }
 
@@ -309,7 +314,7 @@
             }
 
             // manual override if status is set to retired or on break
-            if (soldier.status && (soldier.status === 'Retired' || soldier.status === 'On Break')) {
+            if (soldier.status && (soldier.status === 'Retired' || soldier.status === 'On Break' || soldier.status === 'Memorial')) {
                 status = soldier.status.toLowerCase();
             }
             return status;
@@ -593,6 +598,7 @@
             document.getElementById('stat-inactive').textContent = soldiers.filter(s => (createStatus(s) || '').toLowerCase() === 'inactive').length;
             document.getElementById('stat-on-break').textContent = soldiers.filter(s => (createStatus(s) || '').toLowerCase() === 'on break').length;
             document.getElementById('stat-retired').textContent = soldiers.filter(s => (createStatus(s) || '').toLowerCase() === 'retired').length;
+            document.getElementById('stat-memorial').textContent = soldiers.filter(s => (createStatus(s) || '').toLowerCase() === 'memorial').length;
         }
 
         // ── Init ──
