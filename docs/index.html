@@ -381,6 +381,27 @@ function renderRanks() {
   }).join('');
 }
 
+function createStatus(soldier) {
+    // determine inactivity based on last session or join date
+    // manual override if status is set to retired or on break
+    if (soldier.status && ['retired', 'on break'].includes(soldier.status.toLowerCase())) {
+        return soldier.status.toLowerCase();
+    }
+
+    // get the join date & last session date, keep the most recent
+    let lastActive = soldier.join_date;
+    lastActive = soldier.inactive_date > lastActive ? soldier.inactive_date : lastActive;
+
+    // 6 months of no session = semi-active, 12 months = inactive
+    if (lastActive) {
+        const lastActiveDate = parseDate(lastActive);
+        const now = new Date();
+        const diffMonths = (now.getFullYear() - lastActiveDate.getFullYear()) * 12 + (now.getMonth() - lastActiveDate.getMonth());
+        if (diffMonths >= 12) return 'inactive';
+        if (diffMonths >= 6) return 'semi-active';
+    }
+}
+
 // ── Drawer: open soldier ──
 function openSoldier(encodedName) {
   const name = decodeURIComponent(encodedName);
@@ -434,10 +455,7 @@ function openSoldier(encodedName) {
       })()}</span></div>
     </div>` : ''}
 
-    ${s.inactive_date && new Date(
-        parseInt(String(s.inactive_date).match(/Date\((\d+),(\d+),(\d+)\)/)[1], 10), 
-        parseInt(String(s.inactive_date).match(/Date\((\d+),(\d+),(\d+)\)/)[2], 10), 
-        parseInt(String(s.inactive_date).match(/Date\((\d+),(\d+),(\d+)\)/)[3], 10)) < new Date().setMonth(new Date().getMonth() - 6) ? `<div class="drawer-section">
+    ${createStatus(s) === 'inactive' ? `<div class="drawer-section">
       <h3>Inactivity Details</h3>
       <div class="detail-row"><span class="dk">Inactive Since</span><span class="dv">${formatDate(s.inactive_date)}</span></div>
       <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${(() => {
