@@ -293,22 +293,28 @@
         border: 1px solid #3a6b45;
     }
 
+    .badge-semi-active {
+        background: #2a2f3a;
+        color: #7890b0;
+        border: 1px solid #333a55;
+    }
+
     .badge-inactive {
         background: #2a2010;
         color: #c8863a;
         border: 1px solid #7a4f1e;
     }
 
-    .badge-retired {
-        background: #1a1a2a;
+    .badge-on-break {
+        background: #2a2835;
         color: #7880a0;
         border: 1px solid #333a55;
     }
 
-    .badge-trainee {
-        background: #2a1a10;
-        color: #c86030;
-        border: 1px solid #7a3a1e;
+    .badge-retired {
+        background: #1a1a2a;
+        color: #7880a0;
+        border: 1px solid #333a55;
     }
 
     /* ── Points bar ── */
