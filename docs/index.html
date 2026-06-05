@@ -520,10 +520,7 @@
                 </div>`;
             });
 
-            el.innerHTML = `
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1rem;">
-                ${cards.join('')}
-                </div>`;
+            el.innerHTML = `<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1rem;">${cards.join('')}</div>`;
         }
 
         // ── Drawer: open soldier ──
