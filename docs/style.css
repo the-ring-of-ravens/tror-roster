@@ -323,6 +323,13 @@
         border: 1px solid #463355;
     }
 
+    /* ── Regiment badges ── */
+    .reg-shield      { color: #9b6bd4; }
+    .reg-navy        { color: #4a8fd4; }
+    .reg-restoration { color: #4ab870; }
+    .reg-airforce    { color: #d4873a; }
+    .reg-archery     { color: #d44a4a; }
+
     /* ── Points bar ── */
     .pts-wrap {
         display: flex;
