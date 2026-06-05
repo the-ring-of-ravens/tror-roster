@@ -551,7 +551,7 @@
 
             const activePct = Math.round((counts.active / total) * 100);
             paths += `<text x="${cx}" y="${cy - 8}"  text-anchor="middle" fill="var(--text)"       font-size="20" font-weight="bold" font-family="Cinzel,serif">${activePct}%</text>`;
-            paths += `<text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="var(--text-muted)" font-size="9"  font-family="Cinzel,serif" letter-spacing="2">ACTIVE</text>`;
+            paths += `<text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="var(--text-muted)" font-size="9"  font-weight="bold" font-family="Cinzel,serif" letter-spacing="2">ACTIVE</text>`;
             return paths;
         }
 
@@ -579,7 +579,7 @@
             </div>`).join('');
 
             return `
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 0.75rem;margin-top:0.75rem;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 1.2rem;margin-top:0.75rem;">
                 <div>${renderCol(col1)}</div>
                 <div>${renderCol(col2)}</div>
             </div>`;
@@ -594,7 +594,7 @@
             ? r.leaderboard.map((entry, i) => {
                 const icon = i === 0
                     ? `<span style="font-size:1rem;line-height:1;">🜲</span>`
-                    : `<span style="color:var(--text-muted);font-size:0.8rem;font-family:var(--font-title);width:18px;text-align:center;display:inline-block;">${i + 1}</span>`;
+                    : `<span style="color:white;font-size:0.8rem;font-family:var(--font-title);width:18px;text-align:center;display:inline-block;">${i + 1}</span>`;
                 return `
                     <div class="stat-soldier-row" data-soldier-name="${entry.name.replace(/"/g,'&quot;')}"
                         style="display:grid;grid-template-columns:22px 44px 1fr 28px;align-items:center;gap:0.4rem;
@@ -616,14 +616,14 @@
 
                 <!-- Header -->
                 <div style="margin-bottom:1.1rem;">
-                <div style="display:flex;align-items:baseline;gap:0.75rem;">
+                <div style="display:flex;align-items:baseline;gap:1rem;">
                     <span style="font-family:var(--font-title);font-size:1.1rem;letter-spacing:0.12em;text-transform:uppercase;color:${r.theme.color};">${r.name}</span>
-                    <span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:0.04em;font-style:italic;">${r.motto}</span>
+                    <span style="font-size:1rem;color:var(--text-muted);letter-spacing:0.04em;font-style:italic;">${r.motto}</span>
                 </div>
                 </div>
 
                 <!-- Three columns -->
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;align-items:start;">
+                <div style="display:grid;grid-template-columns:0.8fr 1fr 1fr;gap:1.5rem;align-items:start;">
 
                 <!-- Col 1: Pie + two-column legend -->
                 <div>
@@ -642,7 +642,7 @@
                     <span></span>
                     <span>Rank</span>
                     <span>Name</span>
-                    <span style="text-align:right;">Att.</span>
+                    <span style="text-align:right;">Attendance</span>
                     </div>
                     ${leaderRows}
                 </div>
@@ -656,7 +656,7 @@
                         <div style="font-size:1.4rem;font-weight:700;color:${r.theme.color};font-family:var(--font-title);">${r.total}</div>
                     </div>
                     <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
-                        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.04em;">All-Time Sessions Hosted</div>
+                        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.04em;">Total Sessions Hosted</div>
                         <div style="font-size:1.4rem;font-weight:700;color:${r.theme.color};font-family:var(--font-title);">${r.allTimeSessions}</div>
                     </div>
                     <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
