@@ -466,7 +466,7 @@
             const theme = regimentTheme(s.regiment);
 
             const content = `
-    <div style="height:3px; background:${theme.color}; margin:-1.5rem -1.5rem 1.5rem;"></div>
+    <div style="height:3px; background:${theme.color}; margin:-0.5rem -1.5rem 1.5rem;"></div>
     <h2>${s.name}</h2>
     <div class="rank-line" style="color:${theme.color}">${rank} · ${s.regiment || 'GA'}</div>
     ${badge(createStatus(s))} ${isTrain ? '<span class="badge badge-trainee">Trainee</span>' : ''}
