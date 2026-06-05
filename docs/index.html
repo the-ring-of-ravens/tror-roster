@@ -434,93 +434,248 @@
             }).join('');
         }
 
+        // ── Render statistics ──
         function renderStats() {
-            const el = document.getElementById('stats-content');
+        const el = document.getElementById('stats-content');
+        if (!el) return;
 
-            const regiments = [
-                { name: 'Airforce',    key: 'airforce'    },
-                { name: 'Archery',     key: 'archery'     },
-                { name: 'Navy',        key: 'navy'        },
-                { name: 'Restoration', key: 'restoration' },
-                { name: 'Shield',      key: 'shield'      },
-            ];
+        const regiments = [
+            { name: 'Airforce',    key: 'airforce'    },
+            { name: 'Archery',     key: 'archery'     },
+            { name: 'Navy',        key: 'navy'        },
+            { name: 'Restoration', key: 'restoration' },
+            { name: 'Shield',      key: 'shield'      },
+        ];
 
-            // Count sessions in the last 30 days, bucketed by the host's regiment
-            const now = new Date();
-            const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            const sessionsByReg = {};
-            regiments.forEach(r => sessionsByReg[r.key] = 0);
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-            sessions.forEach(s => {
-                const sessionDate = parseDate(s['Session Date']);
-                if (!sessionDate || sessionDate < thirtyDaysAgo) return;
-                const host = soldiers.find(x => (x.name||'').toLowerCase().trim() === (s['Host']||'').toLowerCase().trim());
-                if (!host) return;
-                const key = (host.regiment || '').toLowerCase();
-                if (sessionsByReg[key] !== undefined) sessionsByReg[key]++;
+        // Build per-soldier 30-day attendance count (hosted + attended)
+        const attendanceCounts = {};
+        sessions.forEach(s => {
+            const sessionDate = parseDate(s['Session Date']);
+            if (!sessionDate || sessionDate < thirtyDaysAgo) return;
+
+            const names = new Set();
+            const host = (s['Host'] || '').trim();
+            if (host) names.add(host.toLowerCase());
+            (s['Attendees'] || '').split('\n').map(a => a.trim().toLowerCase()).filter(Boolean).forEach(a => names.add(a));
+
+            names.forEach(n => {
+            attendanceCounts[n] = (attendanceCounts[n] || 0) + 1;
+            });
+        });
+
+        // Per-regiment: all-time session count and avg attendance
+        const allTimeSessions = {};
+        const allTimeAttendance = {};
+        const lastSessionDate = {};
+        regiments.forEach(r => { allTimeSessions[r.key] = 0; allTimeAttendance[r.key] = []; lastSessionDate[r.key] = null; });
+
+        sessions.forEach(s => {
+            const host = soldiers.find(x => (x.name||'').toLowerCase().trim() === (s['Host']||'').toLowerCase().trim());
+            if (!host) return;
+            const key = (host.regiment||'').toLowerCase();
+            if (allTimeSessions[key] === undefined) return;
+            allTimeSessions[key]++;
+            const count = (s['Attendees']||'').split('\n').filter(Boolean).length;
+            allTimeAttendance[key].push(count);
+            const d = parseDate(s['Session Date']);
+            if (d && (!lastSessionDate[key] || d > lastSessionDate[key])) lastSessionDate[key] = d;
+        });
+
+        // Build regiment data
+        const regData = regiments.map(r => {
+            const theme   = regimentTheme(r.name);
+            const members = soldiers.filter(s => (s.regiment||'').toLowerCase() === r.key);
+            const total   = members.length;
+
+            const statusCounts = {
+            active:       members.filter(s => createStatus(s) === 'active').length,
+            'semi-active':members.filter(s => createStatus(s) === 'semi-active').length,
+            'on break':   members.filter(s => createStatus(s) === 'on break').length,
+            inactive:     members.filter(s => createStatus(s) === 'inactive').length,
+            retired:      members.filter(s => createStatus(s) === 'retired').length,
+            };
+
+            // Top 5 by 30-day attendance
+            const leaderboard = members
+            .map(s => ({
+                name: s.name,
+                rank: getRank(s),
+                count: attendanceCounts[(s.name||'').toLowerCase().trim()] || 0,
+            }))
+            .filter(x => x.count > 0)
+            .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+            .slice(0, 5);
+
+            const avgAtt = allTimeAttendance[r.key].length
+            ? Math.round(allTimeAttendance[r.key].reduce((a,b)=>a+b,0) / allTimeAttendance[r.key].length)
+            : 0;
+
+            return {
+            ...r, theme, members, total, statusCounts,
+            leaderboard, avgAtt,
+            allTimeSessions: allTimeSessions[r.key],
+            lastSession: lastSessionDate[r.key],
+            };
+        });
+
+        // Sort: most total members, tiebreak by most active
+        regData.sort((a, b) => {
+            if (b.total !== a.total) return b.total - a.total;
+            return b.statusCounts.active - a.statusCounts.active;
+        });
+
+        // ── SVG Pie chart generator ──
+        function makePie(counts, total, theme) {
+            if (total === 0) return `<text x="60" y="65" text-anchor="middle" fill="var(--text-muted)" font-size="10">No data</text>`;
+
+            const slices = [
+            { key: 'active',       color: '#4ab870', label: 'Active'      },
+            { key: 'semi-active',  color: '#cac45b', label: 'Semi-Active' },
+            { key: 'on break',     color: '#9295a1', label: 'On Break'    },
+            { key: 'inactive',     color: '#c8863a', label: 'Inactive'    },
+            { key: 'retired',      color: '#7880a0', label: 'Retired'     },
+            ].filter(s => counts[s.key] > 0);
+
+            const cx = 60, cy = 60, r = 52, ri = 30;
+            let angle = -Math.PI / 2;
+            let paths = '';
+
+            slices.forEach(s => {
+            const frac = counts[s.key] / total;
+            const sweep = frac * 2 * Math.PI;
+            const x1o = cx + r  * Math.cos(angle);
+            const y1o = cy + r  * Math.sin(angle);
+            const x1i = cx + ri * Math.cos(angle);
+            const y1i = cy + ri * Math.sin(angle);
+            angle += sweep;
+            const x2o = cx + r  * Math.cos(angle);
+            const y2o = cy + r  * Math.sin(angle);
+            const x2i = cx + ri * Math.cos(angle);
+            const y2i = cy + ri * Math.sin(angle);
+            const large = sweep > Math.PI ? 1 : 0;
+
+            paths += `<path d="M${x1i},${y1i} L${x1o},${y1o} A${r},${r} 0 ${large},1 ${x2o},${y2o} L${x2i},${y2i} A${ri},${ri} 0 ${large},0 ${x1i},${y1i} Z"
+                fill="${s.color}" opacity="0.9"/>`;
             });
 
-            const cards = regiments.map(r => {
-                const theme   = regimentTheme(r.name);
-                const members = soldiers.filter(s => (s.regiment||'').toLowerCase() === r.key);
-                const total   = members.length;
+            // Center label
+            const activePct = Math.round((counts.active / total) * 100);
+            paths += `<text x="${cx}" y="${cy - 5}" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="bold" font-family="Cinzel,serif">${activePct}%</text>`;
+            paths += `<text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="var(--text-muted)" font-size="8" font-family="Cinzel,serif">ACTIVE</text>`;
 
-                const active     = members.filter(s => createStatus(s) === 'active').length;
-                const semiActive = members.filter(s => createStatus(s) === 'semi-active').length;
-                const onBreak    = members.filter(s => createStatus(s) === 'on break').length;
-                const inactive   = members.filter(s => createStatus(s) === 'inactive').length;
-                const retired    = members.filter(s => createStatus(s) === 'retired').length;
+            return paths;
+        }
 
-                const pct = n => total ? (n / total * 100).toFixed(1) : 0;
+        function makeLegend(counts) {
+            const items = [
+            { key: 'active',       color: '#4ab870', label: 'Active'      },
+            { key: 'semi-active',  color: '#cac45b', label: 'Semi‑Active' },
+            { key: 'on break',     color: '#9295a1', label: 'On Break'    },
+            { key: 'inactive',     color: '#c8863a', label: 'Inactive'    },
+            { key: 'retired',      color: '#7880a0', label: 'Retired'     },
+            ].filter(s => counts[s.key] > 0);
 
+            return items.map(s =>
+            `<div style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--text-dim);">
+                <span style="width:8px;height:8px;border-radius:50%;background:${s.color};flex-shrink:0;"></span>
+                <span>${s.label}</span>
+                <span style="margin-left:auto;color:${s.color};font-weight:600;">${counts[s.key]}</span>
+            </div>`
+            ).join('');
+        }
+
+        const cards = regData.map(r => {
+            const pie    = makePie(r.statusCounts, r.total, r.theme);
+            const legend = makeLegend(r.statusCounts);
+
+            const leaderRows = r.leaderboard.length
+            ? r.leaderboard.map((entry, i) => {
+                const rank_icon = i === 0
+                    ? `<span style="font-size:0.9rem;">👑</span>`
+                    : `<span style="color:var(--text-muted);font-size:0.8rem;font-family:var(--font-title);min-width:16px;text-align:center;">${i + 1}</span>`;
                 return `
-                <div style="background:var(--bg-card); border:1px solid var(--border); border-left:3px solid ${theme.color}; border-radius:4px; padding:1.25rem 1.5rem;">
+                    <div data-soldier-name="${entry.name.replace(/"/g,'&quot;')}"
+                        style="display:flex;align-items:center;gap:0.6rem;padding:0.3rem 0;border-bottom:1px solid var(--border);cursor:pointer;"
+                        class="stat-soldier-row">
+                    ${rank_icon}
+                    <span style="font-size:0.75rem;color:var(--text-muted);flex-shrink:0;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${entry.rank}</span>
+                    <span style="font-size:0.85rem;color:${r.theme.color};font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${entry.name}</span>
+                    <span style="font-size:0.85rem;color:var(--amber);font-weight:600;flex-shrink:0;">${entry.count}</span>
+                    </div>`;
+                }).join('')
+            : `<div style="color:var(--text-muted);font-size:0.82rem;padding:0.5rem 0;">No activity this month.</div>`;
 
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
-                    <span style="font-family:var(--font-title); font-size:0.85rem; letter-spacing:0.1em; text-transform:uppercase; color:${theme.color};">${r.name}</span>
-                    <span style="font-family:var(--font-title); font-size:2rem; font-weight:700; color:${theme.color}; line-height:1;">${total}</span>
-                    </div>
+            const lastSess = r.lastSession
+            ? r.lastSession.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
+            : '—';
 
-                    <div style="display:flex; height:6px; border-radius:3px; overflow:hidden; margin-bottom:0.85rem; gap:1px;">
-                    <div title="Active"      style="width:${pct(active)}%;     background:#4ab870; border-radius:3px 0 0 3px;"></div>
-                    <div title="Semi-Active" style="width:${pct(semiActive)}%; background:#cac45b;"></div>
-                    <div title="On Break"    style="width:${pct(onBreak)}%;    background:#9295a1;"></div>
-                    <div title="Inactive"    style="width:${pct(inactive)}%;   background:#c8863a; border-radius:0 3px 3px 0;"></div>
-                    </div>
+            return `
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-left:3px solid ${r.theme.color};border-radius:4px;padding:1.25rem 1.5rem;">
 
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.3rem 1.5rem; font-size:0.85rem; margin-bottom:0.85rem;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:var(--text-muted)">Active</span>
-                        <span style="color:#4ab870; font-weight:600;">${active}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:var(--text-muted)">Semi-Active</span>
-                        <span style="color:#cac45b; font-weight:600;">${semiActive}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:var(--text-muted)">On Break</span>
-                        <span style="color:#9295a1; font-weight:600;">${onBreak}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:var(--text-muted)">Inactive</span>
-                        <span style="color:#c8863a; font-weight:600;">${inactive}</span>
-                    </div>
-                    ${retired ? `
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:var(--text-muted)">Retired</span>
-                        <span style="color:#7880a0; font-weight:600;">${retired}</span>
-                    </div>` : ''}
-                    </div>
+                <!-- Header -->
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <span style="font-family:var(--font-title);font-size:1rem;letter-spacing:0.1em;text-transform:uppercase;color:${r.theme.color};">${r.name}</span>
+                <span style="font-family:var(--font-title);font-size:1.8rem;font-weight:700;color:${r.theme.color};line-height:1;">${r.total} <span style="font-size:0.7rem;color:var(--text-muted);font-weight:400;">soldiers</span></span>
+                </div>
 
-                    <div style="padding-top:0.75rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;">
-                    <span style="color:var(--text-muted)">Sessions hosted (30d)</span>
-                    <span style="color:${theme.color}; font-weight:600;">${sessionsByReg[r.key]}</span>
+                <!-- Three columns -->
+                <div style="display:grid;grid-template-columns:140px 1fr 1fr;gap:1.5rem;align-items:start;">
+
+                <!-- Col 1: Pie + legend -->
+                <div>
+                    <svg viewBox="0 0 120 120" width="120" height="120" style="display:block;margin:0 auto 0.75rem;">
+                    ${pie}
+                    </svg>
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                    ${legend}
                     </div>
+                </div>
 
-                </div>`;
-            });
+                <!-- Col 2: 30-day attendance leaderboard -->
+                <div>
+                    <div style="font-family:var(--font-title);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem;">
+                    30-Day Activity
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:0.65rem;color:var(--text-muted);padding-bottom:0.3rem;border-bottom:1px solid var(--border);margin-bottom:0.25rem;">
+                    <span></span><span>Rank · Name</span><span>Att.</span>
+                    </div>
+                    ${leaderRows}
+                </div>
 
-            el.innerHTML = `<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1rem;">${cards.join('')}</div>`;
+                <!-- Col 3: Regiment health stats -->
+                <div>
+                    <div style="font-family:var(--font-title);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">
+                    Regiment Health
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                    <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
+                        <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:2px;">All-Time Sessions</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:${r.theme.color};font-family:var(--font-title);">${r.allTimeSessions}</div>
+                    </div>
+                    <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
+                        <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:2px;">Avg Attendance</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:${r.theme.color};font-family:var(--font-title);">${r.avgAtt}</div>
+                    </div>
+                    <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
+                        <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:2px;">Last Session</div>
+                        <div style="font-size:0.85rem;font-weight:600;color:${r.theme.color};">${lastSess}</div>
+                    </div>
+                    </div>
+                </div>
+
+                </div>
+            </div>`;
+        });
+
+        el.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">${cards.join('')}</div>`;
+
+        // Wire up soldier row clicks (data-name avoids apostrophe issues)
+        el.querySelectorAll('.stat-soldier-row').forEach(row => {
+            row.addEventListener('click', () => openSoldier(row.dataset.soldierName));
+        });
         }
 
         // ── Drawer: open soldier ──
