@@ -153,7 +153,7 @@
                 <h1>Statistics</h1>
                 <div class="amber-line"></div>
             </div>
-            <div id="growth-chart-section" style="background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:1.25rem 1.5rem;margin-top:1rem;">
+            <div id="growth-chart-section" style="background:var(--bg-card);border:1px solid var(--amber-dim);border-left:3px solid var(--amber);border-radius:4px;padding:1.25rem 1.5rem;margin-top:1rem;">
             <div style="font-family:var(--font-title);font-size:1.1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);margin-bottom:0.25rem;">Company Growth</div>
             <div style="font-size:0.78rem;color:var(--text-muted);font-style:italic;margin-bottom:1.25rem;">Cumulative enrollment by regiment over time</div>
             <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:1rem;">
@@ -748,6 +748,7 @@
                 stacked: true,
                 min: 0,
                 max: yMax,
+                position: 'right',
                 ticks: {
                     stepSize: yStep,
                     color: textColor,
