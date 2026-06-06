@@ -527,8 +527,8 @@
             const slices = [
             { key: 'active',       color: '#4ab870' },
             { key: 'semi-active',  color: '#cac45b' },
-            { key: 'on break',     color: '#9295a1' },
             { key: 'inactive',     color: '#c8863a' },
+            { key: 'on break',     color: '#9295a1' },
             { key: 'retired',      color: '#7880a0' },
             { key: 'memorial',     color: '#846c98' },
             ].filter(s => counts[s.key] > 0);
@@ -579,7 +579,7 @@
             </div>`).join('');
 
             return `
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 1.2rem;margin-top:0.75rem;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 1.5rem;margin-top:0.75rem;">
                 <div>${renderCol(col1)}</div>
                 <div>${renderCol(col2)}</div>
             </div>`;
