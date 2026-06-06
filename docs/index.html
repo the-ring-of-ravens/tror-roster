@@ -153,16 +153,6 @@
                 <h1>Statistics</h1>
                 <div class="amber-line"></div>
             </div>
-            <div id="growth-chart-section" style="background:var(--bg-card);border:1px solid var(--amber-dim);border-left:3px solid var(--amber);border-radius:4px;padding:1.25rem 1.5rem;margin-top:1rem;">
-            <div style="font-family:var(--font-title);font-size:1.1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);margin-bottom:0.25rem;">Company Growth</div>
-            <div style="font-size:0.78rem;color:var(--text-muted);font-style:italic;margin-bottom:1.25rem;">Cumulative enrollment by regiment over time</div>
-            <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:1rem;">
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d4873a;"></span>Airforce</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d44a4a;"></span>Archery</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4a8fd4;"></span>Navy</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4ab870;"></span>Restoration</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#9b6bd4;"></span>Shield</span>
-            </div>
             <div style="position:relative;height:320px;">
                 <canvas id="growth-canvas" role="img" aria-label="Stacked area chart showing cumulative member enrollment by regiment over time">Member enrollment history by regiment.</canvas>
             </div>
@@ -748,7 +738,6 @@
                 stacked: true,
                 min: 0,
                 max: yMax,
-                position: 'right',
                 ticks: {
                     stepSize: yStep,
                     color: textColor,
@@ -931,7 +920,7 @@
         }
 
         // ── Single card builder ──
-        function buildCard(title, motto, color, borderColor, counts, total, leaderEntries, healthItems, defaultLeaderColor) {
+        function buildCard(title, motto, color, borderColor, counts, total, leaderEntries, healthItems, defaultLeaderColor, extra = '') {
             const pie    = makePie(counts, total);
             const legend = makeLegend(counts);
             const rows   = makeLeaderRows(leaderEntries, defaultLeaderColor);
@@ -942,6 +931,7 @@
                 <div class="stat-card-header">
                 <span class="stat-card-title" style="color:${color}">${title}</span>
                 ${motto ? `<span class="stat-card-motto">${motto}</span>` : ''}
+                ${extra}
                 </div>
                 <div class="stat-card-cols">
                 <div>
@@ -998,7 +988,19 @@
             { label: 'Total Sessions Hosted', value: totalSessions },
             { label: 'Last Session',      value: totalLastD ? totalLastD.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—', small: true },
             ],
-            null
+            null,
+            `<div style="font-family:var(--font-title);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">Company Growth</div>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0.75rem;">
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d4873a;"></span>Airforce</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d44a4a;"></span>Archery</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4a8fd4;"></span>Navy</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4ab870;"></span>Restoration</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#9b6bd4;"></span>Shield</span>
+            </div>
+            <div id="growth-chart-section" style="position:relative;height:320px;">
+                <canvas id="growth-canvas" role="img" aria-label="Stacked area chart showing cumulative member enrollment by regiment over time">Member enrollment history by regiment.</canvas>
+            </div>
+            <hr style="border:none;border-top:1px solid var(--border);margin:1.25rem 0.5rem;">`
         );
 
         el.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">${companyCard}${regCards.join('')}</div>`;
