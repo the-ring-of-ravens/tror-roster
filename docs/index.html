@@ -36,6 +36,10 @@
 
     <main>
         <div id="session-warning"
+            style="background:#2a1a10; border:1px solid #7a3a1e; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; color:#c86030; font-size:0.92rem;">
+            ⚠️ <strong>This website is under construction, so some data may be incomplete or inaccurate.</strong> Please refer to the original TRoR Roster for accurate information.
+        </div>
+        <div id="session-warning"
             style="display:none; background:#2a1a10; border:1px solid #7a3a1e; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; color:#c86030; font-size:0.92rem;">
             ⚠️ <strong>Unresolved Sessions:</strong> <span id="session-warning-text"></span> | Officers: Please review
             attendance for name mismatches.
@@ -321,9 +325,9 @@
 
         function regimentTheme(regiment) {
             const themes = {
-                'shield': { color: '#9b6bd4', border: '#4a2a8a', bg: '#1a1030' },
                 'navy': { color: '#4a8fd4', border: '#2a4a8a', bg: '#0d1a30' },
                 'restoration': { color: '#4ab870', border: '#2a6a40', bg: '#0d2010' },
+                'shield': { color: '#9b6bd4', border: '#4a2a8a', bg: '#1a1030' },
                 'airforce': { color: '#d4873a', border: '#8a4a1a', bg: '#2a1a08' },
                 'archery': { color: '#d44a4a', border: '#8a2a2a', bg: '#2a0d0d' },
             };
@@ -597,13 +601,13 @@
             const REGIMENT_COLORS = {
                 airforce: '#d4873a',
                 archery: '#d44a4a',
+                shield: '#9b6bd4',
                 navy: '#4a8fd4',
                 restoration: '#4ab870',
-                shield: '#9b6bd4',
             };
             const REGIMENT_LABELS = {
-                airforce: 'Airforce', archery: 'Archery', navy: 'Navy',
-                restoration: 'Restoration', shield: 'Shield',
+                airforce: 'Airforce', archery: 'Archery', shield: 'Shield', navy: 'Navy',
+                restoration: 'Restoration',
             };
 
             // Build sorted list of (date, regiment) join events
@@ -771,9 +775,9 @@
             const regiments = [
                 { name: 'Airforce', key: 'airforce', motto: 'FLY OR DIE!' },
                 { name: 'Archery', key: 'archery', motto: 'WE BRING DEATH UNDER OUR FIRE!' },
+                { name: 'Shield', key: 'shield', motto: 'LET IRON STRIKE IRON!' },
                 { name: 'Navy', key: 'navy', motto: 'FOR THE HONOR OF THE LAND AND WAVES!' },
                 { name: 'Restoration', key: 'restoration', motto: 'RESTORE THE FAITH IN ALL!' },
-                { name: 'Shield', key: 'shield', motto: 'LET IRON STRIKE IRON!' },
             ];
 
             const STATUSES = [
@@ -989,13 +993,12 @@
                     { label: 'Last Session', value: totalLastD ? totalLastD.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—', small: true },
                 ],
                 null,
-                `<div style="font-family:var(--font-title);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">Company Growth</div>
-            <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0.75rem;">
+                `<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0.75rem;">
                 <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d4873a;"></span>Airforce</span>
                 <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d44a4a;"></span>Archery</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#9b6bd4;"></span>Shield</span>
                 <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4a8fd4;"></span>Navy</span>
                 <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4ab870;"></span>Restoration</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#9b6bd4;"></span>Shield</span>
             </div>
             <div id="growth-chart-section" style="position:relative;height:320px;">
                 <canvas id="growth-canvas" role="img" aria-label="Stacked area chart showing cumulative member enrollment by regiment over time">Member enrollment history by regiment.</canvas>
