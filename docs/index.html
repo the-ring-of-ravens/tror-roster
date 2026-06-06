@@ -459,7 +459,7 @@
             text-transform: uppercase;
             }
             .stat-card-motto {
-            font-size: 0.78rem;
+            font-size: 1.2rem;
             color: var(--text-muted);
             font-style: italic;
             letter-spacing: 0.04em;
@@ -501,7 +501,7 @@
             .stat-leader-icon {
             font-size: 0.8rem;
             font-family: var(--font-title);
-            color: var(--text-muted);
+            color: var(--white);
             text-align: center;
             }
             .stat-leader-abbrev {
@@ -549,8 +549,8 @@
             .stat-legend-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0 1.5rem;
-            margin-top: 0.75rem;
+            gap: 0 2rem;
+            margin: 0.75rem 0.8rem 0rem 0.8rem;
             }
             .stat-legend-item {
             display: flex;
@@ -602,8 +602,8 @@
         const STATUSES = [
             { key: 'active',       color: '#4ab870', label: 'Active'      },
             { key: 'semi-active',  color: '#cac45b', label: 'Semi-Active' },
-            { key: 'on break',     color: '#9295a1', label: 'On Break'    },
             { key: 'inactive',     color: '#c8863a', label: 'Inactive'    },
+            { key: 'on break',     color: '#9295a1', label: 'On Break'    },
             { key: 'retired',      color: '#7880a0', label: 'Retired'     },
             { key: 'memorial',     color: '#846c98', label: 'Memorial'    },
         ];
@@ -702,7 +702,7 @@
             });
             const pct = Math.round((counts.active / total) * 100);
             paths += `<text x="${cx}" y="${cy-8}"  text-anchor="middle" fill="var(--text)"       font-size="20" font-weight="bold" font-family="Cinzel,serif">${pct}%</text>`;
-            paths += `<text x="${cx}" y="${cy+12}" text-anchor="middle" fill="var(--text-muted)" font-size="9"  font-family="Cinzel,serif" letter-spacing="2">ACTIVE</text>`;
+            paths += `<text x="${cx}" y="${cy+12}" text-anchor="middle" fill="var(--text-muted)" font-size="9"  font-weight="bold" font-family="Cinzel,serif" letter-spacing="2">ACTIVE</text>`;
             return paths;
         }
 
@@ -724,7 +724,7 @@
             if (!entries.length) return `<div class="stat-no-activity">No activity this month.</div>`;
             return entries.map(entry => {
             const color = defaultColor || regimentTheme(entry.regiment).color;
-            const icon  = entry.pos === 0
+            const icon  = entry.pos === 1
                 ? `<span style="font-size:1rem;line-height:1;">🜲</span>`
                 : `<span class="stat-leader-icon">${entry.pos}</span>`;
             return `
@@ -767,7 +767,7 @@
                 <div>
                     <div class="stat-col-heading">30-Day Activity</div>
                     <div class="stat-leader-header">
-                    <span></span><span>Rank</span><span>Name</span><span style="text-align:right">Att.</span>
+                    <span></span><span>Rank</span><span>Name</span><span style="text-align:right">Sessions</span>
                     </div>
                     ${rows}
                 </div>
@@ -807,7 +807,7 @@
         const companyBoard  = buildLeaderboard(soldiers, 7);
 
         const companyCard = buildCard(
-            'Full Company', 'All regiments combined', 'var(--amber)', 'var(--amber)',
+            'Full Company', '', 'var(--amber)', 'var(--amber)',
             totalCounts, soldiers.length, companyBoard,
             [
             { label: 'Soldier Count',     value: soldiers.length },
