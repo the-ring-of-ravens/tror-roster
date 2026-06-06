@@ -684,7 +684,7 @@
         const totalAllTimeSessions = Object.values(allTimeSessions).reduce((a,b) => a+b, 0);
         const totalLastSession = Object.values(lastSessionDate).filter(Boolean).reduce((latest, d) => (!latest || d > latest) ? d : latest, null);
 
-        // Top 10 across the whole company
+        // Top 7 across the whole company
         const companyLeaderboard = soldiers
         .map(s => ({
             name:   s.name,
@@ -693,7 +693,7 @@
         }))
         .filter(x => x.count > 0)
         .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
-        .slice(0, 10);
+        .slice(0, 7);
 
         const companyTheme = { color: 'var(--amber)', border: 'var(--amber-dim)', bg: 'var(--bg-card)' };
         const companyPie    = makePie(totalStatusCounts, totalMembers, companyTheme);
