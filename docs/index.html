@@ -668,9 +668,104 @@
 
                 </div>
             </div>`;
+            // ── Full Company summary card ──
+            const totalMembers = soldiers.length;
+            const totalStatusCounts = {
+            active:       soldiers.filter(s => createStatus(s) === 'active').length,
+            'semi-active':soldiers.filter(s => createStatus(s) === 'semi-active').length,
+            inactive:     soldiers.filter(s => createStatus(s) === 'inactive').length,
+            'on break':   soldiers.filter(s => createStatus(s) === 'on break').length,
+            retired:      soldiers.filter(s => createStatus(s) === 'retired').length,
+            memorial:     soldiers.filter(s => createStatus(s) === 'memorial').length,
+            };
+
+            const totalAllTimeSessions = Object.values(allTimeSessions).reduce((a,b) => a+b, 0);
+            const totalLastSession = Object.values(lastSessionDate).filter(Boolean).reduce((latest, d) => (!latest || d > latest) ? d : latest, null);
+
+            // Top 5 across the whole company
+            const companyLeaderboard = soldiers
+            .map(s => ({
+                name:   s.name,
+                abbrev: getAbbrev(s),
+                count:  attendanceCounts[(s.name||'').toLowerCase().trim()] || 0,
+            }))
+            .filter(x => x.count > 0)
+            .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+            .slice(0, 5);
+
+            const companyTheme = { color: 'var(--amber)', border: 'var(--amber-dim)', bg: 'var(--bg-card)' };
+            const companyPie    = makePie(totalStatusCounts, totalMembers, companyTheme);
+            const companyLegend = makeLegend(totalStatusCounts, companyTheme);
+
+            const companyLeaderRows = companyLeaderboard.length
+            ? companyLeaderboard.map((entry, i) => {
+                const soldier = soldiers.find(s => s.name === entry.name);
+                const theme   = regimentTheme(soldier?.regiment);
+                const icon    = i === 0
+                    ? `<span style="font-size:1rem;line-height:1;">🜲</span>`
+                    : `<span style="color:var(--text-muted);font-size:0.8rem;font-family:var(--font-title);width:18px;text-align:center;display:inline-block;">${i + 1}</span>`;
+                return `
+                    <div class="stat-soldier-row" data-soldier-name="${entry.name.replace(/"/g,'&quot;')}"
+                        style="display:grid;grid-template-columns:22px 44px 1fr 28px;align-items:center;gap:0.4rem;
+                                padding:0.35rem 0;border-bottom:1px solid var(--border);cursor:pointer;">
+                    ${icon}
+                    <span style="font-size:0.72rem;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${entry.abbrev}</span>
+                    <span style="font-size:0.88rem;color:${theme.color};font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${entry.name}</span>
+                    <span style="font-size:0.88rem;color:var(--amber);font-weight:600;text-align:right;">${entry.count}</span>
+                    </div>`;
+                }).join('')
+            : `<div style="color:var(--text-muted);font-size:0.82rem;padding:0.5rem 0;">No activity this month.</div>`;
+
+            const companyLastSess = totalLastSession
+            ? totalLastSession.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
+            : '—';
+
+            const companyCard = `
+            <div style="background:var(--bg-card);border:1px solid var(--amber-dim);border-left:3px solid var(--amber);border-radius:4px;padding:1.25rem 1.5rem;margin-bottom:0.5rem;">
+                <div style="margin-bottom:1.1rem;">
+                <div style="display:flex;align-items:baseline;gap:0.75rem;">
+                    <span style="font-family:var(--font-title);font-size:1.1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);">Full Company</span>
+                    <span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:0.04em;font-style:italic;">All regiments combined</span>
+                </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;align-items:start;">
+                <div>
+                    <svg viewBox="0 0 160 160" width="100%" style="display:block;max-width:160px;margin:0 auto;">
+                    ${companyPie}
+                    </svg>
+                    ${companyLegend}
+                </div>
+                <div>
+                    <div style="font-family:var(--font-title);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem;">30-Day Activity</div>
+                    <div style="display:grid;grid-template-columns:22px 44px 1fr 28px;gap:0.4rem;
+                                font-size:0.65rem;color:var(--text-muted);padding-bottom:0.3rem;
+                                border-bottom:1px solid var(--border);margin-bottom:0.1rem;">
+                    <span></span><span>Rank</span><span>Name</span><span style="text-align:right;">Att.</span>
+                    </div>
+                    ${companyLeaderRows}
+                </div>
+                <div>
+                    <div style="font-family:var(--font-title);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">Company Health</div>
+                    <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                    <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
+                        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.04em;">Soldier Count</div>
+                        <div style="font-size:1.4rem;font-weight:700;color:var(--amber);font-family:var(--font-title);">${totalMembers}</div>
+                    </div>
+                    <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
+                        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.04em;">All-Time Sessions</div>
+                        <div style="font-size:1.4rem;font-weight:700;color:var(--amber);font-family:var(--font-title);">${totalAllTimeSessions}</div>
+                    </div>
+                    <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
+                        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.04em;">Last Session</div>
+                        <div style="font-size:0.9rem;font-weight:600;color:var(--amber);">${companyLastSess}</div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>`;
         });
 
-        el.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">${cards.join('')}</div>`;
+        el.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">${companyCard}${cards.join('')}</div>`;
 
         // Wire up clicks — data-soldier-name avoids apostrophe issues
         el.querySelectorAll('.stat-soldier-row').forEach(row => {
