@@ -153,6 +153,20 @@
                 <h1>Statistics</h1>
                 <div class="amber-line"></div>
             </div>
+            <div id="growth-chart-section" style="background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:1.25rem 1.5rem;margin-top:1rem;">
+            <div style="font-family:var(--font-title);font-size:1.1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);margin-bottom:0.25rem;">Company Growth</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);font-style:italic;margin-bottom:1.25rem;">Cumulative enrollment by regiment over time</div>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:1rem;">
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d4873a;"></span>Airforce</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d44a4a;"></span>Archery</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4a8fd4;"></span>Navy</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4ab870;"></span>Restoration</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#9b6bd4;"></span>Shield</span>
+            </div>
+            <div style="position:relative;height:320px;">
+                <canvas id="growth-canvas" role="img" aria-label="Stacked area chart showing cumulative member enrollment by regiment over time">Member enrollment history by regiment.</canvas>
+            </div>
+            </div>
 
             <div id="stats-content">
                 <div class="loading">Loading statistics…</div>
@@ -574,6 +588,179 @@
         document.head.appendChild(s);
         })();
 
+        // Inject Chart.js if not already loaded
+        function renderGrowthChart() {
+        if (!document.getElementById('growth-chart-section')) return;
+        if (window.Chart) { drawGrowthChart(); return; }
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
+        script.onload = drawGrowthChart;
+        document.head.appendChild(script);
+        }
+
+        function drawGrowthChart() {
+        const canvas = document.getElementById('growth-canvas');
+        if (!canvas) return;
+        if (canvas._chartInstance) { canvas._chartInstance.destroy(); }
+
+        const REGIMENT_KEYS = ['airforce','archery','navy','restoration','shield'];
+        const REGIMENT_COLORS = {
+            airforce:    '#d4873a',
+            archery:     '#d44a4a',
+            navy:        '#4a8fd4',
+            restoration: '#4ab870',
+            shield:      '#9b6bd4',
+        };
+        const REGIMENT_LABELS = {
+            airforce: 'Airforce', archery: 'Archery', navy: 'Navy',
+            restoration: 'Restoration', shield: 'Shield',
+        };
+
+        // Build sorted list of (date, regiment) join events
+        const events = soldiers
+            .map(s => ({ date: parseDate(s.join_date), regiment: (s.regiment||'').toLowerCase() }))
+            .filter(e => e.date)
+            .sort((a, b) => a.date - b.date);
+
+        if (!events.length) {
+            canvas.parentElement.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem">No join date data available.</p>';
+            return;
+        }
+
+        // Build monthly tick labels from first join to now
+        const start = new Date(events[0].date.getFullYear(), events[0].date.getMonth(), 1);
+        const end   = new Date();
+        const months = [];
+        let cur = new Date(start);
+        while (cur <= end) {
+            months.push(new Date(cur));
+            cur.setMonth(cur.getMonth() + 1);
+        }
+
+        // For each month, count cumulative members overall and per regiment
+        const totals  = new Array(months.length).fill(0);
+        const regTotals = {};
+        REGIMENT_KEYS.forEach(k => { regTotals[k] = new Array(months.length).fill(0); });
+
+        events.forEach(e => {
+            const mi = months.findIndex(m =>
+            m.getFullYear() > e.date.getFullYear() ||
+            (m.getFullYear() === e.date.getFullYear() && m.getMonth() >= e.date.getMonth())
+            );
+            if (mi === -1) return;
+            for (let i = mi; i < months.length; i++) {
+            totals[i]++;
+            if (regTotals[e.regiment]) regTotals[e.regiment][i]++;
+            }
+        });
+
+        // X-axis labels: year on January ticks, season markers otherwise
+        const labels = months.map((m, i) => {
+            if (m.getMonth() === 0) return String(m.getFullYear()); // Jan → year
+            return ''; // other months blank (minor gridlines handle it)
+        });
+
+        // Which indices are major (Jan) vs minor season ticks (Mar=2, Jun=5, Sep=8)
+        const majorTicks  = months.map(m => m.getMonth() === 0);
+        const seasonTicks = months.map(m => [2,5,8].includes(m.getMonth()));
+
+        // Datasets: one stacked band per regiment, no full-company line (stack = total)
+        const datasets = REGIMENT_KEYS.map(k => ({
+            label:           REGIMENT_LABELS[k],
+            data:            regTotals[k],
+            backgroundColor: REGIMENT_COLORS[k] + 'cc',
+            borderColor:     REGIMENT_COLORS[k],
+            borderWidth:     1.5,
+            fill:            true,
+            tension:         0.3,
+            pointRadius:     0,
+            pointHoverRadius:4,
+        }));
+
+        // Y axis max rounded up to nearest 50
+        const dataMax  = Math.max(...totals);
+        const yMax     = Math.ceil(dataMax / 50) * 50;
+        const yStep    = yMax <= 150 ? 50 : 100;
+
+        const isDark = document.documentElement.classList.contains('dark') ||
+                        window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const gridColor  = 'rgba(255,255,255,0.06)';
+        const minorColor = 'rgba(255,255,255,0.03)';
+        const textColor  = '#8a8070';
+
+        canvas._chartInstance = new Chart(canvas, {
+            type: 'line',
+            data: { labels, datasets },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                backgroundColor: '#13161d',
+                borderColor: '#2a3040',
+                borderWidth: 1,
+                titleColor: '#ddd8cc',
+                bodyColor: '#8a8070',
+                padding: 10,
+                callbacks: {
+                    title: ctx => {
+                    const m = months[ctx[0].dataIndex];
+                    return m.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+                    },
+                    afterTitle: ctx => `Total: ${totals[ctx[0].dataIndex]}`,
+                    label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}`,
+                },
+                },
+            },
+            scales: {
+                x: {
+                stacked: true,
+                grid: {
+                    color: ctx => {
+                    const m = months[ctx.index];
+                    if (!m) return 'transparent';
+                    if (m.getMonth() === 0)      return gridColor;
+                    if ([2,5,8].includes(m.getMonth())) return minorColor;
+                    return 'transparent';
+                    },
+                    lineWidth: ctx => {
+                    const m = months[ctx.index];
+                    if (!m) return 0;
+                    return m.getMonth() === 0 ? 1 : 0.5;
+                    },
+                    tickLength: ctx => {
+                    const m = months[ctx.index];
+                    if (!m) return 0;
+                    return m.getMonth() === 0 ? 6 : 3;
+                    },
+                },
+                ticks: {
+                    color: textColor,
+                    font: { family: 'Cinzel, serif', size: 10 },
+                    maxRotation: 0,
+                    autoSkip: false,
+                },
+                border: { color: '#2a3040' },
+                },
+                y: {
+                stacked: true,
+                min: 0,
+                max: yMax,
+                ticks: {
+                    stepSize: yStep,
+                    color: textColor,
+                    font: { size: 11 },
+                },
+                grid: { color: gridColor },
+                border: { color: '#2a3040' },
+                },
+            },
+            },
+        });
+        }
+
         // ── Render statistics ──
         function renderStats() {
         const el = document.getElementById('stats-content');
@@ -807,7 +994,7 @@
             totalCounts, soldiers.length, companyBoard,
             [
             { label: 'Soldier Count',     value: soldiers.length },
-            { label: 'All-Time Sessions', value: totalSessions },
+            { label: 'Total Sessions Hosted', value: totalSessions },
             { label: 'Last Session',      value: totalLastD ? totalLastD.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—', small: true },
             ],
             null
@@ -817,6 +1004,7 @@
 
         el.querySelectorAll('.stat-leader-row').forEach(row => {
             row.addEventListener('click', () => openSoldier(row.dataset.soldierName));
+            renderGrowthChart();
         });
         }
 
