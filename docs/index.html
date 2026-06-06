@@ -724,8 +724,8 @@
             if (!entries.length) return `<div class="stat-no-activity">No activity this month.</div>`;
             return entries.map(entry => {
             const color = defaultColor || regimentTheme(entry.regiment).color;
-            const icon  = entry.pos === 1
-                ? `<span style="font-size:1rem;line-height:1;">👑</span>`
+            const icon  = entry.pos === 0
+                ? `<span style="font-size:1rem;line-height:1;">🜲</span>`
                 : `<span class="stat-leader-icon">${entry.pos}</span>`;
             return `
                 <div class="stat-leader-row" data-soldier-name="${entry.name.replace(/"/g,'&quot;')}">
