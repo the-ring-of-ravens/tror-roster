@@ -704,7 +704,7 @@
             const soldier = soldiers.find(s => s.name === entry.name);
             const theme   = regimentTheme(soldier?.regiment);
             const icon    = i === 0
-                ? `<span style="font-size:1rem;line-height:1;">👑</span>`
+                ? `<span style="font-size:1rem;line-height:1;">🜲</span>`
                 : `<span style="color:var(--text-muted);font-size:0.8rem;font-family:var(--font-title);width:18px;text-align:center;display:inline-block;">${i + 1}</span>`;
             return `
                 <div class="stat-soldier-row" data-soldier-name="${entry.name.replace(/"/g,'&quot;')}"
@@ -727,10 +727,9 @@
             <div style="margin-bottom:1.1rem;">
             <div style="display:flex;align-items:baseline;gap:0.75rem;">
                 <span style="font-family:var(--font-title);font-size:1.1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);">Full Company</span>
-                <span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:0.04em;font-style:italic;">All regiments combined</span>
             </div>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;align-items:start;">
+            <div style="display:grid;grid-template-columns:0.8fr 1fr 1fr;gap:1.5rem;align-items:start;">
             <div>
                 <svg viewBox="0 0 160 160" width="100%" style="display:block;max-width:160px;margin:0 auto;">
                 ${companyPie}
