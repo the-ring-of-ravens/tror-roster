@@ -434,10 +434,162 @@
             }).join('');
         }
 
+        // ── Statistics styles (injected once) ──
+        (function injectStatsStyles() {
+        if (document.getElementById('stats-styles')) return;
+        const s = document.createElement('style');
+        s.id = 'stats-styles';
+        s.textContent = `
+            .stat-card-wrap {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1.25rem 1.5rem;
+            }
+            .stat-card-header {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            margin-bottom: 1.1rem;
+            }
+            .stat-card-title {
+            font-family: var(--font-title);
+            font-size: 1.1rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            }
+            .stat-card-motto {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-style: italic;
+            letter-spacing: 0.04em;
+            }
+            .stat-card-cols {
+            display: grid;
+            grid-template-columns: 0.8fr 1fr 1fr;
+            gap: 1.5rem;
+            align-items: start;
+            }
+            .stat-col-heading {
+            font-family: var(--font-title);
+            font-size: 0.6rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+            }
+            .stat-leader-header {
+            display: grid;
+            grid-template-columns: 28px 44px 1fr 32px;
+            gap: 0.4rem;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 0.15rem;
+            }
+            .stat-leader-row {
+            display: grid;
+            grid-template-columns: 28px 44px 1fr 32px;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            }
+            .stat-leader-row:hover { background: var(--bg-panel); }
+            .stat-leader-icon {
+            font-size: 0.8rem;
+            font-family: var(--font-title);
+            color: var(--text-muted);
+            text-align: center;
+            }
+            .stat-leader-abbrev {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            }
+            .stat-leader-name {
+            font-size: 0.88rem;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            }
+            .stat-leader-count {
+            font-size: 0.88rem;
+            color: var(--amber);
+            font-weight: 600;
+            text-align: right;
+            }
+            .stat-health-mini {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 0.6rem;
+            }
+            .stat-health-label {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 0.04em;
+            margin-bottom: 3px;
+            }
+            .stat-health-value-lg {
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: var(--font-title);
+            }
+            .stat-health-value-sm {
+            font-size: 0.9rem;
+            font-weight: 600;
+            }
+            .stat-legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 1.5rem;
+            margin-top: 0.75rem;
+            }
+            .stat-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            padding: 2px 0;
+            }
+            .stat-legend-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            }
+            .stat-no-activity {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            padding: 0.5rem 0;
+            }
+        `;
+        document.head.appendChild(s);
+        })();
+
         // ── Render statistics ──
         function renderStats() {
         const el = document.getElementById('stats-content');
         if (!el) return;
+
+        const RANK_ORDER = [
+            'General of the Army','Brigadier General','Colonel','Lieutenant Colonel','Major',
+            'Brigadier','Captain','First Lieutenant','Lieutenant',
+            'Command Sergeant Major','Sergeant Major',
+            'Chief Warrant Officer 5','Chief Warrant Officer 4','Chief Warrant Officer 3',
+            'Chief Warrant Officer 2','Warrant Officer 1',
+            'Master Gunnery Sergeant','Gunnery Sergeant','Senior Cornet',
+            'Paladin Sergeant','Paladin Corporal','Cornet First Class','Cornet','Junior Cornet',
+            'Exarch Lieutenant','Sergeant First Class','Sergeant','Corporal','Specialist',
+            'Private First Class','Private Second Class','Private','Trainee',
+        ];
 
         const regiments = [
             { name: 'Airforce',    key: 'airforce',    motto: 'FLY OR DIE!' },
@@ -447,14 +599,23 @@
             { name: 'Shield',      key: 'shield',      motto: 'LET IRON STRIKE IRON!' },
         ];
 
+        const STATUSES = [
+            { key: 'active',       color: '#4ab870', label: 'Active'      },
+            { key: 'semi-active',  color: '#cac45b', label: 'Semi-Active' },
+            { key: 'on break',     color: '#9295a1', label: 'On Break'    },
+            { key: 'inactive',     color: '#c8863a', label: 'Inactive'    },
+            { key: 'retired',      color: '#7880a0', label: 'Retired'     },
+            { key: 'memorial',     color: '#846c98', label: 'Memorial'    },
+        ];
+
         const now = new Date();
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-        // Build per-soldier 30-day attendance (hosted + attended)
+        // ── 30-day attendance counts per soldier ──
         const attendanceCounts = {};
         sessions.forEach(s => {
-            const sessionDate = parseDate(s['Session Date']);
-            if (!sessionDate || sessionDate < thirtyDaysAgo) return;
+            const d = parseDate(s['Session Date']);
+            if (!d || d < thirtyDaysAgo) return;
             const names = new Set();
             const host = (s['Host'] || '').trim();
             if (host) names.add(host.toLowerCase());
@@ -462,11 +623,9 @@
             names.forEach(n => { attendanceCounts[n] = (attendanceCounts[n] || 0) + 1; });
         });
 
-        // Per-regiment all-time session count and last session date
-        const allTimeSessions = {};
-        const lastSessionDate = {};
+        // ── All-time sessions & last session per regiment ──
+        const allTimeSessions = {}, lastSessionDate = {};
         regiments.forEach(r => { allTimeSessions[r.key] = 0; lastSessionDate[r.key] = null; });
-
         sessions.forEach(s => {
             const host = soldiers.find(x => (x.name||'').toLowerCase().trim() === (s['Host']||'').toLowerCase().trim());
             if (!host) return;
@@ -477,298 +636,190 @@
             if (d && (!lastSessionDate[key] || d > lastSessionDate[key])) lastSessionDate[key] = d;
         });
 
-        // Helper: get rank abbreviation from ranks data
+        // ── Helpers ──
         function getAbbrev(soldier) {
-            if (soldier.title && soldier.title.trim() !== '') return soldier.title.trim();
+            if (soldier.title && soldier.title.trim()) return soldier.title.trim();
             const rankName = getRank(soldier);
-            const rankRow = ranks.find(r => r.rank === rankName);
-            return rankRow?.abbreviation || rankName;
+            return ranks.find(r => r.rank === rankName)?.abbreviation || rankName;
         }
 
-        // Build regiment data
-        const regData = regiments.map(r => {
-            const theme   = regimentTheme(r.name);
-            const members = soldiers.filter(s => (s.regiment||'').toLowerCase() === r.key);
-            const total   = members.length;
+        function statusCounts(memberList) {
+            const counts = {};
+            STATUSES.forEach(s => { counts[s.key] = memberList.filter(m => createStatus(m) === s.key).length; });
+            return counts;
+        }
 
-            const statusCounts = {
-            active:       members.filter(s => createStatus(s) === 'active').length,
-            'semi-active':members.filter(s => createStatus(s) === 'semi-active').length,
-            'on break':   members.filter(s => createStatus(s) === 'on break').length,
-            inactive:     members.filter(s => createStatus(s) === 'inactive').length,
-            retired:      members.filter(s => createStatus(s) === 'retired').length,
-            memorial:     members.filter(s => createStatus(s) === 'memorial').length,
-            };
-
-            const leaderboard = members
+        // ── Build leaderboard with tied ranks ──
+        function buildLeaderboard(memberList, limit) {
+            const entries = memberList
             .map(s => ({
-                name:   s.name,
-                abbrev: getAbbrev(s),
-                count:  attendanceCounts[(s.name||'').toLowerCase().trim()] || 0,
+                name:      s.name,
+                abbrev:    getAbbrev(s),
+                rankName:  getRank(s),
+                rankIndex: RANK_ORDER.indexOf(getRank(s)),
+                count:     attendanceCounts[(s.name||'').toLowerCase().trim()] || 0,
+                regiment:  s.regiment,
             }))
             .filter(x => x.count > 0)
-            .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
-            .slice(0, 5);
+            .sort((a, b) => {
+                if (b.count !== a.count) return b.count - a.count;           // most attendance first
+                const ri = a.rankIndex === -1 ? RANK_ORDER.length : a.rankIndex;
+                const rj = b.rankIndex === -1 ? RANK_ORDER.length : b.rankIndex;
+                if (ri !== rj) return ri - rj;                               // higher rank first
+                return a.name.localeCompare(b.name);                         // alphabetical
+            })
+            .slice(0, limit);
 
-            return {
-            ...r, theme, members, total, statusCounts, leaderboard,
-            allTimeSessions: allTimeSessions[r.key],
-            lastSession:     lastSessionDate[r.key],
-            };
-        });
+            // Assign display positions with ties
+            let displayPos = 1;
+            entries.forEach((e, i) => {
+            if (i === 0) { e.pos = 1; return; }
+            const prev = entries[i - 1];
+            e.pos = (e.count === prev.count) ? prev.pos : displayPos;
+            displayPos++;
+            });
+            // fix displayPos tracking
+            entries.forEach((e, i) => { if (i > 0) displayPos = Math.max(displayPos, e.pos + 1); });
 
-        // Sort: most members, tiebreak most active
-        regData.sort((a, b) => b.total !== a.total ? b.total - a.total : b.statusCounts.active - a.statusCounts.active);
+            return entries;
+        }
 
-        // ── Donut pie chart ──
-        function makePie(counts, total, theme) {
-            if (total === 0) return `<text x="80" y="85" text-anchor="middle" fill="var(--text-muted)" font-size="10">No data</text>`;
-
-            const slices = [
-            { key: 'active',       color: '#4ab870' },
-            { key: 'semi-active',  color: '#cac45b' },
-            { key: 'inactive',     color: '#c8863a' },
-            { key: 'on break',     color: '#9295a1' },
-            { key: 'retired',      color: '#7880a0' },
-            { key: 'memorial',     color: '#846c98' },
-            ].filter(s => counts[s.key] > 0);
-
+        // ── SVG donut pie ──
+        function makePie(counts, total) {
+            if (total === 0) return `<text x="80" y="88" text-anchor="middle" fill="var(--text-muted)" font-size="10">No data</text>`;
+            const slices = STATUSES.filter(s => counts[s.key] > 0);
             const cx = 80, cy = 80, r = 70, ri = 42;
-            let angle = -Math.PI / 2;
-            let paths = '';
-
+            let angle = -Math.PI / 2, paths = '';
             slices.forEach(s => {
-            const frac  = counts[s.key] / total;
-            const sweep = frac * 2 * Math.PI;
-            const x1o = cx + r  * Math.cos(angle), y1o = cy + r  * Math.sin(angle);
-            const x1i = cx + ri * Math.cos(angle), y1i = cy + ri * Math.sin(angle);
+            const sweep = (counts[s.key] / total) * 2 * Math.PI;
+            const x1o = cx + r*Math.cos(angle),  y1o = cy + r*Math.sin(angle);
+            const x1i = cx + ri*Math.cos(angle), y1i = cy + ri*Math.sin(angle);
             angle += sweep;
-            const x2o = cx + r  * Math.cos(angle), y2o = cy + r  * Math.sin(angle);
-            const x2i = cx + ri * Math.cos(angle), y2i = cy + ri * Math.sin(angle);
+            const x2o = cx + r*Math.cos(angle),  y2o = cy + r*Math.sin(angle);
+            const x2i = cx + ri*Math.cos(angle), y2i = cy + ri*Math.sin(angle);
             const large = sweep > Math.PI ? 1 : 0;
             paths += `<path d="M${x1i},${y1i} L${x1o},${y1o} A${r},${r} 0 ${large},1 ${x2o},${y2o} L${x2i},${y2i} A${ri},${ri} 0 ${large},0 ${x1i},${y1i} Z" fill="${s.color}" opacity="0.9"/>`;
             });
-
-            const activePct = Math.round((counts.active / total) * 100);
-            paths += `<text x="${cx}" y="${cy - 8}"  text-anchor="middle" fill="var(--text)"       font-size="20" font-weight="bold" font-family="Cinzel,serif">${activePct}%</text>`;
-            paths += `<text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="var(--text-muted)" font-size="9"  font-weight="bold" font-family="Cinzel,serif" letter-spacing="2">ACTIVE</text>`;
+            const pct = Math.round((counts.active / total) * 100);
+            paths += `<text x="${cx}" y="${cy-8}"  text-anchor="middle" fill="var(--text)"       font-size="20" font-weight="bold" font-family="Cinzel,serif">${pct}%</text>`;
+            paths += `<text x="${cx}" y="${cy+12}" text-anchor="middle" fill="var(--text-muted)" font-size="9"  font-family="Cinzel,serif" letter-spacing="2">ACTIVE</text>`;
             return paths;
         }
 
         // ── Two-column legend ──
-        function makeLegend(counts, theme) {
-            const items = [
-            { key: 'active',       color: '#4ab870', label: 'Active'      },
-            { key: 'semi-active',  color: '#cac45b', label: 'Semi-Active' },
-            { key: 'inactive',     color: '#c8863a', label: 'Inactive'    },
-            { key: 'on break',     color: '#9295a1', label: 'On Break'    },
-            { key: 'retired',      color: '#7880a0', label: 'Retired'     },
-            { key: 'memorial',     color: '#846c98', label: 'Memorial'    },
-            ].filter(s => counts[s.key] > 0);
-
-            // Split into two columns
-            const half = Math.ceil(items.length / 2);
-            const col1 = items.slice(0, half);
-            const col2 = items.slice(half);
-
-            const renderCol = col => col.map(s => `
-            <div style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);padding:2px 0;">
-                <span style="width:8px;height:8px;border-radius:50%;background:${s.color};flex-shrink:0;"></span>
-                <span style="flex:1;">${s.label}</span>
-                <span style="color:${s.color};font-weight:600;">${counts[s.key]}</span>
+        function makeLegend(counts) {
+            const items = STATUSES.filter(s => counts[s.key] > 0);
+            const half  = Math.ceil(items.length / 2);
+            const col   = arr => arr.map(s => `
+            <div class="stat-legend-item">
+                <span class="stat-legend-dot" style="background:${s.color}"></span>
+                <span style="flex:1">${s.label}</span>
+                <span style="color:${s.color};font-weight:600">${counts[s.key]}</span>
             </div>`).join('');
+            return `<div class="stat-legend-grid"><div>${col(items.slice(0,half))}</div><div>${col(items.slice(half))}</div></div>`;
+        }
+
+        // ── Leaderboard rows HTML ──
+        function makeLeaderRows(entries, defaultColor) {
+            if (!entries.length) return `<div class="stat-no-activity">No activity this month.</div>`;
+            return entries.map(entry => {
+            const color = defaultColor || regimentTheme(entry.regiment).color;
+            const icon  = entry.pos === 1
+                ? `<span style="font-size:1rem;line-height:1;">👑</span>`
+                : `<span class="stat-leader-icon">${entry.pos}</span>`;
+            return `
+                <div class="stat-leader-row" data-soldier-name="${entry.name.replace(/"/g,'&quot;')}">
+                ${icon}
+                <span class="stat-leader-abbrev">${entry.abbrev}</span>
+                <span class="stat-leader-name" style="color:${color}">${entry.name}</span>
+                <span class="stat-leader-count">${entry.count}</span>
+                </div>`;
+            }).join('');
+        }
+
+        // ── Health mini-cards HTML ──
+        function makeHealth(items, color) {
+            return items.map(item => `
+            <div class="stat-health-mini">
+                <div class="stat-health-label">${item.label}</div>
+                <div class="${item.small ? 'stat-health-value-sm' : 'stat-health-value-lg'}" style="color:${color}">${item.value}</div>
+            </div>`).join('');
+        }
+
+        // ── Single card builder ──
+        function buildCard(title, motto, color, borderColor, counts, total, leaderEntries, healthItems, defaultLeaderColor) {
+            const pie    = makePie(counts, total);
+            const legend = makeLegend(counts);
+            const rows   = makeLeaderRows(leaderEntries, defaultLeaderColor);
+            const health = makeHealth(healthItems, color);
 
             return `
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 1.5rem;margin-top:0.75rem;">
-                <div>${renderCol(col1)}</div>
-                <div>${renderCol(col2)}</div>
+            <div class="stat-card-wrap" style="border-left:3px solid ${borderColor}">
+                <div class="stat-card-header">
+                <span class="stat-card-title" style="color:${color}">${title}</span>
+                ${motto ? `<span class="stat-card-motto">${motto}</span>` : ''}
+                </div>
+                <div class="stat-card-cols">
+                <div>
+                    <svg viewBox="0 0 160 160" width="100%" style="display:block;max-width:160px;margin:0 auto">${pie}</svg>
+                    ${legend}
+                </div>
+                <div>
+                    <div class="stat-col-heading">30-Day Activity</div>
+                    <div class="stat-leader-header">
+                    <span></span><span>Rank</span><span>Name</span><span style="text-align:right">Att.</span>
+                    </div>
+                    ${rows}
+                </div>
+                <div>
+                    <div class="stat-col-heading">Regiment Data</div>
+                    ${health}
+                </div>
+                </div>
             </div>`;
         }
 
-        // ── Card builder ──
-        const cards = regData.map(r => {
-            const pie    = makePie(r.statusCounts, r.total, r.theme);
-            const legend = makeLegend(r.statusCounts, r.theme);
+        // ── Build regiment data ──
+        const regData = regiments.map(r => {
+            const theme   = regimentTheme(r.name);
+            const members = soldiers.filter(s => (s.regiment||'').toLowerCase() === r.key);
+            const counts  = statusCounts(members);
+            const board   = buildLeaderboard(members, 5);
+            const lastD   = lastSessionDate[r.key];
+            return { ...r, theme, total: members.length, counts, board, lastD };
+        }).sort((a, b) => b.total !== a.total ? b.total - a.total : b.counts.active - a.counts.active);
 
-            const leaderRows = r.leaderboard.length
-            ? r.leaderboard.map((entry, i) => {
-                const icon = i === 0
-                    ? `<span style="font-size:1rem;line-height:1;">🜲</span>`
-                    : `<span style="color:white;font-size:0.8rem;font-family:var(--font-title);width:18px;text-align:center;display:inline-block;">${i + 1}</span>`;
-                return `
-                    <div class="stat-soldier-row" data-soldier-name="${entry.name.replace(/"/g,'&quot;')}"
-                        style="display:grid;grid-template-columns:22px 44px 1fr 28px;align-items:center;gap:0.4rem;
-                                padding:0.35rem 0;border-bottom:1px solid var(--border);cursor:pointer;">
-                    ${icon}
-                    <span style="font-size:0.72rem;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${entry.abbrev}</span>
-                    <span style="font-size:0.88rem;color:${r.theme.color};font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${entry.name}</span>
-                    <span style="font-size:0.88rem;color:var(--amber);font-weight:600;text-align:right;">${entry.count}</span>
-                    </div>`;
-                }).join('')
-            : `<div style="color:var(--text-muted);font-size:0.82rem;padding:0.5rem 0;">No activity this month.</div>`;
+        const regCards = regData.map(r => buildCard(
+            r.name, r.motto, r.theme.color, r.theme.color,
+            r.counts, r.total, r.board,
+            [
+            { label: 'Soldier Count',         value: r.total },
+            { label: 'Total Sessions Hosted', value: allTimeSessions[r.key] },
+            { label: 'Last Session',          value: r.lastD ? r.lastD.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—', small: true },
+            ],
+            null // use each soldier's own regiment color
+        ));
 
-            const lastSess = r.lastSession
-            ? r.lastSession.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
-            : '—';
+        // ── Full Company card ──
+        const totalCounts   = statusCounts(soldiers);
+        const totalSessions = Object.values(allTimeSessions).reduce((a,b) => a+b, 0);
+        const totalLastD    = Object.values(lastSessionDate).filter(Boolean).reduce((l,d) => (!l||d>l)?d:l, null);
+        const companyBoard  = buildLeaderboard(soldiers, 7);
 
-            return `
-            <div style="background:var(--bg-card);border:1px solid var(--border);border-left:3px solid ${r.theme.color};border-radius:4px;padding:1.25rem 1.5rem;">
+        const companyCard = buildCard(
+            'Full Company', 'All regiments combined', 'var(--amber)', 'var(--amber)',
+            totalCounts, soldiers.length, companyBoard,
+            [
+            { label: 'Soldier Count',     value: soldiers.length },
+            { label: 'All-Time Sessions', value: totalSessions },
+            { label: 'Last Session',      value: totalLastD ? totalLastD.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—', small: true },
+            ],
+            null
+        );
 
-                <!-- Header -->
-                <div style="margin-bottom:1.1rem;">
-                <div style="display:flex;align-items:baseline;gap:1rem;">
-                    <span style="font-family:var(--font-title);font-size:1.1rem;letter-spacing:0.12em;text-transform:uppercase;color:${r.theme.color};">${r.name}</span>
-                    <span style="font-size:1rem;color:var(--text-muted);letter-spacing:0.04em;font-style:italic;">${r.motto}</span>
-                </div>
-                </div>
+        el.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">${companyCard}${regCards.join('')}</div>`;
 
-                <!-- Three columns -->
-                <div style="display:grid;grid-template-columns:0.8fr 1fr 1fr;gap:1.5rem;align-items:start;">
-
-                <!-- Col 1: Pie + two-column legend -->
-                <div>
-                    <svg viewBox="0 0 160 160" width="100%" style="display:block;max-width:160px;margin:0 auto;">
-                    ${pie}
-                    </svg>
-                    ${legend}
-                </div>
-
-                <!-- Col 2: 30-day leaderboard -->
-                <div>
-                    <div style="font-family:var(--font-title);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem;">30-Day Activity</div>
-                    <div style="display:grid;grid-template-columns:22px 44px 1fr 28px;gap:0.4rem;
-                                font-size:0.65rem;color:var(--text-muted);padding-bottom:0.3rem;
-                                border-bottom:1px solid var(--border);margin-bottom:0.1rem;">
-                    <span></span>
-                    <span>Rank</span>
-                    <span>Name</span>
-                    <span style="text-align:right;">Attendance</span>
-                    </div>
-                    ${leaderRows}
-                </div>
-
-                <!-- Col 3: Regiment data -->
-                <div>
-                    <div style="font-family:var(--font-title);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">Regiment Data</div>
-                    <div style="display:flex;flex-direction:column;gap:0.6rem;">
-                    <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
-                        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.04em;">Soldier Count</div>
-                        <div style="font-size:1.4rem;font-weight:700;color:${r.theme.color};font-family:var(--font-title);">${r.total}</div>
-                    </div>
-                    <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
-                        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.04em;">Total Sessions Hosted</div>
-                        <div style="font-size:1.4rem;font-weight:700;color:${r.theme.color};font-family:var(--font-title);">${r.allTimeSessions}</div>
-                    </div>
-                    <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
-                        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.04em;">Last Session</div>
-                        <div style="font-size:0.9rem;font-weight:600;color:${r.theme.color};">${lastSess}</div>
-                    </div>
-                    </div>
-                </div>
-
-                </div>
-            </div>`;
-        });
-
-        // ── Full Company summary card ──
-        const totalMembers = soldiers.length;
-        const totalStatusCounts = {
-        active:       soldiers.filter(s => createStatus(s) === 'active').length,
-        'semi-active':soldiers.filter(s => createStatus(s) === 'semi-active').length,
-        'on break':   soldiers.filter(s => createStatus(s) === 'on break').length,
-        inactive:     soldiers.filter(s => createStatus(s) === 'inactive').length,
-        retired:      soldiers.filter(s => createStatus(s) === 'retired').length,
-        memorial:     soldiers.filter(s => createStatus(s) === 'memorial').length,
-        };
-
-        const totalAllTimeSessions = Object.values(allTimeSessions).reduce((a,b) => a+b, 0);
-        const totalLastSession = Object.values(lastSessionDate).filter(Boolean).reduce((latest, d) => (!latest || d > latest) ? d : latest, null);
-
-        // Top 7 across the whole company
-        const companyLeaderboard = soldiers
-        .map(s => ({
-            name:   s.name,
-            abbrev: getAbbrev(s),
-            count:  attendanceCounts[(s.name||'').toLowerCase().trim()] || 0,
-        }))
-        .filter(x => x.count > 0)
-        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
-        .slice(0, 7);
-
-        const companyTheme = { color: 'var(--amber)', border: 'var(--amber-dim)', bg: 'var(--bg-card)' };
-        const companyPie    = makePie(totalStatusCounts, totalMembers, companyTheme);
-        const companyLegend = makeLegend(totalStatusCounts, companyTheme);
-
-        const companyLeaderRows = companyLeaderboard.length
-        ? companyLeaderboard.map((entry, i) => {
-            const soldier = soldiers.find(s => s.name === entry.name);
-            const theme   = regimentTheme(soldier?.regiment);
-            const icon    = i === 0
-                ? `<span style="font-size:1rem;line-height:1;">🜲</span>`
-                : `<span style="color:var(--white);font-size:0.8rem;font-family:var(--font-title);width:18px;text-align:center;display:inline-block;">${i + 1}</span>`;
-            return `
-                <div class="stat-soldier-row" data-soldier-name="${entry.name.replace(/"/g,'&quot;')}"
-                    style="display:grid;grid-template-columns:22px 44px 1fr 28px;align-items:center;gap:0.4rem;
-                            padding:0.35rem 0;border-bottom:1px solid var(--border);cursor:pointer;">
-                ${icon}
-                <span style="font-size:0.72rem;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${entry.abbrev}</span>
-                <span style="font-size:0.88rem;color:${theme.color};font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${entry.name}</span>
-                <span style="font-size:0.88rem;color:var(--amber);font-weight:600;text-align:right;">${entry.count}</span>
-                </div>`;
-            }).join('')
-        : `<div style="color:var(--text-muted);font-size:0.82rem;padding:0.5rem 0;">No activity this month.</div>`;
-
-        const companyLastSess = totalLastSession
-        ? totalLastSession.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
-        : '—';
-
-        const companyCard = `
-        <div style="background:var(--bg-card);border:1px solid var(--amber-dim);border-left:3px solid var(--amber);border-radius:4px;padding:1.25rem 1.5rem;margin-bottom:0.5rem;">
-            <div style="margin-bottom:1.1rem;">
-            <div style="display:flex;align-items:baseline;gap:0.75rem;">
-                <span style="font-family:var(--font-title);font-size:1.1rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);">Full Company</span>
-            </div>
-            </div>
-            <div style="display:grid;grid-template-columns:0.8fr 1fr 1fr;gap:1.5rem;align-items:start;">
-            <div>
-                <svg viewBox="0 0 160 160" width="100%" style="display:block;max-width:160px;margin:0 auto;">
-                ${companyPie}
-                </svg>
-                ${companyLegend}
-            </div>
-            <div>
-                <div style="font-family:var(--font-title);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.5rem;">30-Day Activity</div>
-                <div style="display:grid;grid-template-columns:22px 44px 1fr 28px;gap:0.4rem;
-                            font-size:0.65rem;color:var(--text-muted);padding-bottom:0.3rem;
-                            border-bottom:1px solid var(--border);margin-bottom:0.1rem;">
-                <span></span><span>Rank</span><span>Name</span><span style="text-align:right;">Att.</span>
-                </div>
-                ${companyLeaderRows}
-            </div>
-            <div>
-                <div style="font-family:var(--font-title);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">Company Health</div>
-                <div style="display:flex;flex-direction:column;gap:0.6rem;">
-                <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
-                    <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.04em;">Soldier Count</div>
-                    <div style="font-size:1.4rem;font-weight:700;color:var(--amber);font-family:var(--font-title);">${totalMembers}</div>
-                </div>
-                <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
-                    <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.04em;">All-Time Sessions</div>
-                    <div style="font-size:1.4rem;font-weight:700;color:var(--amber);font-family:var(--font-title);">${totalAllTimeSessions}</div>
-                </div>
-                <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:3px;padding:0.6rem 0.75rem;">
-                    <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.04em;">Last Session</div>
-                    <div style="font-size:0.9rem;font-weight:600;color:var(--amber);">${companyLastSess}</div>
-                </div>
-                </div>
-            </div>
-            </div>
-        </div>`;
-
-        el.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">${companyCard}${cards.join('')}</div>`;
-
-        // Wire up clicks — data-soldier-name avoids apostrophe issues
-        el.querySelectorAll('.stat-soldier-row').forEach(row => {
+        el.querySelectorAll('.stat-leader-row').forEach(row => {
             row.addEventListener('click', () => openSoldier(row.dataset.soldierName));
         });
         }
