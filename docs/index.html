@@ -721,7 +721,7 @@
             return entries.map(entry => {
             const color = defaultColor || regimentTheme(entry.regiment).color;
             const icon  = entry.pos === 1
-                ? `<span style="font-size:1rem;line-height:1;">🜲</span>`
+                ? `<span class="stat-leader-icon">🜲</span>`
                 : `<span class="stat-leader-icon">${entry.pos}</span>`;
             return `
                 <div class="stat-leader-row" data-soldier-name="${entry.name.replace(/"/g,'&quot;')}">
@@ -780,7 +780,7 @@
             const theme   = regimentTheme(r.name);
             const members = soldiers.filter(s => (s.regiment||'').toLowerCase() === r.key);
             const counts  = statusCounts(members);
-            const board   = buildLeaderboard(members, 5);
+            const board   = buildLeaderboard(members, 6);
             const lastD   = lastSessionDate[r.key];
             return { ...r, theme, total: members.length, counts, board, lastD };
         }).sort((a, b) => b.total !== a.total ? b.total - a.total : b.counts.active - a.counts.active);
@@ -800,7 +800,7 @@
         const totalCounts   = statusCounts(soldiers);
         const totalSessions = Object.values(allTimeSessions).reduce((a,b) => a+b, 0);
         const totalLastD    = Object.values(lastSessionDate).filter(Boolean).reduce((l,d) => (!l||d>l)?d:l, null);
-        const companyBoard  = buildLeaderboard(soldiers, 7);
+        const companyBoard  = buildLeaderboard(soldiers, 6);
 
         const companyCard = buildCard(
             'Full Company', '', 'var(--amber)', 'var(--amber)',
@@ -903,7 +903,7 @@
     <div class="drawer-section">
       <h3>Sessions Attended (${attended.length})</h3>
       ${attended.length
-                    ? `<div class="attendee-list">${attended.map(ss =>
+                    ? `<div class="attendee-list">${attended.sort((a, b) => new Date(b['Session Date']) - new Date(a['Session Date'])).map(ss =>
                         `<span class="session-tag">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
                     ).join('')}</div>`
                     : `<span style="color:var(--text-muted);font-size:0.88rem">No sessions recorded.</span>`
