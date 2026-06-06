@@ -649,39 +649,35 @@
             return counts;
         }
 
-        // ── Build leaderboard with tied ranks ──
         function buildLeaderboard(memberList, limit) {
             const entries = memberList
             .map(s => ({
-                name:      s.name,
-                abbrev:    getAbbrev(s),
-                rankName:  getRank(s),
-                rankIndex: RANK_ORDER.indexOf(getRank(s)),
-                count:     attendanceCounts[(s.name||'').toLowerCase().trim()] || 0,
-                regiment:  s.regiment,
+            name:      s.name,
+            abbrev:    getAbbrev(s),
+            rankName:  getRank(s),
+            rankIndex: RANK_ORDER.indexOf(getRank(s)),
+            count:     attendanceCounts[(s.name||'').toLowerCase().trim()] || 0,
+            regiment:  s.regiment,
             }))
             .filter(x => x.count > 0)
             .sort((a, b) => {
-                if (b.count !== a.count) return b.count - a.count;           // most attendance first
-                const ri = a.rankIndex === -1 ? RANK_ORDER.length : a.rankIndex;
-                const rj = b.rankIndex === -1 ? RANK_ORDER.length : b.rankIndex;
-                if (ri !== rj) return ri - rj;                               // higher rank first
-                return a.name.localeCompare(b.name);                         // alphabetical
+            if (b.count !== a.count) return b.count - a.count;
+            const ri = a.rankIndex === -1 ? RANK_ORDER.length : a.rankIndex;
+            const rj = b.rankIndex === -1 ? RANK_ORDER.length : b.rankIndex;
+            if (ri !== rj) return ri - rj;
+            return a.name.localeCompare(b.name);
             })
             .slice(0, limit);
 
-            // Assign display positions with ties
-            let displayPos = 1;
-            entries.forEach((e, i) => {
+        // Dense ranking: next position is always prev+1, regardless of how many tied
+        let pos = 1;
+        entries.forEach((e, i) => {
             if (i === 0) { e.pos = 1; return; }
-            const prev = entries[i - 1];
-            e.pos = (e.count === prev.count) ? prev.pos : displayPos;
-            displayPos++;
-            });
-            // fix displayPos tracking
-            entries.forEach((e, i) => { if (i > 0) displayPos = Math.max(displayPos, e.pos + 1); });
+            if (entries[i - 1].count !== e.count) pos++;
+            e.pos = pos;
+        });
 
-            return entries;
+        return entries;
         }
 
         // ── SVG donut pie ──
