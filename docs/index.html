@@ -390,7 +390,7 @@
                 const rank = getRank(s);
                 const reg = s.regiment || '—';
                 const theme = regimentTheme(s.regiment);
-                return `<tr onclick="openSoldier('${encodeURIComponent(s.name)}')">
+                return `<tr data-soldier-name="${s.name.replace(/"/g, '&quot;')} style="cursor:pointer;">
       <td class="name-cell">${s.name.replace(/"/g, '&quot;') || '—'}</td>
       <td>${rank}</td>
       <td><span class="reg-${(s.regiment || '').toLowerCase()}">${reg}</span></td>
@@ -404,6 +404,9 @@
     </tr>`;
             }).join('');
         }
+        document.querySelectorAll('tr[data-soldier-name]').forEach(row => {
+            row.addEventListener('click', () => openSoldier(row.dataset.soldierName));
+        });
 
         // ── Render sessions list ──
         function renderSessions() {
@@ -1131,12 +1134,14 @@
       <div class="attendee-list">
         ${attendees.map(a => {
                 const found = soldiers.find(x => x.name.toLowerCase() === a.toLowerCase());
-                return `<span class="session-tag" ${found ? `onclick="openSoldier('${encodeURIComponent(found.name)}')" style="cursor:pointer;color:var(--amber)"` : ''}>${a}</span>`;
+                return `<span class="session-tag" ${found ? `data-soldier-name="${found.name}" style="cursor:pointer;color:var(--amber)"` : ''}>${a}</span>`;
             }).join('')}
       </div>
     </div>
   `;
-
+            document.querySelectorAll('.attendee-list [data-soldier-name]').forEach(span => {
+                span.addEventListener('click', () => openSoldier(span.dataset.soldierName));
+            });
             document.getElementById('drawer-content').innerHTML = content;
             document.getElementById('drawer-overlay').classList.add('open');
             document.getElementById('drawer').classList.add('open');
