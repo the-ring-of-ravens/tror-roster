@@ -325,9 +325,9 @@
 
         function regimentTheme(regiment) {
             const themes = {
+                'shield': { color: '#9b6bd4', border: '#4a2a8a', bg: '#1a1030' },
                 'navy': { color: '#4a8fd4', border: '#2a4a8a', bg: '#0d1a30' },
                 'restoration': { color: '#4ab870', border: '#2a6a40', bg: '#0d2010' },
-                'shield': { color: '#9b6bd4', border: '#4a2a8a', bg: '#1a1030' },
                 'airforce': { color: '#d4873a', border: '#8a4a1a', bg: '#2a1a08' },
                 'archery': { color: '#d44a4a', border: '#8a2a2a', bg: '#2a0d0d' },
             };
@@ -600,17 +600,17 @@
             if (!canvas) return;
             if (canvas._chartInstance) { canvas._chartInstance.destroy(); }
 
-            const REGIMENT_KEYS = ['airforce', 'archery', 'shield', 'navy', 'restoration'];
+            const REGIMENT_KEYS = ['airforce', 'archery', 'navy', 'restoration', 'shield'];
             const REGIMENT_COLORS = {
                 airforce: '#d4873a',
                 archery: '#d44a4a',
-                shield: '#9b6bd4',
                 navy: '#4a8fd4',
                 restoration: '#4ab870',
+                shield: '#9b6bd4',
             };
             const REGIMENT_LABELS = {
-                airforce: 'Airforce', archery: 'Archery', shield: 'Shield', navy: 'Navy',
-                restoration: 'Restoration',
+                airforce: 'Airforce', archery: 'Archery', navy: 'Navy',
+                restoration: 'Restoration', shield: 'Shield',
             };
 
             // Build sorted list of (date, regiment) join events
@@ -778,9 +778,9 @@
             const regiments = [
                 { name: 'Airforce', key: 'airforce', motto: 'FLY OR DIE!' },
                 { name: 'Archery', key: 'archery', motto: 'WE BRING DEATH UNDER OUR FIRE!' },
-                { name: 'Shield', key: 'shield', motto: 'LET IRON STRIKE IRON!' },
                 { name: 'Navy', key: 'navy', motto: 'FOR THE HONOR OF THE LAND AND WAVES!' },
                 { name: 'Restoration', key: 'restoration', motto: 'RESTORE THE FAITH IN ALL!' },
+                { name: 'Shield', key: 'shield', motto: 'LET IRON STRIKE IRON!' },
             ];
 
             const STATUSES = [
@@ -999,9 +999,9 @@
                 `<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0.75rem;">
                 <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d4873a;"></span>Airforce</span>
                 <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d44a4a;"></span>Archery</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#9b6bd4;"></span>Shield</span>
                 <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4a8fd4;"></span>Navy</span>
                 <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4ab870;"></span>Restoration</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#9b6bd4;"></span>Shield</span>
             </div>
             <div id="growth-chart-section" style="position:relative;height:320px;">
                 <canvas id="growth-canvas" role="img" aria-label="Stacked area chart showing cumulative member enrollment by regiment over time">Member enrollment history by regiment.</canvas>
