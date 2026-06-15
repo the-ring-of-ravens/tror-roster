@@ -391,7 +391,7 @@
                 const reg = s.regiment || '—';
                 const theme = regimentTheme(s.regiment);
                 return `<tr onclick="openSoldier('${encodeURIComponent(s.name)}')">
-      <td class="name-cell">${s.name || '—'}</td>
+      <td class="name-cell">${s.name.replace(/"/g, '&quot;') || '—'}</td>
       <td>${rank}</td>
       <td><span class="reg-${(s.regiment || '').toLowerCase()}">${reg}</span></td>
       <td>
@@ -597,7 +597,7 @@
             if (!canvas) return;
             if (canvas._chartInstance) { canvas._chartInstance.destroy(); }
 
-            const REGIMENT_KEYS = ['airforce', 'archery', 'navy', 'restoration', 'shield'];
+            const REGIMENT_KEYS = ['airforce', 'archery', 'shield', 'navy', 'restoration'];
             const REGIMENT_COLORS = {
                 airforce: '#d4873a',
                 archery: '#d44a4a',
@@ -654,9 +654,9 @@
                 return ''; // other months blank (minor gridlines handle it)
             });
 
-            // Which indices are major (Jan) vs minor season ticks (Mar=2, Jun=5, Sep=8)
+            // Which indices are major (Jan) vs minor season ticks (Apr=3, Jul=6, Oct=9)
             const majorTicks = months.map(m => m.getMonth() === 0);
-            const seasonTicks = months.map(m => [2, 5, 8].includes(m.getMonth()));
+            const seasonTicks = months.map(m => [3, 6, 9].includes(m.getMonth()));
 
             // Datasets: one stacked band per regiment, no full-company line (stack = total)
             const datasets = REGIMENT_KEYS.map(k => ({
@@ -896,7 +896,7 @@
                 return `<div class="stat-legend-grid"><div>${col(items.slice(0, half))}</div><div>${col(items.slice(half))}</div></div>`;
             }
 
-            // ── Leaderboard rows HTML ──
+            // ── Leaderboard rows ──
             function makeLeaderRows(entries, defaultColor) {
                 if (!entries.length) return `<div class="stat-no-activity">No activity this month.</div>`;
                 return entries.map(entry => {
