@@ -403,10 +403,10 @@
       <td>${badge(createStatus(s))}</td>
     </tr>`;
             }).join('');
-        }
         document.querySelectorAll('tr[data-soldier-name]').forEach(row => {
             row.addEventListener('click', () => openSoldier(row.dataset.soldierName));
         });
+        }
 
         // ── Render sessions list ──
         function renderSessions() {
