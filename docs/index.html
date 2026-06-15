@@ -390,7 +390,7 @@
                 const rank = getRank(s);
                 const reg = s.regiment || '—';
                 const theme = regimentTheme(s.regiment);
-                return `<tr data-soldier-name="${s.name.replace(/"/g, '&quot;')} style="cursor:pointer;">
+                return `<tr data-soldier-name="${s.name.replace(/"/g, '&quot;')}" style="cursor:pointer;">
       <td class="name-cell">${s.name.replace(/"/g, '&quot;') || '—'}</td>
       <td>${rank}</td>
       <td><span class="reg-${(s.regiment || '').toLowerCase()}">${reg}</span></td>
