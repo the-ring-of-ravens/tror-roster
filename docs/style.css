@@ -227,7 +227,7 @@
     .table-wrap {
         border: 1px solid var(--border);
         border-radius: 4px;
-        overflow: hidden;
+        overflow-x: auto;
     }
 
     table {
@@ -391,7 +391,7 @@
         top: 0;
         right: 0;
         bottom: 0;
-        width: 360px;
+        width: min(360px,100vw);
         background: var(--bg-panel);
         border-left: 1px solid var(--border-hi);
         z-index: 201;

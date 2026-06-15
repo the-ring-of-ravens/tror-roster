@@ -1139,10 +1139,10 @@
       </div>
     </div>
   `;
+            document.getElementById('drawer-content').innerHTML = content;
             document.querySelectorAll('.attendee-list [data-soldier-name]').forEach(span => {
                 span.addEventListener('click', () => openSoldier(span.dataset.soldierName));
             });
-            document.getElementById('drawer-content').innerHTML = content;
             document.getElementById('drawer-overlay').classList.add('open');
             document.getElementById('drawer').classList.add('open');
         }
