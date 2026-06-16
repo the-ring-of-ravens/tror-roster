@@ -147,7 +147,6 @@
     .nav-dropdown button.active { color: var(--amber); background: #1a1610; }
 
     @media (max-width: 660px) {
-        header { position: relative; }
         nav { display: none; }
         .hamburger { display: flex; }
         .search-row { flex-direction: column; }
@@ -159,6 +158,14 @@
         table th:nth-child(5),
         table td:nth-child(5) {
             display: none;
+        }
+        .stat-card-cols {
+            grid-template-columns: 1fr;
+        }
+
+        .stat-card-header {
+            flex-direction: column;
+            gap: 0.25rem;
         }
     }
 
