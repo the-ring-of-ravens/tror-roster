@@ -152,6 +152,10 @@
         .hamburger { display: flex; }
     }
 
+    @media (max-width: 970px) {
+        #soldier-stats.stat-row {display: none;}
+    }
+
     /* ── Layout ── */
     main {
         max-width: 1100px;
