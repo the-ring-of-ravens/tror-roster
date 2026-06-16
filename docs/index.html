@@ -387,7 +387,7 @@
                 const theme = regimentTheme(s.regiment);
                 return `<tr data-soldier-name="${s.name.replace(/"/g, '&quot;')}" style="cursor:pointer;">
       <td class="name-cell">${s.name.replace(/"/g, '&quot;') || '—'}</td>
-      <td>${rank}</td>
+      <td style="color:${theme.color}">${rank}</td>
       <td><span class="reg-${(s.regiment || '').toLowerCase()}">${reg}</span></td>
       <td>
         <div class="pts-wrap">
