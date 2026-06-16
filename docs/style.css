@@ -193,7 +193,6 @@
         }
 
         .stat-card-cols {
-            display: flex;
             flex-direction: column;
         }
 
@@ -358,8 +357,7 @@
     }
 
     .stat-card-cols {
-        display: grid;
-        grid-template-columns: 0.8fr 1fr 1fr;
+        display: flex;
         gap: 1.5rem;
         align-items: start;
     }
