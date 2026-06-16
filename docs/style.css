@@ -193,17 +193,19 @@
         }
 
         .stat-card-cols {
-            grid-template-columns: 1fr !important;
-        }
-
-        .stat-card-cols>div {
-            min-width: 0;
-            overflow: hidden;
-        }
-
-        .stat-card-header {
+            display: flex;
             flex-direction: column;
-            gap: 0.25rem;
+        }
+
+        .stat-col {
+            width: 100%;
+            min-width: 0;
+            overflow-x: hidden;
+        }
+
+        .stat-leader-row,
+        .stat-leader-header {
+            grid-template-columns: 24px 36px 1fr 28px;
         }
     }
 
