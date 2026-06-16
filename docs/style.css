@@ -150,10 +150,12 @@
         header { position: relative; }
         nav { display: none; }
         .hamburger { display: flex; }
+        .search-row { flex-direction: column; }
+        .filter-row { width: 100%; }
     }
 
     @media (max-width: 970px) {
-        #soldier-stats.stat-row {display: none;}
+        #soldier-stats.stat-row { display: none; }
     }
 
     /* ── Layout ── */
