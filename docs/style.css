@@ -193,7 +193,12 @@
         }
 
         .stat-card-cols {
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr !important;
+        }
+
+        .stat-card-cols>div {
+            min-width: 0;
+            overflow: hidden;
         }
 
         .stat-card-header {
