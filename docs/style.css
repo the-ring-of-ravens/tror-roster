@@ -113,18 +113,27 @@
         cursor: pointer;
         font-size: 18px;
     }
-    .hamburger.open { border-color: var(--amber); color: var(--amber); }
+
+    .hamburger.open {
+        border-color: var(--amber);
+        color: var(--amber);
+    }
 
     .nav-dropdown {
         display: none;
         position: absolute;
         top: 56px;
-        left: 0; right: 0;
+        left: 0;
+        right: 0;
         background: var(--bg-panel);
         border-bottom: 1px solid var(--border);
         z-index: 99;
     }
-    .nav-dropdown.open { display: block; }
+
+    .nav-dropdown.open {
+        display: block;
+    }
+
     .nav-dropdown button {
         display: flex;
         align-items: center;
@@ -142,15 +151,38 @@
         cursor: pointer;
         text-align: left;
     }
-    .nav-dropdown button:last-child { border-bottom: none; }
-    .nav-dropdown button:hover { background: var(--bg-card); color: var(--text); }
-    .nav-dropdown button.active { color: var(--amber); background: #1a1610; }
+
+    .nav-dropdown button:last-child {
+        border-bottom: none;
+    }
+
+    .nav-dropdown button:hover {
+        background: var(--bg-card);
+        color: var(--text);
+    }
+
+    .nav-dropdown button.active {
+        color: var(--amber);
+        background: #1a1610;
+    }
 
     @media (max-width: 660px) {
-        nav { display: none; }
-        .hamburger { display: flex; }
-        .search-row { flex-direction: column; }
-        .filter-row { width: 100%; }
+        nav {
+            display: none;
+        }
+
+        .hamburger {
+            display: flex;
+        }
+
+        .search-row {
+            flex-direction: column;
+        }
+
+        .filter-row {
+            width: 100%;
+        }
+
         table th:nth-child(3),
         table td:nth-child(3),
         table th:nth-child(4),
@@ -159,6 +191,7 @@
         table td:nth-child(5) {
             display: none;
         }
+
         .stat-card-cols {
             grid-template-columns: 1fr;
         }
@@ -170,7 +203,9 @@
     }
 
     @media (max-width: 970px) {
-        #soldier-stats.stat-row { display: none; }
+        #soldier-stats.stat-row {
+            display: none;
+        }
     }
 
     /* ── Layout ── */
@@ -287,6 +322,160 @@
         line-height: 1;
     }
 
+    .stat-card-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .stat-card-header {
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        margin-bottom: 1.1rem;
+    }
+
+    .stat-card-title {
+        font-family: var(--font-title);
+        font-size: 1.1rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .stat-card-motto {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        font-style: italic;
+        letter-spacing: 0.04em;
+    }
+
+    .stat-card-cols {
+        display: grid;
+        grid-template-columns: 0.8fr 1fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .stat-col-heading {
+        font-family: var(--font-title);
+        font-size: 0.6rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.6rem;
+    }
+
+    .stat-leader-header {
+        display: grid;
+        grid-template-columns: 28px 44px 1fr 32px;
+        gap: 0.4rem;
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        padding-bottom: 0.3rem;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 0.15rem;
+    }
+
+    .stat-leader-row {
+        display: grid;
+        grid-template-columns: 28px 44px 1fr 32px;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+    }
+
+    .stat-leader-row:hover {
+        background: var(--bg-panel);
+    }
+
+    .stat-leader-icon {
+        font-size: 0.8rem;
+        font-family: var(--font-title);
+        color: var(--white);
+        text-align: center;
+    }
+
+    .stat-leader-abbrev {
+        font-size: 0.72rem;
+        color: var(--text-dim);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .stat-leader-name {
+        font-size: 0.88rem;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .stat-leader-count {
+        font-size: 0.88rem;
+        color: var(--amber);
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .stat-health-mini {
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        padding: 0.6rem 0.75rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .stat-health-label {
+        font-size: 0.65rem;
+        color: var(--text-dim);
+        letter-spacing: 0.04em;
+        margin-bottom: 3px;
+    }
+
+    .stat-health-value-lg {
+        font-size: 1.4rem;
+        font-weight: 700;
+        font-family: var(--font-title);
+    }
+
+    .stat-health-value-sm {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .stat-legend-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 2rem;
+        margin: 0.75rem 0.8rem 0rem 0.8rem;
+    }
+
+    .stat-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.78rem;
+        color: var(--text-dim);
+        padding: 2px 0;
+    }
+
+    .stat-legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .stat-no-activity {
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        padding: 0.5rem 0;
+    }
+
     /* ── Table ── */
     .table-wrap {
         border: 1px solid var(--border);
@@ -388,11 +577,25 @@
     }
 
     /* ── Regiment badges ── */
-    .reg-shield      { color: #9b6bd4; }
-    .reg-navy        { color: #4a8fd4; }
-    .reg-restoration { color: #4ab870; }
-    .reg-airforce    { color: #d4873a; }
-    .reg-archery     { color: #d44a4a; }
+    .reg-shield {
+        color: #9b6bd4;
+    }
+
+    .reg-navy {
+        color: #4a8fd4;
+    }
+
+    .reg-restoration {
+        color: #4ab870;
+    }
+
+    .reg-airforce {
+        color: #d4873a;
+    }
+
+    .reg-archery {
+        color: #d44a4a;
+    }
 
     /* ── Points bar ── */
     .pts-wrap {
@@ -455,7 +658,7 @@
         top: 0;
         right: 0;
         bottom: 0;
-        width: min(360px,100vw);
+        width: min(360px, 100vw);
         background: var(--bg-panel);
         border-left: 1px solid var(--border-hi);
         z-index: 201;
