@@ -22,9 +22,6 @@
         <div class="logo">
             <img src="flag.png" alt="[flag icon]" style="height: 22px; width: auto; object-fit: contain;">
             The Ring of Ravens
-            <span class="logo-sep"></span>
-            <span style="font-size:0.7rem;font-weight:400;letter-spacing:0.06em;color:var(--text-muted)">SkyWing
-                Military</span>
         </div>
 
         <nav>
@@ -32,12 +29,21 @@
             <button onclick="switchTab('sessions')">Sessions</button>
             <button onclick="switchTab('stats')">Statistics</button>
         </nav>
+        <button class="hamburger" id="hamburger" aria-label="Open menu" onclick="toggleMenu()">☰</button>
+        <div class="nav-dropdown" id="nav-dropdown">
+            <button class="active" onclick="switchTab('soldiers'); toggleMenu()">Soldiers</button>
+            <button onclick="switchTab('sessions'); toggleMenu()">Sessions</button>
+            <button onclick="switchTab('stats'); toggleMenu()">Statistics</button>
+        </div>
     </header>
 
     <main>
         <div id="session-warning"
             style="background:#2a1a10; border:1px solid #7a3a1e; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; color:#c86030; font-size:0.92rem;">
-            ⚠️ <strong>This website is under construction, so some data may be incomplete or inaccurate.</strong> Please refer to the <a href="https://docs.google.com/spreadsheets/d/190vlWjIf9f69Rwmf1ANw6sy8WdXLReVETd2NnTjus18" target="_blank" rel="noopener noreferrer" style="color:#d89634; text-decoration:underline;">official TRoR Roster</a> for accurate information.
+            ⚠️ <strong>This website is under construction, so some data may be incomplete or inaccurate.</strong> Please
+            refer to the <a href="https://docs.google.com/spreadsheets/d/190vlWjIf9f69Rwmf1ANw6sy8WdXLReVETd2NnTjus18"
+                target="_blank" rel="noopener noreferrer" style="color:#d89634; text-decoration:underline;">official
+                TRoR Roster</a> for accurate information.
         </div>
         <div id="session-warning"
             style="display:none; background:#2a1a10; border:1px solid #7a3a1e; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; color:#c86030; font-size:0.92rem;">
@@ -157,8 +163,8 @@
                 <h1>Statistics</h1>
                 <div class="amber-line"></div>
             </div>
-                <div id="stats-content">
-                    <div style="position:relative;height:320px;">
+            <div id="stats-content">
+                <div style="position:relative;height:320px;">
                     <canvas id="growth-canvas" role="img"
                         aria-label="Stacked area chart showing cumulative member enrollment by regiment over time">Member
                         enrollment history by regiment.</canvas>
@@ -180,26 +186,6 @@
         // ── Data stores ──
         let soldiers = [], sessions = [], ranks = [];
 
-        // ── CSV parser (handles quoted fields) ──
-        function parseCSV(text) {
-            const lines = text.trim().split('\n');
-            const headers = lines[0].split(',').map(h => h.trim());
-            return lines.slice(1).map(line => {
-                const vals = [];
-                let cur = '', inQ = false;
-                for (let i = 0; i < line.length; i++) {
-                    const c = line[i];
-                    if (c === '"') { inQ = !inQ; }
-                    else if (c === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
-                    else { cur += c; }
-                }
-                vals.push(cur.trim());
-                const obj = {};
-                headers.forEach((h, i) => obj[h] = vals[i] ?? '');
-                return obj;
-            });
-        }
-
         function parseDate(val) {
             if (!val) return null;
             const gviz = String(val).match(/Date\((\d+),(\d+),(\d+)\)/);
@@ -218,7 +204,7 @@
             return val;
         }
 
-        // ── Fetch a CSV relative to this page ──
+        // ── Fetch the Google Sheet Roster ──
         const SHEET_ID = '12oUuTbA2wmWWEqOjKRzQhm8IOEGAp2Ja5AIFm5Yffis';
 
         async function fetchSheet(tabName) {
@@ -255,6 +241,13 @@
             if (tab) return fetchSheet(tab);
             console.warn('No sheet tab mapped for:', path);
             return [];
+        }
+
+        function toggleMenu() {
+            const btn = document.getElementById('hamburger');
+            const menu = document.getElementById('nav-dropdown');
+            btn.classList.toggle('open');
+            menu.classList.toggle('open');
         }
 
         // ── Derive rank from soldier ──
@@ -403,9 +396,9 @@
       <td>${badge(createStatus(s))}</td>
     </tr>`;
             }).join('');
-        document.querySelectorAll('tr[data-soldier-name]').forEach(row => {
-            row.addEventListener('click', () => openSoldier(row.dataset.soldierName));
-        });
+            document.querySelectorAll('tr[data-soldier-name]').forEach(row => {
+                row.addEventListener('click', () => openSoldier(row.dataset.soldierName));
+            });
         }
 
         // ── Render sessions list ──
@@ -1156,8 +1149,11 @@
         function switchTab(name) {
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.nav-dropdown button').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + name).classList.add('active');
-            document.querySelectorAll('nav button')[['soldiers', 'sessions', 'stats'].indexOf(name)].classList.add('active');
+            const idx = ['soldiers', 'sessions', 'stats'].indexOf(name);
+            document.querySelectorAll('nav button')[idx].classList.add('active');
+            document.querySelectorAll('.nav-dropdown button')[idx].classList.add('active');
         }
 
         // ── Populate regiment filter ──
