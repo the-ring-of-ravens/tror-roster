@@ -719,7 +719,7 @@
                                     const m = months[ctx.index];
                                     if (!m) return 'transparent';
                                     if (m.getMonth() === 0) return gridColor;
-                                    if ([2, 5, 8].includes(m.getMonth())) return minorColor;
+                                    if ([3, 6, 9].includes(m.getMonth())) return minorColor;
                                     return 'transparent';
                                 },
                                 lineWidth: ctx => {
