@@ -360,8 +360,8 @@
 
     .stat-card-cols {
         display: flex;
+        justify-content: space-around;
         gap: 1.5rem;
-        align-items: start;
         width: 100%;
     }
 
