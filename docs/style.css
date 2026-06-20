@@ -179,10 +179,9 @@
             flex-direction: column;
         }
 
-        /* 0000 might not need this */
-        .filter-row {
-            width: 100%;
-        } 
+        .pill-container {
+            flex-direction: column;
+        }
 
         table th:nth-child(3),
         table td:nth-child(3),
@@ -298,6 +297,17 @@
 
     ::placeholder {
         color: var(--text-muted);
+    }
+
+    .pill-container {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+    }
+
+    .pill-container .pill-row {
+        flex: 1;
     }
 
     .pill-row {
