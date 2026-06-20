@@ -63,58 +63,18 @@
                 <div class="amber-line"></div>
             </div>
 
-            <div class="stat-row" id="soldier-stats">
-                <div class="stat-card">
-                    <div class="label">Total</div>
-                    <div class="value" id="stat-total">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">Active</div>
-                    <div class="value" id="stat-active">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">Semi-Active</div>
-                    <div class="value" id="stat-semi-active">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">Inactive</div>
-                    <div class="value" id="stat-inactive">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">On Break</div>
-                    <div class="value" id="stat-on-break">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">Retired</div>
-                    <div class="value" id="stat-retired">—</div>
-                </div>
-            </div>
-
-            <div class="search-row" style="display:flex; gap:0.75rem; margin-bottom:1.5rem;">
-                <div class="search-wrap" style="position:relative; flex:1; min-width:0;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
+            <div class="search-row">
+                <div class="search-wrap">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8" />
                         <line x1="21" y1="21" x2="16.65" y2="16.65" />
                     </svg>
-                    <input type="text" id="soldier-search" placeholder="Search by name…" oninput="renderSoldiers()"
-                        style="width:100%; padding:0.55rem 0.9rem 0.55rem 2.5rem;">
+                    <input type="text" id="soldier-search" placeholder="Search by name…" oninput="renderSoldiers()">
                 </div>
-                <div id="filter-row" style="display:flex; gap:0.75rem; flex:1;">
-                    <select id="filter-regiment" onchange="renderSoldiers()" style="flex:1; min-width:0;">
-                        <option value="">All Regiments</option>
-                    </select>
-                    <select id="filter-status" onchange="renderSoldiers()" style="flex:1; min-width:0;">
-                        <option value="">All Statuses</option>
-                        <option value="active">Active</option>
-                        <option value="semi-active">Semi-Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="on-break">On Break</option>
-                        <option value="retired">Retired</option>
-                        <option value="memorial">Memorial</option>
-                    </select>
-                </div>
+                <div class="pill-row" id="regiment-pills"></div>
+                <span class="result-count" id="result-count"></span>
             </div>
+            <div class="pill-row" id="status-pills" style="margin-bottom:1.5rem;"></div>
 
             <div class="table-wrap">
                 <table>
@@ -330,6 +290,30 @@
                 || { color: '#a9a9a9', border: '#8c8c8c', bg: 'var(--bg-card)' };
         }
 
+        let activeRegiments = new Set();
+        let activeStatuses = new Set();
+
+        function renderPills() {
+            const regKeys = ['airforce', 'archery', 'navy', 'restoration', 'shield'];
+            const regNames = { airforce: 'Airforce', archery: 'Archery', navy: 'Navy', restoration: 'Restoration', shield: 'Shield' };
+            document.getElementById('regiment-pills').innerHTML = regKeys.map(k => {
+                const t = regimentTheme(regNames[k]);
+                const on = activeRegiments.has(k);
+                return `<span class="pill${on ? ' active' : ''}" style="${on ? `background:${t.color};border-color:${t.color}` : ''}" data-reg="${k}">${regNames[k]}</span>`;
+            }).join('');
+
+            const statKeys = [['active', 'Active'], ['semi-active', 'Semi-Active'], ['inactive', 'Inactive'], ['on break', 'On Break'], ['retired', 'Retired'], ['memorial', 'Memorial']];
+            document.getElementById('status-pills').innerHTML = statKeys.map(([k, label]) => {
+                const on = activeStatuses.has(k);
+                return `<span class="pill${on ? ' active' : ''}" style="${on ? 'background:var(--amber);border-color:var(--amber)' : ''}" data-status="${k}">${label}</span>`;
+            }).join('');
+
+            document.querySelectorAll('#regiment-pills .pill').forEach(p =>
+                p.addEventListener('click', () => { activeRegiments.has(p.dataset.reg) ? activeRegiments.delete(p.dataset.reg) : activeRegiments.add(p.dataset.reg); renderPills(); renderSoldiers(); }));
+            document.querySelectorAll('#status-pills .pill').forEach(p =>
+                p.addEventListener('click', () => { activeStatuses.has(p.dataset.status) ? activeStatuses.delete(p.dataset.status) : activeStatuses.add(p.dataset.status); renderPills(); renderSoldiers(); }));
+        }
+
         // ── Render soldiers table ──
         function renderSoldiers() {
             const q = (document.getElementById('soldier-search').value || '').toLowerCase();
@@ -341,9 +325,10 @@
                 const regiment = (s.regiment || '').toLowerCase();
                 const status = createStatus(s);
                 return (!q || nm.includes(q))
-                    && (!reg || regiment === reg)
-                    && (!st || status === st);
+                    && (activeRegiments.size === 0 || activeRegiments.has(regiment))
+                    && (activeStatuses.size === 0 || activeStatuses.has(status));
             });
+            document.getElementById('result-count').textContent = `${filtered.length} Soldiers`;
 
             const tbody = document.getElementById('soldier-tbody');
 
@@ -1091,6 +1076,7 @@
 
             populateFilters();
             updateStats();
+            renderPills();
             renderSoldiers();
             renderSessions();
             renderStats();
