@@ -293,7 +293,7 @@
         }
 
         let activeRegiments = new Set();
-        let activeStatuses = new Set();
+        let activeStatuses = new Set(['active', 'semi-active', 'inactive', 'on break']);
 
         function renderPills() {
             const regKeys = ['airforce', 'archery', 'navy', 'restoration', 'shield'];
