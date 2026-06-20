@@ -317,8 +317,6 @@
         // ── Render soldiers table ──
         function renderSoldiers() {
             const q = (document.getElementById('soldier-search').value || '').toLowerCase();
-            const reg = document.getElementById('filter-regiment').value.toLowerCase();
-            const st = document.getElementById('filter-status').value.toLowerCase();
 
             const filtered = soldiers.filter(s => {
                 const nm = (s.name || '').toLowerCase();
