@@ -1003,14 +1003,6 @@
             document.querySelectorAll('.nav-dropdown button')[idx].classList.add('active');
         }
 
-        // ── Populate regiment filter ──
-        function populateFilters() {
-            const regSet = [...new Set(soldiers.map(s => s.regiment).filter(Boolean))].sort();
-            const sel = document.getElementById('filter-regiment');
-            sel.innerHTML = '<option value="">All Regiments</option>'
-                + regSet.map(r => `<option value="${r.toLowerCase()}">${r}</option>`).join('');
-        }
-
         // ── Update stat cards ──
         function updateStats() {
             document.getElementById('stat-total').textContent = soldiers.length;
