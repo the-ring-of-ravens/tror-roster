@@ -677,9 +677,20 @@
 
             let pathD = '', dashedSeg = '';
             points.forEach((p, i) => {
-                const cmd = i === 0 ? 'M' : 'L';
-                const seg = `${cmd}${x(p.date.getTime())},${y(p.value)} `;
-                if (p.dashed) dashedSeg += seg; else pathD += seg;
+                const px = x(p.date.getTime());
+                const py = y(p.value);
+
+                if (i === 0) {
+                    pathD += `M${px},${py} `;
+                    return;
+                }
+
+                const prev = points[i - 1];
+                const stepX = px; // step happens right at the new point's x position
+                const stepSeg = `L${stepX},${y(prev.value)} L${px},${py} `;
+
+                if (p.dashed) dashedSeg += stepSeg;
+                else pathD += stepSeg;
             });
 
             const dots = points.map(p =>
