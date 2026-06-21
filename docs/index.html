@@ -153,9 +153,15 @@
     <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
     <div class="drawer" id="drawer">
         <button class="drawer-close" onclick="closeDrawer()">✕ Close</button>
+        <!-- 0000 this might not work with sky'dreader -->
+        <button class="drawer-close" onclick="viewSoldierStats(s.name)">More Info</button>
         <div id="drawer-content"></div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.1/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.30.0/date-fns.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script>
         // ── Data stores ──
         let soldiers = [], sessions = [], ranks = [];
@@ -614,10 +620,102 @@
             });
         }
 
+        function buildPointsHistory(soldier) {
+            const name = (soldier.name || '').toLowerCase().trim();
+            const joinDate = parseDate(soldier.join_date);
+            const currentPoints = parseInt(soldier.points) || 0;
+
+            const relevant = sessions
+                .map(s => ({ s, date: parseDate(s['Session Date']) }))
+                .filter(({ date }) => date && (!joinDate || date >= joinDate))
+                .filter(({ s }) => {
+                    const host = (s['Host'] || '').toLowerCase().trim();
+                    const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim().toLowerCase());
+                    return host === name || attendees.includes(name);
+                })
+                .sort((a, b) => b.date - a.date); // most recent first, for the backward walk
+
+            let running = currentPoints;
+            const points = [{ date: new Date(), value: currentPoints, label: 'Now' }];
+
+            for (const { s, date } of relevant) {
+                const host = (s['Host'] || '').toLowerCase().trim();
+                const counted = (s['Counted?'] || '').trim();
+                const countsForMe = counted === '✅' || (counted === '🟡' && host === name);
+
+                if (countsForMe) running = Math.max(running - 1, 0);
+
+                points.push({
+                    date,
+                    value: running,
+                    label: s['Session Name'],
+                    sessionId: encodeURIComponent(s['Timestamp'] || s['Session Name']),
+                });
+
+                if (running <= 0) break;
+            }
+
+            const ranOut = running > 0;
+            points.reverse(); // chronological order
+
+            points.unshift({ date: joinDate, value: 0, label: 'Enlisted', dashed: ranOut });
+
+            return { points, ranOut };
+        }
+
+        function drawSoldierPointsChart(soldier) {
+            const canvas = document.getElementById('soldier-points-canvas');
+            if (!canvas) return;
+            if (canvas._chartInstance) canvas._chartInstance.destroy();
+
+            const { points } = buildPointsHistory(soldier);
+            const theme = regimentTheme(soldier.regiment);
+
+            canvas._chartInstance = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: points.map(p => p.date),
+                    datasets: [{
+                        data: points.map(p => p.value),
+                        borderColor: theme.color,
+                        backgroundColor: theme.color + '33',
+                        fill: true,
+                        tension: 0.25,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        segment: {
+                            borderDash: ctx => points[ctx.p0DataIndex]?.dashed ? [6, 6] : undefined,
+                        },
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: ctx => points[ctx[0].dataIndex].label,
+                                label: ctx => `Points: ${ctx.raw}`,
+                            },
+                        },
+                    },
+                    scales: {
+                        x: { type: 'time', time: { unit: 'month' }, ticks: { color: '#8a8070' } },
+                        y: { min: 0, ticks: { color: '#8a8070' } },
+                    },
+                },
+            });
+        }
+
+        let focusedSoldier = null;
+
         // ── Render statistics ──
         function renderStats() {
             const el = document.getElementById('stats-content');
             if (!el) return;
+
+            if (focusedSoldier) { renderSoldierStats(focusedSoldier); return; }
 
             const RANK_ORDER = [
                 'General of the Army', 'Brigadier General', 'Colonel', 'Lieutenant Colonel', 'Major',
@@ -944,6 +1042,27 @@
             });
         }
 
+        function renderSoldierStats(name) {
+            const s = soldiers.find(x => x.name === name);
+            const el = document.getElementById('stats-content');
+            if (!s) { focusedSoldier = null; renderStats(); return; }
+
+            const theme = regimentTheme(s.regiment);
+            el.innerHTML = `
+            <button onclick="focusedSoldier = null; renderStats();" style="margin-bottom:1rem;background:none;border:1px solid var(--border);color:var(--text-dim);padding:6px 12px;border-radius:4px;cursor:pointer;">← Back to overview</button>
+            <div class="stat-card-wrap" style="border-left:3px solid ${theme.color}">
+                <div class="stat-card-header">
+                    <span class="stat-card-title" style="color:${theme.color}">${s.name}</span>
+                    <span class="stat-card-motto">${getRank(s)} · ${s.regiment || 'GA'}</span>
+                </div>
+                <div style="position:relative;height:320px;">
+                    <canvas id="soldier-points-canvas"></canvas>
+                </div>
+            </div>
+        `;
+            drawSoldierPointsChart(s);
+        }
+
         // ── Drawer: open soldier ──
         function openSoldier(encodedName) {
             const name = decodeURIComponent(encodedName);
@@ -1026,6 +1145,7 @@
                         }
                     })()}</span></div>
     </div>` : ''}
+    <button onclick="viewSoldierStats('${s.name.replace(/'/g, "\\'")}')" style="width:100%;margin:1rem 0;padding:8px;background:var(--bg-card);border:1px solid var(--border);color:var(--amber);border-radius:4px;cursor:pointer;">More Statistics</button>
 
     ${hosted.length ? `<div class="drawer-section">
         <h3>Sessions Hosted (${hosted.length})</h3>
@@ -1098,6 +1218,13 @@
         function closeDrawer() {
             document.getElementById('drawer-overlay').classList.remove('open');
             document.getElementById('drawer').classList.remove('open');
+        }
+
+        function viewSoldierStats(name) {
+            focusedSoldier = name;
+            closeDrawer();
+            switchTab('stats');
+            renderStats();
         }
 
         // ── Tab switching ──
