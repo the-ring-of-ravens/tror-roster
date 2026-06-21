@@ -880,6 +880,10 @@
             const totalLastD = Object.values(lastSessionDate).filter(Boolean).reduce((l, d) => (!l || d > l) ? d : l, null);
             const companyBoard = buildLeaderboard(soldiers, 6);
 
+            const allLeadership = regiments.flatMap(r =>
+                buildLeadershipList(soldiers.filter(s => (s.regiment || '').toLowerCase() === r.key), REGIMENT_TITLES[r.key] || [])
+            );
+
             const companyCard = buildCard(
                 'Full Company', 'I GAVE YOU EYES, BUT YOU NEVER WANTED TO SEE', 'var(--amber)', 'var(--amber)',
                 totalCounts, soldiers.length, companyBoard,
