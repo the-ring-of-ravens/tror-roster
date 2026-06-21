@@ -224,6 +224,11 @@
             menu.classList.toggle('open');
         }
 
+        // ── Strip accents for searching ── 
+        function stripAccents(str) {
+            return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
         // ── Derive rank from soldier ──
         function getRank(soldier) {
             if (soldier.title && soldier.title.trim() !== '') {
@@ -331,10 +336,11 @@
             const q = (document.getElementById('soldier-search').value || '').toLowerCase();
 
             const filtered = soldiers.filter(s => {
-                const nm = (s.name || '').toLowerCase();
+                const nm = stripAccents(s.name || '').toLowerCase();
+                const qNorm = stripAccents(q);
                 const regiment = (s.regiment || '').toLowerCase();
                 const status = createStatus(s);
-                return (!q || nm.includes(q))
+                return (!q || nm.includes(qNorm))
                     && (activeRegiments.size === 0 || activeRegiments.has(regiment))
                     && (activeStatuses.size === 0 || activeStatuses.has(status));
             });
@@ -947,6 +953,9 @@
             const pts = parseInt(s.points) || 0;
             const rank = getRank(s);
             const attended = sessionsFor(name);
+            const hosted = attended.filter(ss => (ss['Host'] || '').toLowerCase().trim() === name.toLowerCase().trim());
+            const attendedOnly = attended.filter(ss => (ss['Host'] || '').toLowerCase().trim() !== name.toLowerCase().trim());
+
             const isTrain = s.is_trainee === '1';
 
             const theme = regimentTheme(s.regiment);
@@ -1018,18 +1027,28 @@
                     })()}</span></div>
     </div>` : ''}
 
+    ${hosted.length ? `<div class="drawer-section">
+        <h3>Sessions Hosted (${hosted.length})</h3>
+            <div class="attendee-list">${hosted.sort((a, b) => new Date(b['Session Date']) - new Date(a['Session Date'])).map(ss =>
+                        `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer;">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
+                    ).join('')}</div></div>` : ''}
+
     <div class="drawer-section">
-      <h3>Sessions Attended (${attended.length})</h3>
-      ${attended.length
-                    ? `<div class="attendee-list">${attended.sort((a, b) => new Date(b['Session Date']) - new Date(a['Session Date'])).map(ss =>
-                        `<span class="session-tag">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
+        <h3>Sessions Attended (${attendedOnly.length})</h3>
+        ${attendedOnly.length
+                    ? `<div class="attendee-list">${attendedOnly.sort((a, b) => new Date(b['Session Date']) - new Date(a['Session Date'])).map(ss =>
+                        `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer;">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
                     ).join('')}</div>`
-                    : `<span style="color:var(--text-muted);font-size:0.88rem">No sessions recorded.</span>`
+                    : `<span style="color:var(--text-muted);font-size:0.88rem">No sessions attended.</span>`
                 }
     </div>
   `;
 
             document.getElementById('drawer-content').innerHTML = content;
+            document.querySelectorAll('[data-session-id]').forEach(tag => {
+                tag.addEventListener('click', () => openSession(tag.dataset.sessionId));
+            });
+
             document.getElementById('drawer-overlay').classList.add('open');
             document.getElementById('drawer').classList.add('open');
         }
