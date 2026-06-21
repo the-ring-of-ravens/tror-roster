@@ -463,6 +463,10 @@
         cursor: pointer;
     }
 
+    .stat-leader-simple {
+        grid-template-columns: 50px 1fr;
+    }
+
     .stat-leader-row:hover {
         background: var(--bg-panel);
     }

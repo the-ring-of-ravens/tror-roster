@@ -633,6 +633,14 @@
                 { name: 'Shield', key: 'shield', motto: 'LET IRON STRIKE IRON!' },
             ];
 
+            const REGIMENT_TITLES = {
+                navy: ['Admiral', 'Vice Admiral', 'Rear Admiral', 'Captain', 'Commander'],
+                airforce: ['Air Chief Master Sergeant', 'Air Chief Command', 'Wing Master Sergeant'],
+                archery: ['Javelin Marshal', 'Crossbow Lieutenant'],
+                restoration: ['Surgeon General', 'Division Surgeon', 'Medical Command'],
+                shield: ['Diamond Boss', 'Crystal Boss', 'Quartz Boss', 'Obsidian Boss'],
+            };
+
             const STATUSES = [
                 { key: 'active', color: '#4ab870', label: 'Active' },
                 { key: 'semi-active', color: '#cac45b', label: 'Semi-Active' },
@@ -714,6 +722,35 @@
                 return entries;
             }
 
+            function buildLeadershipList(memberList, titleOrder) {
+                return memberList
+                    .filter(s => s.regiment_title && s.regiment_title.trim())
+                    .map(s => ({
+                        name: s.name,
+                        abbrev: getAbbrev(s),
+                        title: s.regiment_title.trim(),
+                        idx: titleOrder.findIndex(t => t.toLowerCase() === s.regiment_title.trim().toLowerCase()),
+                        regiment: s.regiment,
+                    }))
+                    .sort((a, b) => {
+                        const ai = a.idx === -1 ? titleOrder.length : a.idx;
+                        const bi = b.idx === -1 ? titleOrder.length : b.idx;
+                        if (ai !== bi) return ai - bi;
+                        return a.name.localeCompare(b.name);
+                    });
+            }
+
+            function makeLeadershipRows(entries, defaultColor) {
+                if (!entries.length) return `<div class="stat-no-activity">No leadership assigned.</div>`;
+                return entries.map(e => {
+                    const color = defaultColor || regimentTheme(e.regiment).color;
+                    return `<div class="stat-leader-row stat-leader-simple" data-soldier-name="${e.name.replace(/"/g, '&quot;')}">
+            <span class="stat-leader-abbrev">${e.abbrev}</span>
+            <span class="stat-leader-name" style="color:${color}">${e.name}</span>
+        </div>`;
+                }).join('');
+            }
+
             // ── SVG donut pie ──
             function makePie(counts, total) {
                 if (total === 0) return `<text x="80" y="88" text-anchor="middle" fill="var(--text-muted)" font-size="10">No data</text>`;
@@ -777,7 +814,7 @@
             }
 
             // ── Single card builder ──
-            function buildCard(title, motto, color, borderColor, counts, total, leaderEntries, healthItems, defaultLeaderColor, extra = '') {
+            function buildCard(title, motto, color, borderColor, counts, total, leaderEntries, healthItems, defaultLeaderColor, leadershipEntries = [], extra = '') {
                 const pie = makePie(counts, total);
                 const legend = makeLegend(counts);
                 const rows = makeLeaderRows(leaderEntries, defaultLeaderColor);
@@ -806,6 +843,11 @@
                     <div class="stat-col-heading">Regiment Data</div>
                     ${health}
                 </div>
+                <div class="stat-col">
+                    <div class="stat-col-heading">Leadership</div>
+                    <div class="stat-leader-header stat-leader-simple"><span>Rank</span><span>Name</span></div>
+                    ${makeLeadershipRows(leadershipEntries, defaultLeaderColor)}
+                </div>
                 </div>
             </div>`;
             }
@@ -828,7 +870,8 @@
                     { label: 'Sessions Hosted', value: allTimeSessions[r.key] },
                     { label: 'Last Session', value: r.lastD ? r.lastD.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—', small: true },
                 ],
-                null // use each soldier's own regiment color
+                null,
+                buildLeadershipList(soldiers.filter(s => (s.regiment || '').toLowerCase() === r.key), REGIMENT_TITLES[r.key] || [])
             ));
 
             // ── Full Company card ──
