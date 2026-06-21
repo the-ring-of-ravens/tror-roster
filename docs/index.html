@@ -627,10 +627,17 @@
                     const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim().toLowerCase());
                     return host === name || attendees.includes(name);
                 })
-                .sort((a, b) => b.date - a.date); // most recent first, for the backward walk
+                .sort((a, b) => b.date - a.date);
+
+            const rankThresholds = ranks
+                .filter(r => r.rank_points !== '' && r.rank_points !== undefined)
+                .map(r => ({ pts: parseInt(r.rank_points), abbrev: r.abbreviation }))
+                .filter(r => r.pts > 0)
+                .sort((a, b) => b.pts - a.pts);
 
             let running = currentPoints;
             const points = [{ date: new Date(), value: currentPoints, label: 'Now' }];
+            const rankMarkers = [];
 
             for (const { s, date } of relevant) {
                 const host = (s['Host'] || '').toLowerCase().trim();
@@ -639,22 +646,26 @@
 
                 points.push({
                     date,
-                    value: running, // value BEFORE this session's effect — i.e. still the old running total
+                    value: running,
                     label: s['Session Name'],
                     sessionId: encodeURIComponent(s['Timestamp'] || s['Session Name']),
                 });
 
-                if (countsForMe) running = Math.max(running - 1, 0);
+                if (countsForMe) {
+                    const newRunning = Math.max(running - 1, 0);
+                    const crossed = rankThresholds.find(r => r.pts === running);
+                    if (crossed) rankMarkers.push({ date, abbrev: crossed.abbrev, pts: crossed.pts });
+                    running = newRunning;
+                }
 
-                if (running <= 0 && countsForMe) break;
+                if (running <= 0) break;
             }
 
             const ranOut = running > 0;
-            points.reverse(); // chronological order
-
+            points.reverse();
             points.unshift({ date: joinDate, value: 0, label: 'Enlisted', dashed: ranOut });
 
-            return { points, ranOut };
+            return { points, ranOut, rankMarkers };
         }
 
         function drawSoldierPointsChart(soldier) {
@@ -665,7 +676,7 @@
             const theme = regimentTheme(soldier.regiment);
 
             const W = wrap.clientWidth || 600, H = 320;
-            const padL = 40, padR = 20, padT = 20, padB = 30;
+            const padL = 40, padR = 20, padT = 20, padB = 40;
             const innerW = W - padL - padR, innerH = H - padT - padB;
 
             const dates = points.map(p => p.date.getTime());
@@ -697,18 +708,27 @@
                 `<circle cx="${x(p.date.getTime())}" cy="${y(p.value)}" r="3.5" fill="${theme.color}" data-label="${p.label}" data-value="${p.value}" data-date="${p.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}"></circle>`
             ).join('');
 
+            const rankLines = rankMarkers.map(m => {
+                const lx = x(m.date.getTime());
+                return `
+                    <line x1="${lx}" y1="${padT}" x2="${lx}" y2="${padT + innerH}" stroke="${theme.color}" stroke-width="1" stroke-dasharray="3,3" opacity="0.45"/>
+                    <text x="${lx}" y="${padT + innerH + 14}" text-anchor="middle" font-size="9" fill="${theme.color}">${m.abbrev}</text>
+                `;
+            }).join('');
+
             wrap.innerHTML = `
-        <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
-            <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + innerH}" stroke="var(--border)" />
-            <line x1="${padL}" y1="${padT + innerH}" x2="${padL + innerW}" y2="${padT + innerH}" stroke="var(--border)" />
-            <text x="${padL - 8}" y="${padT + 5}" text-anchor="end" font-size="10" fill="var(--text-muted)">${maxV}</text>
-            <text x="${padL - 8}" y="${padT + innerH}" text-anchor="end" font-size="10" fill="var(--text-muted)">0</text>
-            <path d="${pathD}" fill="none" stroke="${theme.color}" stroke-width="2"/>
-            ${dashedSeg ? `<path d="${dashedSeg}" fill="none" stroke="${theme.color}" stroke-width="2" stroke-dasharray="6,6"/>` : ''}
-            ${dots}
-        </svg>
-        <div id="soldier-chart-tooltip" style="position:absolute;display:none;background:#13161d;border:1px solid var(--border);border-radius:4px;padding:6px 10px;font-size:0.78rem;color:var(--text);pointer-events:none;"></div>
-    `;
+                <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
+                    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + innerH}" stroke="var(--border)" />
+                    <line x1="${padL}" y1="${padT + innerH}" x2="${padL + innerW}" y2="${padT + innerH}" stroke="var(--border)" />
+                    <text x="${padL - 8}" y="${padT + 5}" text-anchor="end" font-size="10" fill="var(--text-muted)">${maxV}</text>
+                    <text x="${padL - 8}" y="${padT + innerH}" text-anchor="end" font-size="10" fill="var(--text-muted)">0</text>
+                    <path d="${pathD}" fill="none" stroke="${theme.color}" stroke-width="2"/>
+                    ${dashedSeg ? `<path d="${dashedSeg}" fill="none" stroke="${theme.color}" stroke-width="2" stroke-dasharray="6,6"/>` : ''}
+                    ${dots}
+                    ${rankLines}
+                </svg>
+                <div id="soldier-chart-tooltip" style="position:absolute;display:none;background:#13161d;border:1px solid var(--border);border-radius:4px;padding:6px 10px;font-size:0.78rem;color:var(--text);pointer-events:none;"></div>
+            `;
 
             const tooltip = wrap.querySelector('#soldier-chart-tooltip');
             wrap.style.position = 'relative';
