@@ -672,7 +672,7 @@
             const wrap = document.getElementById('soldier-points-canvas')?.parentElement;
             if (!wrap) return;
 
-            const { points, ranOut } = buildPointsHistory(soldier);
+            const { points, ranOut, rankMarkers } = buildPointsHistory(soldier);
             const theme = regimentTheme(soldier.regiment);
 
             const W = wrap.clientWidth || 600, H = 320;
