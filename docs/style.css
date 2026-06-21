@@ -560,7 +560,6 @@
     .table-wrap {
         border: 1px solid var(--border);
         border-radius: 4px;
-        overflow-x: auto;
     }
 
     table {
@@ -572,6 +571,9 @@
     thead tr {
         background: var(--bg-panel);
         border-bottom: 1px solid var(--border-hi);
+        position: sticky;
+        top: 56px;
+        z-index: 50;
     }
 
     thead th {
