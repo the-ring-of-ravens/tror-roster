@@ -158,7 +158,7 @@
 
     <script>
         // ── Data stores ──
-        let soldiers = [], sessions = [], ranks = [];
+        let soldiers = [], sessions = [], ranks = [], officerRankups = [];
 
         function parseDate(val) {
             if (!val) return null;
@@ -210,6 +210,7 @@
                 'data/soldiers.csv': 'soldiers',
                 'data/sessions.csv': 'sessions',
                 'data/ranks.csv': 'ranks',
+                'data/officer_rankups.csv': 'officerRankups',
             };
             const tab = tabMap[path];
             if (tab) return fetchSheet(tab);
@@ -249,6 +250,14 @@
         // ── Max rank points (for bar scaling) ──
         function maxRankPts() {
             return Math.max(...ranks.map(r => parseInt(r.rank_points) || 0), 100);
+        }
+
+        function getOfficerRankups(name) {
+            return officerRankups
+                .filter(r => (r.name || '').toLowerCase().trim() === name.toLowerCase().trim())
+                .map(r => ({ date: parseDate(r.date), abbrev: (r.rank || '').trim() }))
+                .filter(r => r.date)
+                .sort((a, b) => a.date - b.date);
         }
 
         // ── Badge HTML ──
@@ -665,7 +674,19 @@
             points.reverse();
             points.unshift({ date: joinDate, value: 0, label: 'Enlisted', dashed: ranOut });
 
-            return { points, ranOut, rankMarkers };
+            const officerMarkers = getOfficerRankups(soldier.name).map(r => ({
+                date: r.date,
+                abbrev: r.abbrev,
+                pts: null,
+                isOfficer: true,
+            }));
+
+            const firstOfficerDate = officerMarkers.length ? officerMarkers[0].date : null;
+            const filteredRankMarkers = firstOfficerDate
+                ? rankMarkers.filter(m => m.date < firstOfficerDate)
+                : rankMarkers;
+
+            return { points, ranOut, rankMarkers: [...filteredRankMarkers, ...officerMarkers] };
         }
 
         function drawSoldierPointsChart(soldier) {
@@ -711,7 +732,7 @@
             const rankLines = rankMarkers.map(m => {
                 const lx = x(m.date.getTime());
                 return `
-                    <line x1="${lx}" y1="${padT}" x2="${lx}" y2="${padT + innerH}" stroke="${theme.color}" stroke-width="1" stroke-dasharray="3,3" opacity="0.45"/>
+                    <line x1="${lx}" y1="${padT}" x2="${lx}" y2="${padT + innerH}" stroke="${theme.color}" stroke-width="1" stroke-dasharray="3,3" opacity="0.2"/>
                     <text x="${lx}" y="${padT + innerH + 14}" text-anchor="middle" font-size="9" fill="${theme.color}">${m.abbrev}</text>
                 `;
             }).join('');
@@ -1282,6 +1303,7 @@
                 fetchCSV('data/soldiers.csv'),
                 fetchCSV('data/sessions.csv'),
                 fetchCSV('data/ranks.csv'),
+                fetchCSV('data/officer_rankups.csv'),
             ]);
 
             // Warn about unresolved sessions
