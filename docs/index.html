@@ -153,15 +153,14 @@
     <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
     <div class="drawer" id="drawer">
         <button class="drawer-close" onclick="closeDrawer()">✕ Close</button>
-        <!-- 0000 this might not work with sky'dreader -->
-        <button class="drawer-close" onclick="viewSoldierStats(s.name)">More Info</button>
         <div id="drawer-content"></div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.1/chart.umd.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.30.0/date-fns.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/3.6.0/date-fns.min.js"></script>
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.bundle.min.js"></script>
+
     <script>
         // ── Data stores ──
         let soldiers = [], sessions = [], ranks = [];
