@@ -1299,7 +1299,7 @@
 
         // ── Init ──
         async function init() {
-            [soldiers, sessions, ranks] = await Promise.all([
+            [soldiers, sessions, ranks, officerRankups] = await Promise.all([
                 fetchCSV('data/soldiers.csv'),
                 fetchCSV('data/sessions.csv'),
                 fetchCSV('data/ranks.csv'),
