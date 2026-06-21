@@ -725,17 +725,22 @@
             function buildLeadershipList(memberList, titleOrder) {
                 return memberList
                     .filter(s => s.regiment_title && s.regiment_title.trim())
+                    .filter(s => !['retired', 'memorial'].includes(createStatus(s)))
                     .map(s => ({
                         name: s.name,
                         abbrev: getAbbrev(s),
                         title: s.regiment_title.trim(),
                         idx: titleOrder.findIndex(t => t.toLowerCase() === s.regiment_title.trim().toLowerCase()),
+                        rankIndex: RANK_ORDER.indexOf(getRank(s)),
                         regiment: s.regiment,
                     }))
                     .sort((a, b) => {
                         const ai = a.idx === -1 ? titleOrder.length : a.idx;
                         const bi = b.idx === -1 ? titleOrder.length : b.idx;
                         if (ai !== bi) return ai - bi;
+                        const ari = a.rankIndex === -1 ? RANK_ORDER.length : a.rankIndex;
+                        const bri = b.rankIndex === -1 ? RANK_ORDER.length : b.rankIndex;
+                        if (ari !== bri) return ari - bri;
                         return a.name.localeCompare(b.name);
                     });
             }
@@ -859,14 +864,15 @@
                 const counts = statusCounts(members);
                 const board = buildLeaderboard(members, 6);
                 const lastD = lastSessionDate[r.key];
-                return { ...r, theme, total: members.length, counts, board, lastD };
+                const enlisted = members.filter(m => !['retired', 'memorial'].includes(createStatus(m))).length;
+                return { ...r, theme, total: members.length, enlisted, counts, board, lastD };
             }).sort((a, b) => b.total !== a.total ? b.total - a.total : b.counts.active - a.counts.active);
 
             const regCards = regData.map(r => buildCard(
                 r.name, r.motto, r.theme.color, r.theme.color,
                 r.counts, r.total, r.board,
                 [
-                    { label: 'Soldier Count', value: r.total },
+                    { label: 'Total Enlisted', value: r.enlisted },
                     { label: 'Sessions Hosted', value: allTimeSessions[r.key] },
                     { label: 'Last Session', value: r.lastD ? r.lastD.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—', small: true },
                 ],
@@ -880,9 +886,26 @@
             const totalLastD = Object.values(lastSessionDate).filter(Boolean).reduce((l, d) => (!l || d > l) ? d : l, null);
             const companyBoard = buildLeaderboard(soldiers, 6);
 
-            const allLeadership = regiments.flatMap(r =>
-                buildLeadershipList(soldiers.filter(s => (s.regiment || '').toLowerCase() === r.key), REGIMENT_TITLES[r.key] || [])
-            );
+            function topCommandingOfficer(members, titleOrder) {
+                const list = buildLeadershipList(members, titleOrder);
+                return list.length ? list[0] : null;
+            }
+
+            const activeSoldiers = soldiers.filter(s => !['retired', 'memorial'].includes(createStatus(s)));
+            const topOverall = activeSoldiers
+                .map(s => ({ name: s.name, abbrev: getAbbrev(s), rankIndex: RANK_ORDER.indexOf(getRank(s)), regiment: s.regiment }))
+                .sort((a, b) => {
+                    const ai = a.rankIndex === -1 ? RANK_ORDER.length : a.rankIndex;
+                    const bi = b.rankIndex === -1 ? RANK_ORDER.length : b.rankIndex;
+                    return ai - bi;
+                })[0];
+
+            const companyLeadership = topOverall ? [topOverall] : [];
+            regiments.forEach(r => {
+                const members = soldiers.filter(s => (s.regiment || '').toLowerCase() === r.key);
+                const co = topCommandingOfficer(members, REGIMENT_TITLES[r.key] || []);
+                if (co && co.name !== topOverall?.name) companyLeadership.push(co);
+            });
 
             const companyCard = buildCard(
                 'Full Company', 'I GAVE YOU EYES, BUT YOU NEVER WANTED TO SEE', 'var(--amber)', 'var(--amber)',
@@ -893,7 +916,7 @@
                     { label: 'Last Session', value: totalLastD ? totalLastD.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—', small: true },
                 ],
                 null,
-                allLeadership,
+                companyLeadership,
                 `<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0.75rem;">
                 <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d4873a;"></span>Airforce</span>
                 <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d44a4a;"></span>Archery</span>
