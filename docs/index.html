@@ -1066,21 +1066,29 @@
     <div class="rank-line">${formatDate(s['Session Date'])}</div>
     <div class="drawer-section">
       <h3>Details</h3>
-      <div class="detail-row"><span class="dk">Instructor</span><span class="dv">${s['Host'] || '—'}</span></div>
+      <div class="detail-row"><span class="dk">Instructor</span><span class="dv">
+            ${(() => {
+                    const host = s['Host'] || '';
+                    const found = soldiers.find(x => x.name.toLowerCase() === host.toLowerCase());
+                    return found
+                        ? `<span class="session-tag" data-soldier-name="${found.name}" style="cursor:pointer;color:var(--amber)">${host}</span>`
+                        : (host || '—');
+                })()}
+        </span></div>
       <div class="detail-row"><span class="dk">Attendees</span><span class="dv">${attendees.length}</span></div>
     </div>
     <div class="drawer-section">
       <h3>Attendee List</h3>
       <div class="attendee-list">
         ${attendees.map(a => {
-                const found = soldiers.find(x => x.name.toLowerCase() === a.toLowerCase());
-                return `<span class="session-tag" ${found ? `data-soldier-name="${found.name}" style="cursor:pointer;color:var(--amber)"` : ''}>${a}</span>`;
-            }).join('')}
+                    const found = soldiers.find(x => x.name.toLowerCase() === a.toLowerCase());
+                    return `<span class="session-tag" ${found ? `data-soldier-name="${found.name}" style="cursor:pointer;color:var(--amber)"` : ''}>${a}</span>`;
+                }).join('')}
       </div>
     </div>
   `;
             document.getElementById('drawer-content').innerHTML = content;
-            document.querySelectorAll('.attendee-list [data-soldier-name]').forEach(span => {
+            document.querySelectorAll('.drawer-section [data-soldier-name]').forEach(span => {
                 span.addEventListener('click', () => openSoldier(span.dataset.soldierName));
             });
             document.getElementById('drawer-overlay').classList.add('open');
