@@ -445,14 +445,9 @@
             }).join('');
         }
 
-        // Inject Chart.js if not already loaded
         function renderGrowthChart() {
             if (!document.getElementById('growth-chart-section')) return;
-            if (window.Chart) { drawGrowthChart(); return; }
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
-            script.onload = drawGrowthChart;
-            document.head.appendChild(script);
+            drawGrowthChart();
         }
 
         function drawGrowthChart() {
