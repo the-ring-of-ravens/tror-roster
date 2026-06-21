@@ -1030,7 +1030,7 @@
     ${hosted.length ? `<div class="drawer-section">
         <h3>Sessions Hosted (${hosted.length})</h3>
             <div class="attendee-list">${hosted.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
-                        `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color=var(--amber)">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
+                        `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color:var(--amber)">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
                     ).join('')}</div></div>` : ''}
 
     <div class="drawer-section">
