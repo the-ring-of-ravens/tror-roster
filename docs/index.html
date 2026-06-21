@@ -637,16 +637,16 @@
                 const counted = (s['Counted?'] || '').trim();
                 const countsForMe = counted === '✅' || (counted === '🟡' && host === name);
 
-                if (countsForMe) running = Math.max(running - 1, 0);
-
                 points.push({
                     date,
-                    value: running,
+                    value: running, // value BEFORE this session's effect — i.e. still the old running total
                     label: s['Session Name'],
                     sessionId: encodeURIComponent(s['Timestamp'] || s['Session Name']),
                 });
 
-                if (running <= 0) break;
+                if (countsForMe) running = Math.max(running - 1, 0);
+
+                if (running <= 0 && countsForMe) break;
             }
 
             const ranOut = running > 0;
