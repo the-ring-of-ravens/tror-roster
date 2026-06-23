@@ -38,7 +38,7 @@
     </header>
 
     <main>
-        <div id="session-warning"
+        <div id="website-warning"
             style="display:none; background:#2a1a10; border:1px solid #7a3a1e; border-radius:4px; padding:0.75rem 1rem; margin-bottom:1.5rem; color:#c86030; font-size:0.92rem;">
             ⚠️ <strong>This website is under construction, so some data may be incomplete or inaccurate.</strong> Please
             refer to the <a href="https://docs.google.com/spreadsheets/d/190vlWjIf9f69Rwmf1ANw6sy8WdXLReVETd2NnTjus18"
@@ -204,20 +204,6 @@
             }
         }
 
-        async function fetchCSV(path) {
-            // Map old CSV paths to sheet tab names
-            const tabMap = {
-                'data/soldiers.csv': 'soldiers',
-                'data/sessions.csv': 'sessions',
-                'data/ranks.csv': 'ranks',
-                'data/officer_rankups.csv': 'officerRankups',
-            };
-            const tab = tabMap[path];
-            if (tab) return fetchSheet(tab);
-            console.warn('No sheet tab mapped for:', path);
-            return [];
-        }
-
         function toggleMenu() {
             const btn = document.getElementById('hamburger');
             const menu = document.getElementById('nav-dropdown');
@@ -245,11 +231,6 @@
                 if (pts >= parseInt(r.rank_points)) return r.rank;
             }
             return ranks[0]?.rank ?? '—';
-        }
-
-        // ── Max rank points (for bar scaling) ──
-        function maxRankPts() {
-            return Math.max(...ranks.map(r => parseInt(r.rank_points) || 0), 100);
         }
 
         function getOfficerRankups(name) {
@@ -1097,8 +1078,8 @@
 
             el.querySelectorAll('.stat-leader-row').forEach(row => {
                 row.addEventListener('click', () => openSoldier(row.dataset.soldierName));
-                renderGrowthChart();
             });
+            renderGrowthChart();
         }
 
         function renderSoldierStats(name) {
@@ -1300,10 +1281,10 @@
         // ── Init ──
         async function init() {
             [soldiers, sessions, ranks, officerRankups] = await Promise.all([
-                fetchCSV('data/soldiers.csv'),
-                fetchCSV('data/sessions.csv'),
-                fetchCSV('data/ranks.csv'),
-                fetchCSV('data/officer_rankups.csv'),
+                fetchSheet('soldiers'),
+                fetchSheet('sessions'),
+                fetchSheet('ranks'),
+                fetchSheet('officerRankups'),
             ]);
 
             // Warn about unresolved sessions
@@ -1326,28 +1307,17 @@
             // We want to output a message that says "Congratulations to Name for ranking up to New Rank!"
             if (rankups.length) {
                 const messages = [];
-                rankups.forEach(s => {
-                    if (s !== sessions[sessions.length - 1]) return;
-
-                    //find the last row
-                    const lastSession = sessions[sessions.length - 1];
-
-                    if (lastSession && lastSession['Rankups']) {
-                        const parts = lastSession['Rankups'].split('\n').map(r => r.trim()).filter(Boolean);
-
-                        parts.forEach(p => {
+                const lastSession = sessions.findLast(s => String(s['Rankups'] ?? '').trim());
+                if (lastSession?.['Rankups']) {
+                    const messages = lastSession['Rankups'].split('\n').map(r => r.trim()).filter(Boolean)
+                        .map(p => {
                             const match = p.match(/^(.+)\s+\((.+)\)$/);
-                            if (match) {
-                                const name = match[1].trim();
-                                const newRank = match[2].trim();
-                                messages.push(`🎉 Congratulations to ${name} for ranking up to ${newRank}!`);
-                            }
-                        });
+                            return match ? `🎉 Congratulations to ${match[1].trim()} for ranking up to ${match[2].trim()}!` : null;
+                        }).filter(Boolean);
+                    if (messages.length) {
+                        document.getElementById('rankup-text').innerHTML = messages.join('<br>');
+                        document.getElementById('rankup-banner').style.display = 'block';
                     }
-                });
-                if (messages.length) {
-                    document.getElementById('rankup-text').innerHTML = messages.join('<br>');
-                    document.getElementById('rankup-banner').style.display = 'block';
                 }
             }
 
