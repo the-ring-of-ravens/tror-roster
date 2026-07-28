@@ -1090,6 +1090,13 @@
     ${badge(createStatus(s))} ${isTrain ? '<span class="badge badge-trainee">Trainee</span>' : ''}
 
     <div class="drawer-section">
+        <h3>Points History</h3>
+        <div style="position:relative;height:280px;">
+            <div id="soldier-points-canvas"></div>
+        </div>
+    </div>
+
+    <div class="drawer-section">
       <h3>Points & Rank</h3>
       <div class="detail-row"><span class="dk">Points</span><span class="dv">${pts}</span></div>
       <div class="detail-row"><span class="dk">Current Rank</span><span class="dv">${rank}</span></div>
@@ -1149,12 +1156,7 @@
                         }
                     })()}</span></div>
                         </div>` : ''}
-                        <div class="drawer-section">
-                        <h3>Points History</h3>
-                        <div style="position:relative;height:280px;">
-                            <div id="soldier-points-canvas"></div>
-                        </div>
-                        </div>
+
                         ${hosted.length ? `<div class="drawer-section">
                             <h3>Sessions Hosted (${hosted.length})</h3>
                                 <div class="attendee-list">${hosted.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
