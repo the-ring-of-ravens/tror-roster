@@ -720,7 +720,7 @@
                 }
 
                 const prev = points[i - 1];
-                const stepSeg = `L${stepX},${y(prev.value)} L${px},${py} `;
+                const stepSeg = `L${px},${y(prev.value)} L${px},${py} `;
 
                 if (p.dashed) dashedSeg += stepSeg;
                 else pathD += stepSeg;
