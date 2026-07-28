@@ -691,8 +691,8 @@
             const x = t => padL + ((t - minT) / (maxT - minT || 1)) * innerW;
 
             // fix rank labels too close
-            const minLabelGap = 40;
-            const rowHeight = 16;
+            const minLabelGap = 30;
+            const rowHeight = 12;
             const sortedMarkers = rankMarkers.map(m => ({ ...m, lx: x(m.date.getTime()) })).sort((a, b) => a.lx - b.lx);
             const rowLastX = [];
             sortedMarkers.forEach(m => {
