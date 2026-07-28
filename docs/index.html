@@ -1189,15 +1189,15 @@
 
                         ${hosted.length ? `<div class="drawer-section">
                             <h3>Sessions Hosted (${hosted.length})</h3>
-                                <div class="attendee-list">${hosted.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
-                        `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color:var(--amber)">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
+                                <div class="attendee-list" style="display:flex;flex-direction:column">${hosted.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
+                        `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color:var(--amber); display:flex; justify-content:space-between">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
                     ).join('')}</div></div>` : ''}
 
                         <div class="drawer-section">
                             <h3>Sessions Attended (${attendedOnly.length})</h3>
                             ${attendedOnly.length
-                    ? `<div class="attendee-list">${attendedOnly.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
-                        `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color:var(--amber)">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
+                    ? `<div class="attendee-list" style="display:flex;flex-direction:column">${attendedOnly.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
+                        `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color:var(--amber); display:flex; justify-content:space-between">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
                     ).join('')}</div>`
                     : `<span style="color:var(--text-muted);font-size:0.88rem">No sessions attended.</span>`
                 }
