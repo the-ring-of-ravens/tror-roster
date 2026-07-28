@@ -160,6 +160,44 @@
         // ── Data stores ──
         let soldiers = [], sessions = [], ranks = [], officerRankups = [];
 
+        // ── Constants ──
+        const RANK_ORDER = [
+            'General of the Army', 'Brigadier General', 'Colonel', 'Lieutenant Colonel', 'Major',
+            'Brigadier', 'Captain', 'First Lieutenant', 'Lieutenant',
+            'Command Sergeant Major', 'Sergeant Major',
+            'Chief Warrant Officer 5', 'Chief Warrant Officer 4', 'Chief Warrant Officer 3',
+            'Chief Warrant Officer 2', 'Warrant Officer 1',
+            'Master Gunnery Sergeant', 'Gunnery Sergeant', 'Senior Cornet',
+            'Paladin Sergeant', 'Paladin Corporal', 'Cornet First Class', 'Cornet', 'Junior Cornet',
+            'Exarch Lieutenant', 'Sergeant First Class', 'Sergeant', 'Corporal', 'Specialist',
+            'Private First Class', 'Private Second Class', 'Private', 'Trainee',
+        ];
+
+        const REGIMENTS = [
+            { name: 'Airforce', key: 'airforce', motto: 'FLY OR DIE!', color: '#d4873a', border: '#8a4a1a', bg: '#2a1a08' },
+            { name: 'Archery', key: 'archery', motto: 'WE BRING DEATH UNDER OUR FIRE!', color: '#d44a4a', border: '#8a2a2a', bg: '#2a0d0d' },
+            { name: 'Navy', key: 'navy', motto: 'FOR THE HONOR OF THE LAND AND WAVES!', color: '#4a8fd4', border: '#2a4a8a', bg: '#0d1a30' },
+            { name: 'Restoration', key: 'restoration', motto: 'RESTORE THE FAITH IN ALL!', color: '#4ab870', border: '#2a6a40', bg: '#0d2010' },
+            { name: 'Shield', key: 'shield', motto: 'LET IRON STRIKE IRON!', color: '#9b6bd4', border: '#4a2a8a', bg: '#1a1030' },
+        ];
+
+        const REGIMENT_TITLES = {
+            navy: ['Admiral', 'Vice Admiral', 'Rear Admiral', 'Captain', 'Commander'],
+            airforce: ['Air Chief Master Sergeant', 'Air Chief Command', 'Wing Master Sergeant'],
+            archery: ['Javelin Marshal', 'Crossbow Lieutenant'],
+            restoration: ['Surgeon General', 'Division Surgeon', 'Medical Command'],
+            shield: ['Diamond Boss', 'Crystal Boss', 'Quartz Boss', 'Obsidian Boss'],
+        };
+
+        const STATUSES = [
+            { key: 'active', color: '#4ab870', label: 'Active' },
+            { key: 'semi-active', color: '#cac45b', label: 'Semi-Active' },
+            { key: 'inactive', color: '#c8863a', label: 'Inactive' },
+            { key: 'on break', color: '#9295a1', label: 'On Break' },
+            { key: 'retired', color: '#7880a0', label: 'Retired' },
+            { key: 'memorial', color: '#846c98', label: 'Memorial' },
+        ];
+
         function parseDate(val) {
             if (!val) return null;
             const gviz = String(val).match(/Date\((\d+),(\d+),(\d+)\)/);
@@ -286,27 +324,19 @@
         }
 
         function regimentTheme(regiment) {
-            const themes = {
-                'shield': { color: '#9b6bd4', border: '#4a2a8a', bg: '#1a1030' },
-                'navy': { color: '#4a8fd4', border: '#2a4a8a', bg: '#0d1a30' },
-                'restoration': { color: '#4ab870', border: '#2a6a40', bg: '#0d2010' },
-                'airforce': { color: '#d4873a', border: '#8a4a1a', bg: '#2a1a08' },
-                'archery': { color: '#d44a4a', border: '#8a2a2a', bg: '#2a0d0d' },
-            };
-            return themes[(regiment || '').toLowerCase()]
-                || { color: '#a9a9a9', border: '#8c8c8c', bg: 'var(--bg-card)' };
+            const r = REGIMENTS.find(r => r.name.toLowerCase() === (regiment || '').toLowerCase());
+            return r ? { color: r.color, border: r.border, bg: r.bg } : { color: '#a9a9a9', border: '#8c8c8c', bg: 'var(--bg-card)' };
         }
 
         let activeRegiments = new Set();
         let activeStatuses = new Set(['active', 'semi-active', 'inactive', 'on break']);
 
         function renderPills() {
-            const regKeys = ['airforce', 'archery', 'navy', 'restoration', 'shield'];
-            const regNames = { airforce: 'Airforce', archery: 'Archery', navy: 'Navy', restoration: 'Restoration', shield: 'Shield' };
-            document.getElementById('regiment-pills').innerHTML = regKeys.map(k => {
-                const t = regimentTheme(regNames[k]);
+            REGIMENTS.map(r => r.name.toLowerCase()).forEach(k => activeRegiments.add(k));
+            document.getElementById('regiment-pills').innerHTML = REGIMENTS.map(r => r.name.toLowerCase()).filter((v, i, a) => a.indexOf(v) === i).map(k => {
+                const t = regimentTheme(k);
                 const on = activeRegiments.has(k);
-                return `<span class="pill${on ? ' active' : ''}" style="${on ? `background:${t.color};border-color:${t.color}` : ''}" data-reg="${k}">${regNames[k]}</span>`;
+                return `<span class="pill${on ? ' active' : ''}" style="${on ? `background:${t.color};border-color:${t.color}` : ''}" data-reg="${k}">${REGIMENTS.find(r => r.name.toLowerCase() === k).name}</span>`;
             }).join('');
 
             const statKeys = [['active', 'Active'], ['semi-active', 'Semi-Active'], ['inactive', 'Inactive'], ['on break', 'On Break'], ['retired', 'Retired'], ['memorial', 'Memorial']];
@@ -348,22 +378,11 @@
                 return;
             }
 
-            const rankOrder = [
-                'General of the Army', 'Brigadier General', 'Colonel', 'Lieutenant Colonel', 'Major',
-                'Brigadier', 'Captain', 'First Lieutenant', 'Lieutenant',
-                'Command Sergeant Major', 'Sergeant Major',
-                'Chief Warrant Officer 5', 'Chief Warrant Officer 4', 'Chief Warrant Officer 3',
-                'Chief Warrant Officer 2', 'Warrant Officer 1',
-                'Master Gunnery Sergeant', 'Gunnery Sergeant', 'Senior Cornet',
-                'Paladin Sergeant', 'Paladin Corporal', 'Cornet First Class', 'Cornet', 'Junior Cornet',
-                'Exarch Lieutenant', 'Sergeant First Class', 'Sergeant', 'Corporal', 'Specialist',
-                'Private First Class', 'Private Second Class', 'Private', 'Trainee',];
-
             filtered.sort((a, b) => {
-                const ri = rankOrder.indexOf(getRank(a));
-                const rj = rankOrder.indexOf(getRank(b));
-                const riSafe = ri === -1 ? rankOrder.length : ri;
-                const rjSafe = rj === -1 ? rankOrder.length : rj;
+                const ri = RANK_ORDER.indexOf(getRank(a));
+                const rj = RANK_ORDER.indexOf(getRank(b));
+                const riSafe = ri === -1 ? RANK_ORDER.length : ri;
+                const rjSafe = rj === -1 ? RANK_ORDER.length : rj;
                 if (riSafe !== rjSafe) return riSafe - rjSafe;
                 const ptsDiff = (parseInt(b.points) || 0) - (parseInt(a.points) || 0);
                 if (ptsDiff !== 0) return ptsDiff;
@@ -446,19 +465,6 @@
             if (!canvas) return;
             if (canvas._chartInstance) { canvas._chartInstance.destroy(); }
 
-            const REGIMENT_KEYS = ['airforce', 'archery', 'navy', 'restoration', 'shield'];
-            const REGIMENT_COLORS = {
-                airforce: '#d4873a',
-                archery: '#d44a4a',
-                navy: '#4a8fd4',
-                restoration: '#4ab870',
-                shield: '#9b6bd4',
-            };
-            const REGIMENT_LABELS = {
-                airforce: 'Airforce', archery: 'Archery', navy: 'Navy',
-                restoration: 'Restoration', shield: 'Shield',
-            };
-
             // Build sorted list of (date, regiment) join events
             const events = soldiers
                 .map(s => ({ date: parseDate(s.join_date), regiment: (s.regiment || '').toLowerCase() }))
@@ -483,7 +489,7 @@
             // For each month, count cumulative members overall and per regiment
             const totals = new Array(months.length).fill(0);
             const regTotals = {};
-            REGIMENT_KEYS.forEach(k => { regTotals[k] = new Array(months.length).fill(0); });
+            REGIMENTS.forEach(r => { regTotals[r.key] = new Array(months.length).fill(0); });
 
             events.forEach(e => {
                 const mi = months.findIndex(m =>
@@ -508,11 +514,11 @@
             const seasonTicks = months.map(m => [3, 6, 9].includes(m.getMonth()));
 
             // Datasets: one stacked band per regiment, no full-company line (stack = total)
-            const datasets = REGIMENT_KEYS.map(k => ({
-                label: REGIMENT_LABELS[k],
-                data: regTotals[k],
-                backgroundColor: REGIMENT_COLORS[k] + 'cc',
-                borderColor: REGIMENT_COLORS[k],
+            const datasets = REGIMENTS.map(r => ({
+                label: r.name,
+                data: regTotals[r.key],
+                backgroundColor: r.color + 'cc',
+                borderColor: r.color,
                 borderWidth: 1.5,
                 fill: true,
                 tension: 0.3,
@@ -525,8 +531,6 @@
             const yMax = Math.ceil(dataMax / 50) * 50;
             const yStep = yMax <= 150 ? 50 : 100;
 
-            const isDark = document.documentElement.classList.contains('dark') ||
-                window.matchMedia('(prefers-color-scheme: dark)').matches;
             const gridColor = 'rgba(255,255,255,0.06)';
             const minorColor = 'rgba(255,255,255,0.03)';
             const textColor = '#8a8070';
@@ -757,43 +761,6 @@
 
             if (focusedSoldier) { renderSoldierStats(focusedSoldier); return; }
 
-            const RANK_ORDER = [
-                'General of the Army', 'Brigadier General', 'Colonel', 'Lieutenant Colonel', 'Major',
-                'Brigadier', 'Captain', 'First Lieutenant', 'Lieutenant',
-                'Command Sergeant Major', 'Sergeant Major',
-                'Chief Warrant Officer 5', 'Chief Warrant Officer 4', 'Chief Warrant Officer 3',
-                'Chief Warrant Officer 2', 'Warrant Officer 1',
-                'Master Gunnery Sergeant', 'Gunnery Sergeant', 'Senior Cornet',
-                'Paladin Sergeant', 'Paladin Corporal', 'Cornet First Class', 'Cornet', 'Junior Cornet',
-                'Exarch Lieutenant', 'Sergeant First Class', 'Sergeant', 'Corporal', 'Specialist',
-                'Private First Class', 'Private Second Class', 'Private', 'Trainee',
-            ];
-
-            const regiments = [
-                { name: 'Airforce', key: 'airforce', motto: 'FLY OR DIE!' },
-                { name: 'Archery', key: 'archery', motto: 'WE BRING DEATH UNDER OUR FIRE!' },
-                { name: 'Navy', key: 'navy', motto: 'FOR THE HONOR OF THE LAND AND WAVES!' },
-                { name: 'Restoration', key: 'restoration', motto: 'RESTORE THE FAITH IN ALL!' },
-                { name: 'Shield', key: 'shield', motto: 'LET IRON STRIKE IRON!' },
-            ];
-
-            const REGIMENT_TITLES = {
-                navy: ['Admiral', 'Vice Admiral', 'Rear Admiral', 'Captain', 'Commander'],
-                airforce: ['Air Chief Master Sergeant', 'Air Chief Command', 'Wing Master Sergeant'],
-                archery: ['Javelin Marshal', 'Crossbow Lieutenant'],
-                restoration: ['Surgeon General', 'Division Surgeon', 'Medical Command'],
-                shield: ['Diamond Boss', 'Crystal Boss', 'Quartz Boss', 'Obsidian Boss'],
-            };
-
-            const STATUSES = [
-                { key: 'active', color: '#4ab870', label: 'Active' },
-                { key: 'semi-active', color: '#cac45b', label: 'Semi-Active' },
-                { key: 'inactive', color: '#c8863a', label: 'Inactive' },
-                { key: 'on break', color: '#9295a1', label: 'On Break' },
-                { key: 'retired', color: '#7880a0', label: 'Retired' },
-                { key: 'memorial', color: '#846c98', label: 'Memorial' },
-            ];
-
             const now = new Date();
             const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
@@ -811,7 +778,7 @@
 
             // ── All-time sessions & last session per regiment ──
             const allTimeSessions = {}, lastSessionDate = {};
-            regiments.forEach(r => { allTimeSessions[r.key] = 0; lastSessionDate[r.key] = null; });
+            REGIMENTS.forEach(r => { allTimeSessions[r.key] = 0; lastSessionDate[r.key] = null; });
             sessions.forEach(s => {
                 const host = soldiers.find(x => (x.name || '').toLowerCase().trim() === (s['Host'] || '').toLowerCase().trim());
                 if (!host) return;
@@ -1002,7 +969,7 @@
             }
 
             // ── Build regiment data ──
-            const regData = regiments.map(r => {
+            const regData = REGIMENTS.map(r => {
                 const theme = regimentTheme(r.name);
                 const members = soldiers.filter(s => (s.regiment || '').toLowerCase() === r.key);
                 const counts = statusCounts(members);
@@ -1045,7 +1012,7 @@
                 })[0];
 
             const companyLeadership = topOverall ? [topOverall] : [];
-            regiments.forEach(r => {
+            REGIMENTS.forEach(r => {
                 const members = soldiers.filter(s => (s.regiment || '').toLowerCase() === r.key);
                 const co = topCommandingOfficer(members, REGIMENT_TITLES[r.key] || []);
                 if (co && co.name !== topOverall?.name) companyLeadership.push(co);
@@ -1062,11 +1029,9 @@
                 null,
                 companyLeadership,
                 `<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0.75rem;">
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d4873a;"></span>Airforce</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#d44a4a;"></span>Archery</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4a8fd4;"></span>Navy</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#4ab870;"></span>Restoration</span>
-                <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:#9b6bd4;"></span>Shield</span>
+                ${REGIMENTS.map(r => `
+                    <span style="display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--text-dim);"><span style="width:10px;height:10px;border-radius:2px;background:${r.color};"></span>${r.name}</span>
+                `).join('')}
             </div>
             <div id="growth-chart-section" style="position:relative;height:320px;">
                 <canvas id="growth-canvas" role="img" aria-label="Stacked area chart showing cumulative member enrollment by regiment over time">Member enrollment history by regiment.</canvas>
