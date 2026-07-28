@@ -751,14 +751,10 @@
             });
         }
 
-        let focusedSoldier = null;
-
         // ── Render statistics ──
         function renderStats() {
             const el = document.getElementById('stats-content');
             if (!el) return;
-
-            if (focusedSoldier) { renderSoldierStats(focusedSoldier); return; }
 
             const now = new Date();
             const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -1046,27 +1042,6 @@
             renderGrowthChart();
         }
 
-        function renderSoldierStats(name) {
-            const s = soldiers.find(x => x.name === name);
-            const el = document.getElementById('stats-content');
-            if (!s) { focusedSoldier = null; renderStats(); return; }
-
-            const theme = regimentTheme(s.regiment);
-            el.innerHTML = `
-            <button onclick="focusedSoldier = null; renderStats();" style="margin-bottom:1rem;background:none;border:1px solid var(--border);color:var(--text-dim);padding:6px 12px;border-radius:4px;cursor:pointer;">Back to general statistics</button>
-            <div class="stat-card-wrap" style="border-left:3px solid ${theme.color}">
-                <div class="stat-card-header">
-                    <span class="stat-card-title" style="color:${theme.color}">${s.name}</span>
-                    <span class="stat-card-motto">${getRank(s)} · ${s.regiment || 'GA'}</span>
-                </div>
-                <div style="position:relative;height:320px;">
-                    <div id="soldier-points-canvas"></div>
-                </div>
-            </div>
-        `;
-            drawSoldierPointsChart(s);
-        }
-
         // ── Drawer: open soldier ──
         function openSoldier(encodedName) {
             const name = decodeURIComponent(encodedName);
@@ -1232,13 +1207,6 @@
         function closeDrawer() {
             document.getElementById('drawer-overlay').classList.remove('open');
             document.getElementById('drawer').classList.remove('open');
-        }
-
-        function viewSoldierStats(name) {
-            focusedSoldier = name;
-            closeDrawer();
-            switchTab('stats');
-            renderStats();
         }
 
         // ── Tab switching ──
