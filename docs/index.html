@@ -680,15 +680,33 @@
             const { points, ranOut, rankMarkers } = buildPointsHistory(soldier);
             const theme = regimentTheme(soldier.regiment);
 
-            const W = wrap.clientWidth || 600, H = 320;
-            const padL = 40, padR = 20, padT = 20, padB = 40;
-            const innerW = W - padL - padR, innerH = H - padT - padB;
+            const W = wrap.clientWidth || 600;
+            const padL = 44, padR = 20, padT = 20;
+            const innerW = W - padL - padR;
 
             const dates = points.map(p => p.date.getTime());
             const minT = Math.min(...dates), maxT = Math.max(...dates);
             const maxV = Math.max(...points.map(p => p.value), 1);
 
             const x = t => padL + ((t - minT) / (maxT - minT || 1)) * innerW;
+
+            // fix rank labels too close
+            const minLabelGap = 40;
+            const rowHeight = 16;
+            const sortedMarkers = rankMarkers.map(m => ({ ...m, lx: x(m.date.getTime()) })).sort((a, b) => a.lx - b.lx);
+            const rowLastX = [];
+            sortedMarkers.forEach(m => {
+                let row = 0;
+                while (rowLastX[row] !== undefined && m.lx - rowLastX[row] < minLabelGap) row++;
+                m.row = row;
+                rowLastX[row] = m.lx;
+            });
+            const maxRow = sortedMarkers.reduce((max, m) => Math.max(max, m.row), 0);
+
+            const padB = 20 + maxRow * rowHeight;
+            const H = 200 + padB;
+            const innerH = H - padT - padB;
+
             const y = v => padT + innerH - (v / maxV) * innerH;
 
             let pathD = '', dashedSeg = '';
@@ -702,22 +720,21 @@
                 }
 
                 const prev = points[i - 1];
-                const stepX = px; // step happens right at the new point's x position
                 const stepSeg = `L${stepX},${y(prev.value)} L${px},${py} `;
 
                 if (p.dashed) dashedSeg += stepSeg;
                 else pathD += stepSeg;
             });
 
-            const dots = points.map(p =>
-                `<circle cx="${x(p.date.getTime())}" cy="${y(p.value)}" r="3.5" fill="${theme.color}" data-label="${p.label}" data-value="${p.value}" data-date="${p.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}"></circle>`
+            const dots = points.map((p, i) =>
+                `<circle class = "pt-dot" data-idx="${i}" cx="${x(p.date.getTime())}" cy="${y(p.value)}" r="3.5" fill="${theme.color}"></circle>`
             ).join('');
 
-            const rankLines = rankMarkers.map(m => {
-                const lx = x(m.date.getTime());
+            const rankLines = sortedMarkers.map(m => {
+                const ly = padT + innerH + 16 + m.row * rowHeight;
                 return `
-                    <line x1="${lx}" y1="${padT}" x2="${lx}" y2="${padT + innerH}" stroke="${theme.color}" stroke-width="1" stroke-dasharray="3,3" opacity="0.2"/>
-                    <text x="${lx}" y="${padT + innerH + 14}" text-anchor="middle" font-size="9" fill="${theme.color}">${m.abbrev}</text>
+                    <line x1="${m.lx}" y1="${padT}" x2="${m.lx}" y2="${padT + innerH}" stroke="${theme.color}" stroke-width="1" stroke-dasharray="3,3" opacity="0.2"/>
+                    <text x="${m.lx}" y="${padT + innerH + 14 + m.row * rowHeight}" text-anchor="middle" font-size="9" fill="${theme.color}">${m.abbrev}</text>
                 `;
             }).join('');
 
@@ -725,30 +742,68 @@
                 <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
                     <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + innerH}" stroke="var(--border)" />
                     <line x1="${padL}" y1="${padT + innerH}" x2="${padL + innerW}" y2="${padT + innerH}" stroke="var(--border)" />
-                    <text x="${padL - 8}" y="${padT + 5}" text-anchor="end" font-size="10" fill="var(--text-muted)">${maxV}</text>
-                    <text x="${padL - 8}" y="${padT + innerH}" text-anchor="end" font-size="10" fill="var(--text-muted)">0</text>
+                    <text x="${padL - 10}" y="${padT + 6}" text-anchor="end" font-size="13" fill="var(--text-muted)">${maxV}</text>
+                    <text x="${padL - 10}" y="${padT + innerH}" text-anchor="end" font-size="13" fill="var(--text-muted)">0</text>
                     <path d="${pathD}" fill="none" stroke="${theme.color}" stroke-width="2"/>
                     ${dashedSeg ? `<path d="${dashedSeg}" fill="none" stroke="${theme.color}" stroke-width="2" stroke-dasharray="6,6"/>` : ''}
                     ${dots}
                     ${rankLines}
+                    <line id="hover-guide" x1="0" y1="${padT}" x2="0" y2="${padT + innerH}" stroke="${theme.color}" stroke-width="1" opacity="0" pointer-events="none"/>
+                    <circle id="hover-dot" r="5.5" fill="${theme.color}" stroke="var(--bg-card)" stroke-width="2" opacity="0" pointer-events="none"/>
+                    <rect id="hover-overlay" x="${padL}" y="${padT}" width="${innerW}" height="${innerH}" fill="transparent" style="cursor:crosshair;"/>
                 </svg>
-                <div id="soldier-chart-tooltip" style="position:absolute;display:none;background:#13161d;border:1px solid var(--border);border-radius:4px;padding:6px 10px;font-size:0.78rem;color:var(--text);pointer-events:none;"></div>
+                <div id="soldier-chart-tooltip" style="position:absolute;display:none;background:#13161d;border:1px solid var(--border);border-radius:4px;padding:6px 10px;font-size:0.78rem;color:var(--text);pointer-events:none;white-space:nowrap;"></div>
             `;
 
+            const svg = wrap.querySelector('svg');
+            const hoverGuide = svg.querySelector('#hover-guide');
+            const hoverDot = svg.querySelector('#hover-dot');
+            const hoverOverlay = svg.querySelector('#hover-overlay');
             const tooltip = wrap.querySelector('#soldier-chart-tooltip');
             wrap.style.position = 'relative';
-            wrap.querySelectorAll('circle').forEach(c => {
-                c.addEventListener('mouseenter', e => {
-                    tooltip.innerHTML = `<strong>${c.dataset.label}</strong><br>${c.dataset.date} · ${c.dataset.value} pts`;
-                    tooltip.style.display = 'block';
+
+            const pxPositions = points.map(p => x(p.date.getTime()));
+
+            function showTooltip(idx, clientX, clientY) {
+                const p = points[idx];
+                const px = pxPositions[idx];
+                const py = y(p.value);
+
+                hoverGuide.setAttribute('x1', px);
+                hoverGuide.setAttribute('x2', px);hoverGuide.setAttribute('opacity', 1);
+                hoverDot.setAttribute('cx', px);
+                hoverDot.setAttribute('cy', py);
+                hoverDot.setAttribute('opacity', 1);
+
+                tooltip.innerHTML = `<strong>${p.label}</strong><br>${p.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} · ${p.value} pts`;
+                tooltip.style.display = 'block';
+
+                const rect = wrap.getBoundingClientRect();
+                tooltip.style.left = (clientX - rect.left + 12) + 'px';
+                tooltip.style.top = (clientY - rect.top - 10) + 'px';
+            }
+
+            function hideTooltip() {
+                hoverGuide.setAttribute('opacity', 0);
+                hoverDot.setAttribute('opacity', 0);
+                tooltip.style.display = 'none';
+            }
+
+            overlay.addEventListener('mousemove', e => {
+                const rect = svg.getBoundingClientRect();
+                const scaleX = W / rect.width;
+                const localL = (e.clientX - rect.left) * scaleX;
+
+                let nearest = 0, best = Infinity;
+                pxPositions.forEach((px, i) => {
+                    const dist = Math.abs(px - localL);
+                    if (dist < best) { best = dist; nearest = i; }
                 });
-                c.addEventListener('mousemove', e => {
-                    const rect = wrap.getBoundingClientRect();
-                    tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
-                    tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
-                });
-                c.addEventListener('mouseleave', () => tooltip.style.display = 'none');
+
+                showTooltip(nearest, e.clientX, e.clientY);
             });
+
+            overlay.addEventListener('mouseleave', hideTooltip);
         }
 
         // ── Render statistics ──
