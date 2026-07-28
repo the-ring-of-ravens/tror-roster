@@ -332,7 +332,6 @@
         let activeStatuses = new Set(['active', 'semi-active', 'inactive', 'on break']);
 
         function renderPills() {
-            REGIMENTS.map(r => r.name.toLowerCase()).forEach(k => activeRegiments.add(k));
             document.getElementById('regiment-pills').innerHTML = REGIMENTS.map(r => r.name.toLowerCase()).filter((v, i, a) => a.indexOf(v) === i).map(k => {
                 const t = regimentTheme(k);
                 const on = activeRegiments.has(k);
@@ -1149,18 +1148,22 @@
                             return parts.join(', ');
                         }
                     })()}</span></div>
-    </div>` : ''}
-    <button onclick="viewSoldierStats('${s.name.replace(/'/g, "\\'")}')" style="width:100%;margin:1rem 0;padding:8px;background:var(--bg-card);border:1px solid var(--border);color:var(--amber);border-radius:4px;cursor:pointer;">All Statistics (UNDER CONSTRUCTION)</button>
-
-    ${hosted.length ? `<div class="drawer-section">
-        <h3>Sessions Hosted (${hosted.length})</h3>
-            <div class="attendee-list">${hosted.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
+                        </div>` : ''}
+                        <div class="drawer-section">
+                        <h3>Points History</h3>
+                        <div style="position:relative;height:280px;">
+                            <div id="soldier-points-canvas"></div>
+                        </div>
+                        </div>
+                        ${hosted.length ? `<div class="drawer-section">
+                            <h3>Sessions Hosted (${hosted.length})</h3>
+                                <div class="attendee-list">${hosted.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
                         `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color:var(--amber)">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
                     ).join('')}</div></div>` : ''}
 
-    <div class="drawer-section">
-        <h3>Sessions Attended (${attendedOnly.length})</h3>
-        ${attendedOnly.length
+                        <div class="drawer-section">
+                            <h3>Sessions Attended (${attendedOnly.length})</h3>
+                            ${attendedOnly.length
                     ? `<div class="attendee-list">${attendedOnly.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
                         `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color:var(--amber)">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
                     ).join('')}</div>`
