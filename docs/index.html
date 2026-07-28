@@ -698,8 +698,8 @@
             sortedMarkers.forEach(m => {
                 let row = 0;
                 while (rowLastX[row] !== undefined && m.lx - rowLastX[row] < minLabelGap) row++;
-                m.row = row;
                 rowLastX[row] = m.lx;
+                m.row = row;
             });
             const maxRow = sortedMarkers.reduce((max, m) => Math.max(max, m.row), 0);
 
@@ -733,7 +733,7 @@
             const rankLines = sortedMarkers.map(m => {
                 const ly = padT + innerH + 16 + m.row * rowHeight;
                 return `
-                    <line x1="${m.lx}" y1="${padT}" x2="${m.lx}" y2="${padT + innerH}" stroke="${theme.color}" stroke-width="1" stroke-dasharray="3,3" opacity="0.2"/>
+                    <line x1="${m.lx}" y1="${padT}" x2="${m.lx}" y2="${ly - 10}" stroke="${theme.color}" stroke-width="1" stroke-dasharray="3,3" opacity="0.2"/>
                     <text x="${m.lx}" y="${padT + innerH + 14 + m.row * rowHeight}" text-anchor="middle" font-size="9" fill="${theme.color}">${m.abbrev}</text>
                 `;
             }).join('');
