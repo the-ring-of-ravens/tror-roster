@@ -770,7 +770,8 @@
                 const py = y(p.value);
 
                 hoverGuide.setAttribute('x1', px);
-                hoverGuide.setAttribute('x2', px);hoverGuide.setAttribute('opacity', 1);
+                hoverGuide.setAttribute('x2', px);
+                hoverGuide.setAttribute('opacity', 1);
                 hoverDot.setAttribute('cx', px);
                 hoverDot.setAttribute('cy', py);
                 hoverDot.setAttribute('opacity', 1);
@@ -779,7 +780,18 @@
                 tooltip.style.display = 'block';
 
                 const rect = wrap.getBoundingClientRect();
-                tooltip.style.left = (clientX - rect.left + 12) + 'px';
+                const tooltipRect = tooltip.getBoundingClientRect();
+                const gap = 12;
+
+                let left = clientX - rect.left + gap;
+                // flip left if overflow
+                if (left + tooltipRect.width > rect.width) {
+                    left = clientX - rect.left - tooltipRect.width - gap;
+                }
+                // clamp so it never goes negative on left side
+                left = Math.max(4, left);
+
+                tooltip.style.left = left + 'px';
                 tooltip.style.top = (clientY - rect.top - 10) + 'px';
             }
 
