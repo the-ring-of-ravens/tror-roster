@@ -153,7 +153,7 @@
 
     <script>
         // ── Data stores ──
-        let soldiers = [], sessions = [], ranks = [], officerRankups = [];
+        let soldiers = [], sessions = [], ranks = [], regimentRanks = [], officerRankups = [];
 
         // ── Constants ──
         const RANK_ORDER = [
@@ -264,6 +264,26 @@
                 if (pts >= parseInt(r.rank_points)) return r.rank;
             }
             return ranks[0]?.rank ?? '—';
+        }
+
+        function getRegimentRank(soldier) {
+            const regiment = (soldier.regiment || '').toLowerCase();
+            const forRegiment = regimentRanks.filter(r => (r.regiment || '').toLowerCase() === regiment);
+
+            if (soldier.regiment_title && soldier.regiment_title.trim() !== '') {
+                const match = forRegiment.find(r => r.abbreviation === soldier.regiment_title.trim());
+                return match ? match.rank : soldier.regiment_title.trim();
+            }
+
+            const pts = parseInt(soldier.regiment_points) || 0;
+            if (!forRegiment.length) return '—';
+            const sorted = [...forRegiment]
+                .filter(r => r.rank_points !== '' && r.rank_points !== undefined)
+                .sort((a, b) => parseInt(b.rank_points) - parseInt(a.rank_points));
+            for (const r of sorted) {
+                if (pts >= parseInt(r.rank_points)) return r.rank;
+            }
+            return forRegiment[0]?.rank ?? '—';
         }
 
         function getOfficerRankups(name) {
@@ -1145,16 +1165,11 @@
     </div>
 
     <div class="drawer-section">
-      <h3>Points & Rank</h3>
+    <h3>Points & Rank</h3>
       <div class="detail-row"><span class="dk">Points</span><span class="dv">${pts}</span></div>
       <div class="detail-row"><span class="dk">Current Rank</span><span class="dv">${rank}</span></div>
-      ${isTrain && s.trainee_points_needed ? `<div class="detail-row"><span class="dk">Points to Graduate</span><span class="dv">${s.trainee_points_needed}</span></div>` : ''}
-    </div>
-
-    <div class="drawer-section">
-      <h3>Assignment</h3>
-      <div class="detail-row"><span class="dk">Regiment</span><span class="dv" style="color:${theme.color}">${s.regiment || '—'}</span></div>
-      <div class="detail-row"><span class="dk">Title</span><span class="dv">${s.regiment_title || '—'}</span></div>
+      <div class="detail-row"><span class="dk">Regiment Points</span><span class="dv">${parseInt(s.regiment_points) || 0}</span></div>
+      <div class="detail-row"><span class="dk">Regiment Rank</span><span class="dv">${getRegimentRank(s)}</span></div>
     </div>
 
     ${s.join_date ? `<div class="drawer-section">
@@ -1260,6 +1275,7 @@
                 fetchSheet('soldiers'),
                 fetchSheet('sessions'),
                 fetchSheet('ranks'),
+                fetchSheet('regiment ranks'),
                 fetchSheet('officerRankups'),
             ]);
 
