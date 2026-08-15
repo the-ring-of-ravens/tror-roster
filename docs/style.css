@@ -730,6 +730,9 @@
         overflow-y: auto;
         transform: translateX(100%);
         transition: transform 0.2s ease;
+        padding-top: 0rem;
+        padding: 1.5rem;
+        padding: 1.5rem;
         padding: 1.5rem;
     }
 
@@ -742,7 +745,7 @@
         top: 0;
         z-index: 10;
         background: var(--bg-panel);
-        margin: -1.5rem -1.5rem 1.5rem;
+        margin: -1.5rem -1.5rem 2rem;
         padding: 1.5rem 1.5rem 0.75rem;
     }
 
