@@ -632,7 +632,6 @@
                     date,
                     value: running,
                     label: s['Session Name'],
-                    sessionId: encodeURIComponent(s['Timestamp'] || s['Session Name']),
                 });
 
                 if (countsForMe) {
@@ -1100,7 +1099,7 @@
             renderGrowthChart();
         }
 
-        function durationSince(val) {
+        function formatDuration(val) {
             const match = String(val).match(/Date\((\d+),(\d+),(\d+)\)/);
             if (!match) return '';
             const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
