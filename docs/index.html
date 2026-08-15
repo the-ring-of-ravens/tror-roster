@@ -143,6 +143,7 @@
     </footer>
 
     <!-- Detail drawer -->
+    <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
     <div class="drawer" id="drawer">
         <div class="drawer-close-wrap">
             <button class="drawer-close" onclick="closeDrawer()">✕ Close</button>
@@ -298,7 +299,7 @@
 
             // get the join date & last session date, keep the most recent
             let lastActive = soldier.join_date;
-            lastActive = soldier.inactive_date > lastActive ? soldier.inactive_date : lastActive;
+            lastActive = soldier.last_session > lastActive ? soldier.last_session : lastActive;
 
             // 6 months of no session = semi-active, 12 months = inactive
             if (lastActive) {
@@ -1164,8 +1165,8 @@
 
     ${createStatus(s) === 'inactive' ? `<div class="drawer-section">
       <h3>Inactivity Details</h3>
-      <div class="detail-row"><span class="dk">Inactive Since</span><span class="dv">${formatDate(s.inactive_date)}</span></div>
-      <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${formatDuration(s.inactive_date)}</span></div>
+      <div class="detail-row"><span class="dk">Inactive Since</span><span class="dv">${formatDate(s.last_session)}</span></div>
+      <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${formatDuration(s.last_session)}</span></div>
     </div>` : ''}
 
                         ${hosted.length ? `<div class="drawer-section">
