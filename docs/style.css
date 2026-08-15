@@ -10,7 +10,6 @@
         --bg: #0d0f14;
         --bg-panel: #13161d;
         --bg-card: #1a1e28;
-        --bg-hover: #21263300;
         --border: #2a3040;
         --border-hi: #3d4a60;
         --amber: #c8863a;
@@ -62,12 +61,6 @@
         display: flex;
         align-items: center;
         gap: 0.6rem;
-    }
-
-    .logo-sep {
-        width: 1px;
-        height: 20px;
-        background: var(--border-hi);
     }
 
     nav {
@@ -231,12 +224,6 @@
         }
     }
 
-    @media (max-width: 970px) {
-        #soldier-stats.stat-row {
-            display: none;
-        }
-    }
-
     /* ── Layout ── */
     main {
         max-width: 1100px;
@@ -373,29 +360,6 @@
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: 0.75rem;
         margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        padding: 0.9rem 1rem;
-    }
-
-    .stat-card .label {
-        font-family: var(--font-title);
-        font-size: 0.62rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        margin-bottom: 0.4rem;
-    }
-
-    .stat-card .value {
-        font-size: 1.6rem;
-        font-weight: 600;
-        color: var(--amber);
-        line-height: 1;
     }
 
     .stat-card-wrap {
@@ -874,37 +838,6 @@
         display: flex;
         flex-wrap: wrap;
         gap: 4px;
-    }
-
-    /* ── Ranks tab ── */
-    .rank-row {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        padding: 0.75rem 1rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .rank-number {
-        font-family: var(--font-title);
-        font-size: 1.2rem;
-        color: var(--rank-gold);
-        min-width: 2rem;
-        text-align: right;
-    }
-
-    .rank-name {
-        flex: 1;
-        font-size: 1rem;
-        font-weight: 600;
-    }
-
-    .rank-pts {
-        font-size: 0.85rem;
-        color: var(--text-dim);
     }
 
     /* ── Loading ── */

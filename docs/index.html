@@ -128,11 +128,6 @@
                 <div class="amber-line"></div>
             </div>
             <div id="stats-content">
-                <div style="position:relative;height:320px;">
-                    <canvas id="growth-canvas" role="img"
-                        aria-label="Stacked area chart showing cumulative member enrollment by regiment over time">Member
-                        enrollment history by regiment.</canvas>
-                </div>
                 <div class="loading">Loading statistics…</div>
             </div>
         </div>
@@ -507,10 +502,6 @@
                 if (m.getMonth() === 0) return String(m.getFullYear()); // Jan → year
                 return ''; // other months blank (minor gridlines handle it)
             });
-
-            // Which indices are major (Jan) vs minor season ticks (Apr=3, Jul=6, Oct=9)
-            const majorTicks = months.map(m => m.getMonth() === 0);
-            const seasonTicks = months.map(m => [3, 6, 9].includes(m.getMonth()));
 
             // Datasets: one stacked band per regiment, no full-company line (stack = total)
             const datasets = REGIMENTS.map(r => ({
@@ -1109,6 +1100,22 @@
             renderGrowthChart();
         }
 
+        function durationSince(val) {
+            const match = String(val).match(/Date\((\d+),(\d+),(\d+)\)/);
+            if (!match) return '';
+            const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
+            let days = Math.floor((new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+            const years = Math.floor(days / 365); days -= years * 365;
+            const months = Math.floor(days / 30); days -= months * 30;
+            const weeks = Math.floor(days / 7); days -= weeks * 7;
+            const parts = [];
+            if (years) parts.push(`${years} year${years !== 1 ? 's' : ''}`);
+            if (months) parts.push(`${months} month${months !== 1 ? 's' : ''}`);
+            if (weeks) parts.push(`${weeks} week${weeks !== 1 ? 's' : ''}`);
+            if (days) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
+            return parts.join(', ');
+        }
+
         // ── Drawer: open soldier ──
         function openSoldier(encodedName) {
             const name = decodeURIComponent(encodedName);
@@ -1154,50 +1161,14 @@
     ${s.join_date ? `<div class="drawer-section">
       <h3>Enlistment Details</h3>
       <div class="detail-row"><span class="dk">Join Date</span><span class="dv">${formatDate(s.join_date)}</span></div>
-      <div class="detail-row"><span class="dk">Member Duration</span><span class="dv">${(() => {
-                        const match = String(s.join_date).match(/Date\((\d+),(\d+),(\d+)\)/);
-                        if (match) {
-                            const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
-                            let days = Math.floor((new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-                            const years = Math.floor(days / 365);
-                            days -= years * 365;
-                            const months = Math.floor(days / 30);
-                            days -= months * 30;
-                            const weeks = Math.floor(days / 7);
-                            days -= weeks * 7;
-                            let parts = [];
-                            if (years) parts.push(`${years} year${years !== 1 ? 's' : ''}`);
-                            if (months) parts.push(`${months} month${months !== 1 ? 's' : ''}`);
-                            if (weeks) parts.push(`${weeks} week${weeks !== 1 ? 's' : ''}`);
-                            if (days) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
-                            return parts.join(', ');
-                        }
-                    })()}</span></div>
+      <div class="detail-row"><span class="dk">Member Duration</span><span class="dv">${formatDuration(s.join_date)}</span></div>
     </div>` : ''}
 
     ${createStatus(s) === 'inactive' ? `<div class="drawer-section">
       <h3>Inactivity Details</h3>
       <div class="detail-row"><span class="dk">Inactive Since</span><span class="dv">${formatDate(s.inactive_date)}</span></div>
-      <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${(() => {
-                        const match = String(s.inactive_date).match(/Date\((\d+),(\d+),(\d+)\)/);
-                        if (match) {
-                            const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10));
-                            let days = Math.floor((new Date().getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-                            const years = Math.floor(days / 365);
-                            days -= years * 365;
-                            const months = Math.floor(days / 30);
-                            days -= months * 30;
-                            const weeks = Math.floor(days / 7);
-                            days -= weeks * 7;
-                            let parts = [];
-                            if (years) parts.push(`${years} year${years !== 1 ? 's' : ''}`);
-                            if (months) parts.push(`${months} month${months !== 1 ? 's' : ''}`);
-                            if (weeks) parts.push(`${weeks} week${weeks !== 1 ? 's' : ''}`);
-                            if (days) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
-                            return parts.join(', ');
-                        }
-                    })()}</span></div>
-                        </div>` : ''}
+      <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${formatDuration(s.inactive_date)}</span></div>
+    </div>` : ''}
 
                         ${hosted.length ? `<div class="drawer-section">
                             <h3>Sessions Hosted (${hosted.length})</h3>
@@ -1220,9 +1191,6 @@
             document.querySelectorAll('[data-session-id]').forEach(tag => {
                 tag.addEventListener('click', () => openSession(tag.dataset.sessionId));
             });
-
-            document.getElementById('drawer-overlay').classList.add('open');
-            document.getElementById('drawer').classList.add('open');
 
             document.getElementById('drawer-overlay').classList.add('open');
             document.getElementById('drawer').classList.add('open');
@@ -1308,12 +1276,11 @@
             }
 
             // Celebrate recent rankups
-            // We will only look at the last training session and get the Rankups column for that session, which contains "Name (New Rank)".
             const rankups = sessions.filter(s => {
                 const rankup = String(s['Rankups'] ?? '').trim();
                 return rankup;
             });
-            // We want to output a message that says "Congratulations to Name for ranking up to New Rank!"
+            // outputs "Congratulations to [NAME] for ranking up to [New Rank]!"
             if (rankups.length) {
                 const messages = [];
                 const lastSession = sessions.findLast(s => String(s['Rankups'] ?? '').trim());
