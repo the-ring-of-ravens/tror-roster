@@ -39,8 +39,9 @@
 
     <main>
         <div id="website-warning" class="alert alert-warning">
-            ⚠️ <strong>This website is under construction.</strong> 
-            Please refer to the <a href="https://docs.google.com/spreadsheets/d/190vlWjIf9f69Rwmf1ANw6sy8WdXLReVETd2NnTjus18"
+            ⚠️ <strong>This website is under construction.</strong>
+            Please refer to the <a
+                href="https://docs.google.com/spreadsheets/d/190vlWjIf9f69Rwmf1ANw6sy8WdXLReVETd2NnTjus18"
                 target="_blank" rel="noopener noreferrer">official
                 TRoR Roster</a> for accurate information, and DM Canary if you find an error or have a suggestion.
         </div>
@@ -49,8 +50,7 @@
             attendance for name mismatches.
         </div>
 
-        <div id="rankup-banner" class="alert alert-success"
-            style="display:none;">
+        <div id="rankup-banner" class="alert alert-success" style="display:none;">
             <span id="rankup-text"></span>
         </div>
 
@@ -143,9 +143,10 @@
     </footer>
 
     <!-- Detail drawer -->
-    <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
     <div class="drawer" id="drawer">
-        <button class="drawer-close" onclick="closeDrawer()">✕ Close</button>
+        <div class="drawer-close-wrap">
+            <button class="drawer-close" onclick="closeDrawer()">✕ Close</button>
+        </div>
         <div id="drawer-content"></div>
     </div>
 
@@ -1170,8 +1171,8 @@
                         ${hosted.length ? `<div class="drawer-section">
                             <h3>Sessions Hosted (${hosted.length})</h3>
                                 <div class="attendee-list" style="display:flex;flex-direction:column">${hosted.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
-                        `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color:var(--amber); display:flex; justify-content:space-between">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
-                    ).join('')}</div></div>` : ''}
+                `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color:var(--amber); display:flex; justify-content:space-between">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
+            ).join('')}</div></div>` : ''}
 
                         <div class="drawer-section">
                             <h3>Sessions Attended (${attendedOnly.length})</h3>

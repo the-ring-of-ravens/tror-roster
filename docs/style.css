@@ -737,6 +737,15 @@
         transform: translateX(0);
     }
 
+    .drawer-close-wrap {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--bg-panel);
+        margin: -1.5rem -1.5rem 1.5rem;
+        padding: 1.5rem 1.5rem 0.75rem;
+    }
+
     .drawer-close {
         background: none;
         border: 1px solid var(--border);
@@ -748,7 +757,6 @@
         font-size: 0.65rem;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        margin-bottom: 1.5rem;
     }
 
     .drawer-close:hover {
