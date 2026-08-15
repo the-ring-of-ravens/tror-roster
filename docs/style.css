@@ -730,14 +730,14 @@
         overflow-y: auto;
         transform: translateX(100%);
         transition: transform 0.2s ease;
-        padding-top: 0rem;
-        padding: 1.5rem;
-        padding: 1.5rem;
-        padding: 1.5rem;
     }
 
     .drawer.open {
         transform: translateX(0);
+        padding-top: 0rem;
+        padding: 1.5rem;
+        padding: 1.5rem;
+        padding: 1.5rem;
     }
 
     .drawer-close-wrap {
