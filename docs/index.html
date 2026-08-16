@@ -1275,7 +1275,7 @@
 
         // ── Init ──
         async function init() {
-            [soldiers, sessions, ranks, officerRankups] = await Promise.all([
+            [soldiers, sessions, ranks, regimentRanks, officerRankups] = await Promise.all([
                 fetchSheet('soldiers'),
                 fetchSheet('sessions'),
                 fetchSheet('ranks'),
