@@ -1320,7 +1320,7 @@
 
             // ── Full Company card ──
             const totalCounts = statusCounts(soldiers);
-            const totalSessions = Object.values(allTimeSessions).reduce((a, b) => a + b, 0);
+            const totalSessions = sessions.length;
             const totalLastD = Object.values(lastSessionDate).filter(Boolean).reduce((l, d) => (!l || d > l) ? d : l, null);
             const companyBoard = buildLeaderboard(soldiers, 6);
 
@@ -1407,58 +1407,58 @@
             const theme = regimentTheme(s.regiment);
 
             const content = `
-    <div style="height:3px; background:${theme.color}; margin:-0.5rem -1.5rem 1.5rem;"></div>
-    <h2>${s.name}</h2>
-    <div class="rank-line" style="color:${theme.color}">${rank} · ${s.regiment || 'GA'}</div>
-    ${badge(createStatus(s))} ${isTrain ? '<span class="badge badge-trainee">Trainee</span>' : ''}
+            <div style="height:3px; background:${theme.color}; margin:-0.5rem -1.5rem 1.5rem;"></div>
+            <h2>${s.name}</h2>
+            <div class="rank-line" style="color:${theme.color}">${rank} · ${s.regiment || 'GA'}</div>
+            ${badge(createStatus(s))} ${isTrain ? '<span class="badge badge-trainee">Trainee</span>' : ''}
 
-    <div class="drawer-section">
-        <h3>Points History</h3>
-        <div style="position:relative;height:240px;">
-            <div id="soldier-points-canvas"></div>
-        </div>
-    </div>
+            <div class="drawer-section">
+                <h3>Points History</h3>
+                <div style="position:relative;height:240px;">
+                    <div id="soldier-points-canvas"></div>
+                </div>
+            </div>
 
-    <div class="drawer-section">
-    <h3>Points & Rank</h3>
-      <div class="detail-row"><span class="dk">Points</span><span class="dv">${pts}</span></div>
-      <div class="detail-row"><span class="dk">Current Rank</span><span class="dv">${rank}</span></div>
-    </div>
+            <div class="drawer-section">
+            <h3>Points & Rank</h3>
+            <div class="detail-row"><span class="dk">Points</span><span class="dv">${pts}</span></div>
+            <div class="detail-row"><span class="dk">Current Rank</span><span class="dv">${rank}</span></div>
+            </div>
 
-    <div class="drawer-section">
-    <h3>Regiment Points & Rank</h3>
-      <div class="detail-row"><span class="dk">Regiment Points</span><span class="dv">${parseInt(s.regiment_points) || 0}</span></div>
-      <div class="detail-row"><span class="dk">Regiment Rank</span><span class="dv">${getRegimentRank(s)}</span></div>
-    </div>
+            <div class="drawer-section">
+            <h3>Regiment Points & Rank</h3>
+            <div class="detail-row"><span class="dk">Regiment Points</span><span class="dv">${parseInt(s.regiment_points) || 0}</span></div>
+            <div class="detail-row"><span class="dk">Regiment Rank</span><span class="dv">${getRegimentRank(s)}</span></div>
+            </div>
 
-    ${s.join_date ? `<div class="drawer-section">
-      <h3>Enlistment Details</h3>
-      <div class="detail-row"><span class="dk">Join Date</span><span class="dv">${formatDate(s.join_date)}</span></div>
-      <div class="detail-row"><span class="dk">Member Duration</span><span class="dv">${formatDuration(s.join_date)}</span></div>
-    </div>` : ''}
+            ${s.join_date ? `<div class="drawer-section">
+            <h3>Enlistment Details</h3>
+            <div class="detail-row"><span class="dk">Join Date</span><span class="dv">${formatDate(s.join_date)}</span></div>
+            <div class="detail-row"><span class="dk">Member Duration</span><span class="dv">${formatDuration(s.join_date)}</span></div>
+            </div>` : ''}
 
-    ${createStatus(s) === 'inactive' ? `<div class="drawer-section">
-      <h3>Inactivity Details</h3>
-      <div class="detail-row"><span class="dk">Inactive Since</span><span class="dv">${formatDate(s.last_session)}</span></div>
-      <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${formatDuration(s.last_session)}</span></div>
-    </div>` : ''}
+            ${createStatus(s) === 'inactive' ? `<div class="drawer-section">
+            <h3>Inactivity Details</h3>
+            <div class="detail-row"><span class="dk">Inactive Since</span><span class="dv">${formatDate(s.last_session)}</span></div>
+            <div class="detail-row"><span class="dk">Inactive Duration</span><span class="dv">${formatDuration(s.last_session)}</span></div>
+            </div>` : ''}
 
-                        ${hosted.length ? `<div class="drawer-section">
-                            <h3>Sessions Hosted (${hosted.length})</h3>
-                                <div class="attendee-list" style="display:flex;flex-direction:column">${hosted.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
+                                ${hosted.length ? `<div class="drawer-section">
+                                    <h3>Sessions Hosted (${hosted.length})</h3>
+                                        <div class="attendee-list" style="display:flex;flex-direction:column">${hosted.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
                 `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color:var(--amber); display:flex; justify-content:space-between">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
             ).join('')}</div></div>` : ''}
 
-                        <div class="drawer-section">
-                            <h3>Sessions Attended (${attendedOnly.length})</h3>
-                            ${attendedOnly.length
+                                <div class="drawer-section">
+                                    <h3>Sessions Attended (${attendedOnly.length})</h3>
+                                    ${attendedOnly.length
                     ? `<div class="attendee-list" style="display:flex;flex-direction:column">${attendedOnly.sort((a, b) => parseDate(b['Session Date']) - parseDate(a['Session Date'])).map(ss =>
                         `<span class="session-tag" data-session-id="${encodeURIComponent(ss['Timestamp'] || ss['Session Name'])}" style="cursor:pointer; color:var(--amber); display:flex; justify-content:space-between">${ss['Session Name']} <span style="color:var(--text-muted)">${formatDate(ss['Session Date'])}</span></span>`
                     ).join('')}</div>`
                     : `<span style="color:var(--text-muted);font-size:0.88rem">No sessions attended.</span>`
                 }
-    </div>
-  `;
+            </div>
+        `;
 
             document.getElementById('drawer-content').innerHTML = content;
             document.querySelectorAll('[data-session-id]').forEach(tag => {
@@ -1479,31 +1479,31 @@
             const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim()).filter(Boolean);
 
             const content = `
-    <h2>${s['Session Name'] || 'Session'}</h2>
-    <div class="rank-line">${formatDate(s['Session Date'])}</div>
-    <div class="drawer-section">
-      <h3>Details</h3>
-      <div class="detail-row"><span class="dk">Instructor</span><span class="dv">
-            ${(() => {
+            <h2>${s['Session Name'] || 'Session'}</h2>
+            <div class="rank-line">${formatDate(s['Session Date'])}</div>
+            <div class="drawer-section">
+            <h3>Details</h3>
+            <div class="detail-row"><span class="dk">Instructor</span><span class="dv">
+                    ${(() => {
                     const host = s['Host'] || '';
                     const found = soldiers.find(x => x.name.toLowerCase() === host.toLowerCase());
                     return found
                         ? `<span class="session-tag" data-soldier-name="${found.name}" style="cursor:pointer;color:var(--amber)">${host}</span>`
                         : (host || '—');
                 })()}
-        </span></div>
-      <div class="detail-row"><span class="dk">Attendees</span><span class="dv">${attendees.length}</span></div>
-    </div>
-    <div class="drawer-section">
-      <h3>Attendee List</h3>
-      <div class="attendee-list">
-        ${attendees.map(a => {
+                </span></div>
+            <div class="detail-row"><span class="dk">Attendees</span><span class="dv">${attendees.length}</span></div>
+            </div>
+            <div class="drawer-section">
+            <h3>Attendee List</h3>
+            <div class="attendee-list">
+                ${attendees.map(a => {
                     const found = soldiers.find(x => x.name.toLowerCase() === a.toLowerCase());
                     return `<span class="session-tag" ${found ? `data-soldier-name="${found.name}" style="cursor:pointer;color:var(--amber)"` : ''}>${a}</span>`;
                 }).join('')}
-      </div>
-    </div>
-  `;
+            </div>
+            </div>
+        `;
             document.getElementById('drawer-content').innerHTML = content;
             document.querySelectorAll('.drawer-section [data-soldier-name]').forEach(span => {
                 span.addEventListener('click', () => openSoldier(span.dataset.soldierName));
