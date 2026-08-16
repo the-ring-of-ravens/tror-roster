@@ -40,11 +40,11 @@
     <main>
         <div id="website-warning" class="alert alert-warning">
             <div>
-            ⚠️ <strong>This website is under construction.</strong>
-            Please refer to the <a
-                href="https://docs.google.com/spreadsheets/d/190vlWjIf9f69Rwmf1ANw6sy8WdXLReVETd2NnTjus18"
-                target="_blank" rel="noopener noreferrer">official
-                TRoR Roster</a> for accurate information, and DM Canary if you find an error.
+                ⚠️ <strong>This website is under construction.</strong>
+                Please refer to the <a
+                    href="https://docs.google.com/spreadsheets/d/190vlWjIf9f69Rwmf1ANw6sy8WdXLReVETd2NnTjus18"
+                    target="_blank" rel="noopener noreferrer">official
+                    TRoR Roster</a> for accurate information, and DM Canary if you find an error.
             </div>
             <button class="alert-close" onclick="this.parentElement.style.display = 'none'">✕</button>
         </div>
@@ -125,6 +125,11 @@
                 </div>
             </div>
 
+            <div class="pill-container">
+                <div class="pill-row" id="session-type-pills"></div>
+                <div class="pill-row" id="session-regiment-pills"></div>
+            </div>
+
             <div id="session-list">
                 <div class="loading">Loading sessions…</div>
             </div>
@@ -202,6 +207,12 @@
             { key: 'on break', color: '#9295a1', label: 'On Break' },
             { key: 'retired', color: '#7880a0', label: 'Retired' },
             { key: 'memorial', color: '#846c98', label: 'Memorial' },
+        ];
+
+        const SESSION_TYPES = [
+            { key: 'bootcamp', label: 'Bootcamp' },
+            { key: 'airshow', label: 'Airshow' },
+            { key: 'recruitment', label: 'Recruitment' },
         ];
 
         function parseDate(val) {
@@ -395,11 +406,11 @@
 
             if (!filtered.length) {
                 tbody.innerHTML = `<tr><td colspan="5" class="empty">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      No soldiers found.
-    </td></tr>`;
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                No soldiers found.
+                </td></tr>`;
                 return;
             }
 
@@ -421,30 +432,61 @@
                 const reg = s.regiment || '—';
                 const theme = regimentTheme(s.regiment);
                 return `<tr data-soldier-name="${s.name.replace(/"/g, '&quot;')}" style="cursor:pointer;">
-      <td class="name-cell">${s.name.replace(/"/g, '&quot;') || '—'}</td>
-      <td style="color:${theme.color}">${rank}</td>
-      <td><span class="reg-${(s.regiment || '').toLowerCase()}">${reg}</span></td>
-      <td>
-        <div class="pts-wrap">
-          <div class="pts-bar-bg"><div class="pts-bar-fill" style="width:${pct}%; background:${theme.color}"></div></div>
-          <span class="pts-num" style="color:${theme.color}">${pts}</span>
-        </div>
-      </td>
-      <td>${badge(createStatus(s))}</td>
-    </tr>`;
+                <td class="name-cell">${s.name.replace(/"/g, '&quot;') || '—'}</td>
+                <td style="color:${theme.color}">${rank}</td>
+                <td><span class="reg-${(s.regiment || '').toLowerCase()}">${reg}</span></td>
+                <td>
+                    <div class="pts-wrap">
+                    <div class="pts-bar-bg"><div class="pts-bar-fill" style="width:${pct}%; background:${theme.color}"></div></div>
+                    <span class="pts-num" style="color:${theme.color}">${pts}</span>
+                    </div>
+                </td>
+                <td>${badge(createStatus(s))}</td>
+                </tr>`;
             }).join('');
             document.querySelectorAll('tr[data-soldier-name]').forEach(row => {
                 row.addEventListener('click', () => openSoldier(row.dataset.soldierName));
             });
         }
 
+        function renderSessionPills() {
+            document.getElementById('session-type-pills').innerHTML = SESSION_TYPES.map(t => {
+                const on = activeSessionTypes.has(t.key);
+                return `<span class="pill${on ? ' active' : ''}" style="${on ? 'background:var(--amber);border-color:var(--amber)' : ''}" data-type="${t.key}">${t.label}</span>`;
+            }).join('');
+
+            document.getElementById('session-regiment-pills').innerHTML = REGIMENTS.map(r => {
+                const on = activeSessionRegiments.has(r.key);
+                return `<span class="pill${on ? ' active' : ''}" style="${on ? `background:${r.color};border-color:${r.color}` : ''}" data-reg="${r.key}">${r.name}</span>`;
+            }).join('');
+
+            document.querySelectorAll('#session-type-pills .pill').forEach(p =>
+                p.addEventListener('click', () => {
+                    activeSessionTypes.has(p.dataset.type) ? activeSessionTypes.delete(p.dataset.type) : activeSessionTypes.add(p.dataset.type);
+                    renderSessionPills(); renderSessions();
+                }));
+            document.querySelectorAll('#session-regiment-pills .pill').forEach(p =>
+                p.addEventListener('click', () => {
+                    activeSessionRegiments.has(p.dataset.reg) ? activeSessionRegiments.delete(p.dataset.reg) : activeSessionRegiments.add(p.dataset.reg);
+                    renderSessionPills(); renderSessions();
+                }));
+        }
+
+        function sessionMatchesFilters(s) {
+            const name = (s['Session Name'] || '').toLowerCase();
+            const typeOk = activeSessionTypes.size === 0 || [...activeSessionTypes].some(k => name.includes(k));
+            const regOk = activeSessionRegiments.size === 0 || [...activeSessionRegiments].some(k => name.includes(k));
+            return typeOk && regOk;
+        }
+
         // ── Render sessions list ──
         function renderSessions() {
             const q = (document.getElementById('session-search').value || '').toLowerCase();
             const filtered = sessions.filter(s =>
-                !q
-                || (s['Session Name'] || '').toLowerCase().includes(q)
-                || (s['Host'] || '').toLowerCase().includes(q)
+                (!q
+                    || (s['Session Name'] || '').toLowerCase().includes(q)
+                    || (s['Host'] || '').toLowerCase().includes(q))
+                && sessionMatchesFilters(s)
             );
 
             const el = document.getElementById('session-list');
@@ -462,16 +504,16 @@
                 const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim()).filter(Boolean);
                 const sid = encodeURIComponent(s['Timestamp'] || s['Session Name']);
                 return `<div class="session-card" onclick="openSession('${sid}')">
-      <div class="sc-head">
-        <span class="sc-name">${s['Session Name'] || 'Unnamed Session'}</span>
-        <span class="sc-date">${formatDate(s['Session Date'])}</span>
-      </div>
-      <div class="sc-meta">Instructor: <strong>${s['Host'] || '—'}</strong> · ${attendees.length} attendees</div>
-      <div class="attendee-list">
-        ${attendees.slice(0, 8).map(a => `<span class="session-tag">${a}</span>`).join('')}
-        ${attendees.length > 8 ? `<span class="session-tag">+${attendees.length - 8} more</span>` : ''}
-      </div>
-    </div>`;
+                <div class="sc-head">
+                    <span class="sc-name">${s['Session Name'] || 'Unnamed Session'}</span>
+                    <span class="sc-date">${formatDate(s['Session Date'])}</span>
+                </div>
+                <div class="sc-meta">Instructor: <strong>${s['Host'] || '—'}</strong> · ${attendees.length} attendees</div>
+                <div class="attendee-list">
+                    ${attendees.slice(0, 8).map(a => `<span class="session-tag">${a}</span>`).join('')}
+                    ${attendees.length > 8 ? `<span class="session-tag">+${attendees.length - 8} more</span>` : ''}
+                </div>
+                </div>`;
             }).join('');
         }
 
@@ -1337,7 +1379,7 @@
                 if (years < 1) return null;
                 return { name: s.name, years };
             })
-            .filter(Boolean);
+                .filter(Boolean);
 
             if (anniversaries.length) {
                 const messages = anniversaries.map(a => `🎉 Happy ${a.years}-Year Anniversary to ${a.name}!`);
@@ -1346,6 +1388,7 @@
             }
 
             renderPills();
+            renderSessionPills();
             renderSoldiers();
             renderSessions();
             renderStats();
