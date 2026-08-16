@@ -123,11 +123,24 @@
                     <input type="text" id="session-search" placeholder="Search by session name or instructor…"
                         oninput="renderSessions()">
                 </div>
+                <span class="result-count" id="session-result-count"></span>
             </div>
 
             <div class="pill-container">
                 <div class="pill-row" id="session-type-pills"></div>
                 <div class="pill-row" id="session-regiment-pills"></div>
+            </div>
+
+            <div id="session-history" class="history-wrap">
+                <div class="history-tabs">
+                    <button class="history-tab active" data-range="week">Week</button>
+                    <button class="history-tab" data-range="month">Month</button>
+                    <button class="history-tab" data-range="year">Year</button>
+                    <button class="history-tab" data-range="alltime">All-Time</button>
+                </div>
+                <div class="history-card">
+                    <div id="session-history-chart"></div>
+                </div>
             </div>
 
             <div id="session-list">
@@ -472,7 +485,8 @@
                 p.addEventListener('click', () => {
                     activeSessionRegiments.has(p.dataset.reg) ? activeSessionRegiments.delete(p.dataset.reg) : activeSessionRegiments.add(p.dataset.reg);
                     activeSessionTypes.clear(); // types and regiments are mutually exclusive
-                    renderSessionPills(); renderSessions();
+                    renderSessionPills();
+                    renderSessions();
                 }));
         }
 
@@ -483,15 +497,16 @@
             return typeOk && regOk;
         }
 
+        function sessionPassesAllFilters(s) {
+            const q = (document.getElementById('session-search').value || '').toLowerCase();
+            const matchesSearch = !q || (s['Session Name'] || '').toLowerCase().includes(q) || (s['Host'] || '').toLowerCase().includes(q);
+            return matchesSearch && sessionMatchesFilters(s);
+        }
+
         // ── Render sessions list ──
         function renderSessions() {
             const q = (document.getElementById('session-search').value || '').toLowerCase();
-            const filtered = sessions.filter(s =>
-                (!q
-                    || (s['Session Name'] || '').toLowerCase().includes(q)
-                    || (s['Host'] || '').toLowerCase().includes(q))
-                && sessionMatchesFilters(s)
-            );
+            const filtered = sessions.filter(sessionPassesAllFilters);
 
             const el = document.getElementById('session-list');
             if (!filtered.length) { el.innerHTML = '<div class="empty">No sessions found.</div>'; return; }
@@ -503,6 +518,8 @@
                 if (nameDiff !== 0) return nameDiff;
                 return (a['Host'] || '').localeCompare(b['Host'] || '');
             });
+
+            document.getElementById('session-result-count').textContent = `${filtered.length} Sessions`;
 
             el.innerHTML = filtered.map(s => {
                 const attendees = (s['Attendees'] || '').split('\n').map(a => a.trim()).filter(Boolean);
@@ -519,6 +536,187 @@
                 </div>
                 </div>`;
             }).join('');
+            renderSessionHistory();
+        }
+
+        // ── Session History ──
+        let activeHistoryRange = 'week';
+
+        function getSessionHistoryBuckets(range) {
+            const dates = sessions
+                .filter(sessionPassesAllFilters)
+                .map(s => parseDate(s['Session Date']))
+                .filter(Boolean);
+
+            const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            const today = startOfDay(new Date());
+
+            if (range === 'week') {
+                const buckets = [];
+                for (let i = 6; i >= 0; i--) {
+                    const day = new Date(today);
+                    day.setDate(day.getDate() - i);
+                    const count = dates.filter(d => startOfDay(d).getTime() === day.getTime()).length;
+                    buckets.push({
+                        label: day.toLocaleDateString('en-GB', { weekday: 'short' }),
+                        sublabel: day.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+                        count,
+                    });
+                }
+                return buckets;
+            }
+
+            if (range === 'month') {
+                const buckets = [];
+                for (let i = 3; i >= 0; i--) {
+                    const end = new Date(today);
+                    end.setDate(end.getDate() - (i * 7));
+                    const start = new Date(end);
+                    start.setDate(start.getDate() - 6);
+                    const count = dates.filter(d => { const sd = startOfDay(d); return sd >= start && sd <= end; }).length;
+                    buckets.push({
+                        label: start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+                        sublabel: `${start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} – ${end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`,
+                        count,
+                    });
+                }
+                return buckets;
+            }
+
+            if (range === 'year') {
+                const buckets = [];
+                for (let i = 11; i >= 0; i--) {
+                    const m = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                    const count = dates.filter(d => d.getFullYear() === m.getFullYear() && d.getMonth() === m.getMonth()).length;
+                    buckets.push({
+                        label: m.toLocaleDateString('en-GB', { month: 'short' }),
+                        sublabel: m.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
+                        count,
+                    });
+                }
+                return buckets;
+            }
+
+            if (range === 'alltime') {
+                if (!dates.length) return [];
+                const sorted = [...dates].sort((a, b) => a - b);
+                const quarterOf = d => Math.floor(d.getMonth() / 3);
+                let qYear = sorted[0].getFullYear(), qIdx = quarterOf(sorted[0]);
+                const endYear = today.getFullYear(), endIdx = quarterOf(today);
+                const buckets = [];
+                while (qYear < endYear || (qYear === endYear && qIdx <= endIdx)) {
+                    const count = dates.filter(d => d.getFullYear() === qYear && quarterOf(d) === qIdx).length;
+                    buckets.push({ label: `Q${qIdx + 1}`, sublabel: `Q${qIdx + 1} ${qYear}`, count });
+                    qIdx++;
+                    if (qIdx > 3) { qIdx = 0; qYear++; }
+                }
+                return buckets;
+            }
+
+            return [];
+        }
+
+        // Catmull-Rom → cubic Bezier, for a smooth (not stepped) curve
+        function smoothPath(pts) {
+            if (pts.length < 2) return '';
+            let d = `M${pts[0].x},${pts[0].y} `;
+            for (let i = 0; i < pts.length - 1; i++) {
+                const p0 = pts[i === 0 ? i : i - 1];
+                const p1 = pts[i];
+                const p2 = pts[i + 1];
+                const p3 = pts[i + 2 < pts.length ? i + 2 : i + 1];
+                const cp1x = p1.x + (p2.x - p0.x) / 6, cp1y = p1.y + (p2.y - p0.y) / 6;
+                const cp2x = p2.x - (p3.x - p1.x) / 6, cp2y = p2.y - (p3.y - p1.y) / 6;
+                d += `C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y} `;
+            }
+            return d;
+        }
+
+        function renderSessionHistory() {
+            const wrap = document.getElementById('session-history-chart');
+            if (!wrap) return;
+
+            const buckets = getSessionHistoryBuckets(activeHistoryRange);
+            const color = '#c8863a'; // matches --amber
+
+            if (!buckets.length) {
+                wrap.innerHTML = `<p style="color:var(--text-muted);text-align:center;padding:2rem 0;">No sessions found for this filter.</p>`;
+                return;
+            }
+
+            const W = wrap.clientWidth || 600;
+            const padL = 40, padR = 20, padT = 20, padB = 36;
+            const innerW = W - padL - padR;
+            const H = 220;
+            const innerH = H - padT - padB;
+
+            const maxV = Math.max(...buckets.map(b => b.count), 1);
+            const n = buckets.length;
+            const x = i => n === 1 ? padL + innerW / 2 : padL + (i / (n - 1)) * innerW;
+            const y = v => padT + innerH - (v / maxV) * innerH;
+
+            const pts = buckets.map((b, i) => ({ x: x(i), y: y(b.count) }));
+            const pathD = smoothPath(pts);
+            const dots = pts.map((p, i) => `<circle data-idx="${i}" cx="${p.x}" cy="${p.y}" r="3.5" fill="${color}"></circle>`).join('');
+
+            const showEvery = n > 12 ? Math.ceil(n / 12) : 1;
+            const xLabels = buckets.map((b, i) => {
+                if (i % showEvery !== 0 && i !== n - 1) return '';
+                return `<text x="${x(i)}" y="${padT + innerH + 18}" text-anchor="middle" font-size="10" fill="var(--text-muted)">${b.label}</text>`;
+            }).join('');
+
+            wrap.innerHTML = `
+        <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
+            <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + innerH}" stroke="var(--border)" />
+            <line x1="${padL}" y1="${padT + innerH}" x2="${padL + innerW}" y2="${padT + innerH}" stroke="var(--border)" />
+            <text x="${padL - 10}" y="${padT + 6}" text-anchor="end" font-size="12" fill="var(--text-muted)">${maxV}</text>
+            <text x="${padL - 10}" y="${padT + innerH}" text-anchor="end" font-size="12" fill="var(--text-muted)">0</text>
+            <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2"/>
+            ${dots}
+            ${xLabels}
+            <line id="hist-hover-guide" x1="0" y1="${padT}" x2="0" y2="${padT + innerH}" stroke="${color}" stroke-width="1" opacity="0" pointer-events="none"/>
+            <circle id="hist-hover-dot" r="5.5" fill="${color}" stroke="var(--bg-card)" stroke-width="2" opacity="0" pointer-events="none"/>
+            <rect id="hist-hover-overlay" x="${padL}" y="${padT}" width="${innerW}" height="${innerH}" fill="transparent" style="cursor:crosshair;"/>
+        </svg>
+        <div id="hist-tooltip" style="position:absolute;display:none;background:#13161d;border:1px solid var(--border);border-radius:4px;padding:6px 10px;font-size:0.78rem;color:var(--text);pointer-events:none;white-space:nowrap;"></div>
+    `;
+
+            const svg = wrap.querySelector('svg');
+            const hoverGuide = svg.querySelector('#hist-hover-guide');
+            const hoverDot = svg.querySelector('#hist-hover-dot');
+            const overlay = svg.querySelector('#hist-hover-overlay');
+            const tooltip = wrap.querySelector('#hist-tooltip');
+            wrap.style.position = 'relative';
+
+            function showTooltip(idx, clientX, clientY) {
+                const b = buckets[idx], p = pts[idx];
+                hoverGuide.setAttribute('x1', p.x); hoverGuide.setAttribute('x2', p.x); hoverGuide.setAttribute('opacity', 1);
+                hoverDot.setAttribute('cx', p.x); hoverDot.setAttribute('cy', p.y); hoverDot.setAttribute('opacity', 1);
+                tooltip.innerHTML = `<strong>${b.sublabel}</strong><br>${b.count} session${b.count !== 1 ? 's' : ''}`;
+                tooltip.style.display = 'block';
+
+                const rect = wrap.getBoundingClientRect();
+                const tooltipRect = tooltip.getBoundingClientRect();
+                let left = clientX - rect.left + 12;
+                if (left + tooltipRect.width > rect.width) left = clientX - rect.left - tooltipRect.width - 12;
+                tooltip.style.left = Math.max(4, left) + 'px';
+                tooltip.style.top = (clientY - rect.top - 10) + 'px';
+            }
+            function hideTooltip() {
+                hoverGuide.setAttribute('opacity', 0);
+                hoverDot.setAttribute('opacity', 0);
+                tooltip.style.display = 'none';
+            }
+
+            overlay.addEventListener('mousemove', e => {
+                const rect = svg.getBoundingClientRect();
+                const scaleX = W / rect.width;
+                const localX = (e.clientX - rect.left) * scaleX;
+                let nearest = 0, best = Infinity;
+                pts.forEach((p, i) => { const d = Math.abs(p.x - localX); if (d < best) { best = d; nearest = i; } });
+                showTooltip(nearest, e.clientX, e.clientY);
+            });
+            overlay.addEventListener('mouseleave', hideTooltip);
         }
 
         // Inject Chart.js if not already loaded
@@ -1328,6 +1526,7 @@
             const idx = ['soldiers', 'sessions', 'stats'].indexOf(name);
             document.querySelectorAll('nav button')[idx].classList.add('active');
             document.querySelectorAll('.nav-dropdown button')[idx].classList.add('active');
+            if (name === 'sessions') renderSessionHistory();
         }
 
         // ── Init ──
@@ -1390,6 +1589,14 @@
                 document.getElementById('anniversary-text').innerHTML = messages.join('<br>');
                 document.getElementById('anniversary-banner').style.display = 'block';
             }
+
+            document.getElementById('session-history').addEventListener('click', e => {
+                const tab = e.target.closest('.history-tab');
+                if (!tab) return;
+                activeHistoryRange = tab.dataset.range;
+                document.querySelectorAll('.history-tab').forEach(t => t.classList.toggle('active', t === tab));
+                renderSessionHistory();
+            });
 
             renderPills();
             renderSessionPills();
