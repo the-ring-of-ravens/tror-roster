@@ -59,6 +59,12 @@
             <button class="alert-close" onclick="this.parentElement.style.display = 'none'">✕</button>
         </div>
 
+        <div id="anniversary-banner" class="alert alert-success" style="display:none;">
+            <span id="anniversary-text"></span>
+            <button class="alert-close" onclick="this.parentElement.style.display = 'none'">✕</button>
+        </div>
+
+
         <!-- ═══ SOLDIERS TAB ═══ -->
         <div id="tab-soldiers" class="tab-panel active">
             <div class="page-heading">
@@ -1319,6 +1325,24 @@
                         document.getElementById('rankup-banner').style.display = 'block';
                     }
                 }
+            }
+
+            const today = new Date();
+            const anniversaries = soldiers.map(s => {
+                const joinDate = parseDate(s.join_date);
+                if (!joinDate) return null;
+                const isToday = joinDate.getDate() === today.getDate() && joinDate.getMonth() === today.getMonth();
+                if (!isToday) return null;
+                const years = today.getFullYear() - joinDate.getFullYear();
+                if (years < 1) return null;
+                return { name: s.name, years };
+            })
+            .filter(Boolean);
+
+            if (anniversaries.length) {
+                const messages = anniversaries.map(a => `🎉 Happy ${a.years}-Year Anniversary to ${a.name}!`);
+                document.getElementById('anniversary-text').innerHTML = messages.join('<br>');
+                document.getElementById('anniversary-banner').style.display = 'block';
             }
 
             renderPills();
