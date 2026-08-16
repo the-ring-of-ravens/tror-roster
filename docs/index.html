@@ -367,7 +367,9 @@
 
         let activeRegiments = new Set();
         let activeStatuses = new Set(['active', 'semi-active', 'inactive', 'on break']);
-
+        let activeSessionTypes = new Set();
+        let activeSessionRegiments = new Set();
+        
         function renderPills() {
             document.getElementById('regiment-pills').innerHTML = REGIMENTS.map(r => r.name.toLowerCase()).filter((v, i, a) => a.indexOf(v) === i).map(k => {
                 const t = regimentTheme(k);
