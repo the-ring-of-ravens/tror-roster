@@ -133,8 +133,7 @@
 
             <div id="session-history" class="history-wrap">
                 <div class="history-tabs">
-                    <button class="history-tab active" data-range="week">Week</button>
-                    <button class="history-tab" data-range="month">Month</button>
+                    <button class="history-tab-active" data-range="month">3 Months</button>
                     <button class="history-tab" data-range="year">Year</button>
                     <button class="history-tab" data-range="alltime">All-Time</button>
                 </div>
@@ -540,7 +539,7 @@
         }
 
         // ── Session History ──
-        let activeHistoryRange = 'week';
+        let activeHistoryRange = 'month';
 
         function getSessionHistoryBuckets(range) {
             const dates = sessions
@@ -551,24 +550,9 @@
             const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
             const today = startOfDay(new Date());
 
-            if (range === 'week') {
-                const buckets = [];
-                for (let i = 6; i >= 0; i--) {
-                    const day = new Date(today);
-                    day.setDate(day.getDate() - i);
-                    const count = dates.filter(d => startOfDay(d).getTime() === day.getTime()).length;
-                    buckets.push({
-                        label: day.toLocaleDateString('en-GB', { weekday: 'short' }),
-                        sublabel: day.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-                        count,
-                    });
-                }
-                return buckets;
-            }
-
             if (range === 'month') {
                 const buckets = [];
-                for (let i = 3; i >= 0; i--) {
+                for (let i = 12; i >= 0; i--) {
                     const end = new Date(today);
                     end.setDate(end.getDate() - (i * 7));
                     const start = new Date(end);
