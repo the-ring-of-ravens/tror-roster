@@ -369,7 +369,7 @@
         let activeStatuses = new Set(['active', 'semi-active', 'inactive', 'on break']);
         let activeSessionTypes = new Set();
         let activeSessionRegiments = new Set();
-        
+
         function renderPills() {
             document.getElementById('regiment-pills').innerHTML = REGIMENTS.map(r => r.name.toLowerCase()).filter((v, i, a) => a.indexOf(v) === i).map(k => {
                 const t = regimentTheme(k);
@@ -465,11 +465,13 @@
             document.querySelectorAll('#session-type-pills .pill').forEach(p =>
                 p.addEventListener('click', () => {
                     activeSessionTypes.has(p.dataset.type) ? activeSessionTypes.delete(p.dataset.type) : activeSessionTypes.add(p.dataset.type);
+                    activeSessionRegiments.clear(); // types and regiments are mutually exclusive
                     renderSessionPills(); renderSessions();
                 }));
             document.querySelectorAll('#session-regiment-pills .pill').forEach(p =>
                 p.addEventListener('click', () => {
                     activeSessionRegiments.has(p.dataset.reg) ? activeSessionRegiments.delete(p.dataset.reg) : activeSessionRegiments.add(p.dataset.reg);
+                    activeSessionTypes.clear(); // types and regiments are mutually exclusive
                     renderSessionPills(); renderSessions();
                 }));
         }
