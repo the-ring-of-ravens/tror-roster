@@ -28,13 +28,14 @@
             <button class="active" onclick="switchTab('soldiers')">Soldiers</button>
             <button onclick="switchTab('sessions')">Sessions</button>
             <button onclick="switchTab('stats')">Statistics</button>
-            <a href="changelog.html" class="nav-link">Changelog</a>
+            <button onclick="switchTab('changelog')">Changelog</button>
         </nav>
         <button class="hamburger" id="hamburger" aria-label="Open menu" onclick="toggleMenu()">☰</button>
         <div class="nav-dropdown" id="nav-dropdown">
             <button class="active" onclick="switchTab('soldiers'); toggleMenu()">Soldiers</button>
             <button onclick="switchTab('sessions'); toggleMenu()">Sessions</button>
             <button onclick="switchTab('stats'); toggleMenu()">Statistics</button>
+            <button onclick="switchTab('changelog')">Changelog</button>
         </div>
     </header>
 
@@ -157,6 +158,27 @@
             <div id="stats-content">
                 <div class="loading">Loading statistics…</div>
             </div>
+        </div>
+
+        <!-- ═══ CHANGELOG TAB ═══ -->
+        <div id="tab-changelog" class="tab-panel">
+            <div class="page-heading">
+                <h1>Changelog</h1>
+                <div class="amber-line"></div>
+            </div>
+
+            <div class="changelog-entry">
+                <div class="cl-date">16 August 2026</div>
+                <h2>Session History &amp; Regiment Points</h2>
+                <p>
+                    test
+                </p>
+                <div class="cl-images">
+                    <img src="images/2026-08-session-history.png" alt="Session history trendline">
+                    <img src="images/2026-08-regiment-points.png" alt="Regiment points in the soldier drawer">
+                </div>
+            </div>
+
         </div>
 
     </main>
@@ -1508,7 +1530,7 @@
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.nav-dropdown button').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + name).classList.add('active');
-            const idx = ['soldiers', 'sessions', 'stats'].indexOf(name);
+            const idx = ['soldiers', 'sessions', 'stats', 'changelog'].indexOf(name);
             document.querySelectorAll('nav button')[idx].classList.add('active');
             document.querySelectorAll('.nav-dropdown button')[idx].classList.add('active');
             if (name === 'sessions') renderSessionHistory();
