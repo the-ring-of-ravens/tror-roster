@@ -87,6 +87,27 @@
         border-bottom-color: var(--amber);
     }
 
+    nav a.nav-link {
+        display: flex;
+        align-items: center;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--text-dim);
+        font-family: var(--font-title);
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0 1.2rem;
+        text-decoration: none;
+        cursor: pointer;
+        transition: color 0.15s, border-color 0.15s;
+    }
+
+    nav a.nav-link:hover {
+        color: var(--text);
+    }
+
     .hamburger {
         display: none;
         background: none;
