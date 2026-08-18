@@ -168,6 +168,14 @@
             </div>
 
             <div class="changelog-entry">
+                <h2>A Note From the Developer</h2>
+                <p>Hello! Thanks for checking out this website! I created it to help visualize data from the Ring of Ravens. It is currently a passion project and not official, but it does remain up to date and is regularly being worked on.</p>
+                <p>If you find anything that needs to be fixed, or just want to let me know what you think, please reach out! I'd love to know your thoughts, and I'm always looking for ideas on how to make this site better.</p>
+                <p>Thanks again, and happy exploring!</p>
+                <p>~ Canary 🍋❤️</p>
+            </div>
+
+            <div class="changelog-entry">
                 <div class="cl-date">16 August 2026</div>
                 <h2>Session History</h2>
                 <p>A new session history chart has been added to the Sessions tab! It shows the number of sessions over time, with filters for session type and regiment.</p>
@@ -219,17 +227,52 @@
             </div>
 
             <div class="changelog-entry">
-                <div class="cl-date">29 July 2026</div>
-                <h2>Session Searching</h2>
-                <p>You can now search for specific training sessions instead of just scrolling through them!</p>
+                <div class="cl-date">21 July 2026</div>
+                <h2>Special Character Searching</h2>
+                <p>You can now search for names with accents and they'll show up!</p>
                 <div class="cl-images">
-                    <img src="images/2026-07-12-session-search.png" alt="Session search functionality.">
+                    <img src="images/2026-06-21-notos.png" alt="Special character searching with Notos as an example.">
                 </div>
             </div>
 
             <div class="changelog-entry">
+                <div class="cl-date">20 July 2026</div>
+                <h2>First Draft of Soldier Point Chart</h2>
+                <p>I created a line graph of a soldier's point history over time! This took me several days to perfect. There was a lot of work that had to be done behind the scenes.</p>
+                <div class="cl-images">
+                    <img src="images/2026-06-21-canary-1.png" alt="A blank point history chart.">
+                </div>
+                <p>First, I created a subpage on the statistics tab that you could navigate to from a soldier's profile. I wasn't completely set on having the profile be here, so the buttons weren't completed and the spacing was a little off.</p>
+                <div class="cl-images">
+                    <img src="images/2026-06-21-canary-2.png" alt="A soldier's point history chart with a smooth line between it.">
+                </div>
+                <p>Next, I made a line graph showing the point history over time. This was by far the most difficult part, but was mostly solved by the data entry I did beforehand. The general process for generating a graph is as follows:<br>
+                • Find the soldier's join date & all sessions attended<br>
+                • Starting at the current date and current points, work right to left<br>
+                • For each session, mark a point and then move down a step<br>
+                • If the soldier's join date is reached, stop<br>
+                • If the soldier's points reach zero, stop<br>
+                • Connect all the points with a line<br>
+                </p>
+                <p>One thing that I struggled with was getting the line to actually show up on charts with hundreds of points, such as the one below.</p>
+                <div class="cl-images">
+                    <img src="images/2026-06-21-brimstone.png" alt="A soldier's point history chart with no line between the points.">
+                </div>
+                <p>I realized this was a problem with the way the line was being drawn, and also realized that it makes more logical sense for the lines to be straight along the axises (axes?) instead of going directly from one point to the next. You're not going to earn half a point over the course of a week!</p>
+                <div class="cl-images">
+                    <img src="images/2026-06-21-canary-3.png" alt="A soldier's point history chart with straight lines following the axes between the points.">
+                </div>
+                <p>I also added markers for when each soldier ranked up. Want to know a secret? The regular rankups are just estimates, not the actual rank-up dates. When a soldier reaches a certain point threshold, the website says they get promoted whether that change is actually made in Discord or not.</p>
+                <p>This is not the case for officer rankups, though. Those are put in manually because I can't think of a reliable system to track them automatically. But since our officer team is relatively small, their rankups aren't difficult to record.</p>
+                <div class="cl-images">
+                    <img src="images/2026-06-21-brimstone-2.png" alt="A soldier's point history chart with straight lines following the axes between the points.">
+                </div>
+                <p>And the change works for all soldiers now!</p>
+            </div>
+
+            <div class="changelog-entry">
                 <h2>Coming soon...</h2>
-                <p>I'm currently going through the backlog of changes and updates I've implemented so far. Check back soon to read about all the changes and updates I've made to this website!</p>
+                <p>The changelog is currently in the works! Check back soon to read about all the changes and updates I've made to this website!</p>
             </div>
         </div>
 
