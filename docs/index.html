@@ -188,13 +188,48 @@
                 <p>I realized that we can compare dates pretty easily, and I've recorded everyone's join date already. So a simple, fun change was to compare today's date to every soldier's join date and make an anniversary message celebrating it!</p>
                 <p>It's very fitting that I finished this change on the anniversary of when I enlisted :)</p>
                 <div class="cl-images">
-                    <img src="images/2026-08-16-anniversary.png" alt="Canary's 1st anniversary!">
+                    <img src="images/2026-08-16-anniversary.png" alt="Canary's first anniversary!">
                 </div>
                 <p>I also realized I made a mistake in counting the sessions hosted, but it's fixed now! Previously I only tracked the sessions that had a valid host name, but some hosts have left TRoR (which removes their sessions from the count). So now we're at 800 sessions exactly!</p>
             </div>
 
             <div class="changelog-entry">
-                <h2>To be continued...</h2>
+                <div class="cl-date">15 August 2026</div>
+                <h2>Close Buttons</h2>
+                <p>The close button on a soldier's profile now remains at the top of the page even when scrolling! It used to stay at the top, which was tedious for mobile users to have to scroll all the way back to the top to close the profile.</p>
+                <div class="cl-images">
+                    <img src="images/2026-08-15-close.png" alt="Close button on a soldier profile that stays at the top of the page when scrolling.">
+                </div>
+                <p>Another change I began to make was to allow the alerts at the top of the page to be closed. This had a strange error where the x button appeared at the top right corner of the screen instead of where it should have been.</p>
+                <div class="cl-images">
+                    <img src="images/2026-08-15-button.png" alt="Close button appearing at top right of screen instead of on the alert.">
+                </div>
+                <p>Luckily, that issue was fixed easily! I just forgot a position property (position=relative instead of absolute).</p>
+            </div>
+
+            <div class="changelog-entry">
+                <div class="cl-date">29 July 2026</div>
+                <h2>Point Chart on Soldier Profiles</h2>
+                <p>I added a point history chart to each soldier's profile card! Now people can see their point progression over time, and view the details about their specific training sessions below.</p>
+                <div class="cl-images">
+                    <img src="images/2026-07-29-points.png" alt="Point history chart on a soldier's profile.">
+                </div>
+                <p>I originally planned for this chart to be a subsection of the statistics tab, but having to click through multiple times is not a good user experience. Plus, adding new page subsections just made everything way more complicated than it needed to be. Sometimes it's better to keep things simple!</p>
+                <p>Another fix I made in this update was fixing the information card that shows up when you hover over a specific point on the chart. It used to only show up to the right of the cursor, which meant that it would go offscreen if you went too far to the right. Now it flips if it detects that it would go out of bounds.</p>
+            </div>
+
+            <div class="changelog-entry">
+                <div class="cl-date">29 July 2026</div>
+                <h2>Session Searching</h2>
+                <p>You can now search for specific training sessions instead of just scrolling through them!</p>
+                <div class="cl-images">
+                    <img src="images/2026-07-12-session-search.png" alt="Session search functionality.">
+                </div>
+            </div>
+
+            <div class="changelog-entry">
+                <h2>Coming soon...</h2>
+                <p>I'm currently going through the backlog of changes and updates I've implemented so far. Check back soon to read about all the changes and updates I've made to this website!</p>
             </div>
         </div>
 
