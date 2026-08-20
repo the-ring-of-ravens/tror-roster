@@ -246,7 +246,7 @@
                 <div class="cl-images">
                     <img src="images/2026-06-21-canary-2.png" alt="A soldier's point history chart with a smooth line between it.">
                 </div>
-                <p>Next, I made a line graph showing the point history over time. This was by far the most difficult part, but was mostly solved by the data entry I did beforehand. The general process for generating a graph is as follows:<br>
+                <p>Next, I made a line graph showing the point history over time. This was by far the most difficult part, but was mostly solved by the data entry I did beforehand. Here's how I created the graph:<br>
                 • Find the soldier's join date & all sessions attended<br>
                 • Starting at the current date and current points, work right to left<br>
                 • For each session, mark a point and then move down a step<br>
@@ -271,13 +271,53 @@
             </div>
 
             <div class="changelog-entry">
+                <div class="cl-date">15 June 2026</div>
+                <h2>Making Things Mobile-Friendly</h2>
+                <p>Mobile-first development is really hard. Since I'm imagining that most people access the website on their computers, I pushed off this update until the last possible minute. Don't do that. That's how you get problems like this:</p>
+                <div class="cl-images">
+                    <img src="images/2026-06-15-mobile-1.png" alt="">
+                </div>
+                <p>That's what the website looked like on a mobile device. Yikes. You could scroll horizontally to see a large empty space, and the content was crushed together and all but unreadable. I made several changes to clamp down the information and keep it from escaping, and created a hamburger menu so mobile users can navigate through the tabs. That still didn't look too great but it was very late at night and I needed to sleep.</p>
+                <div class="cl-images">
+                    <img src="images/2026-06-15-mobile-2.png" alt="">
+                    <img src="images/2026-06-15-mobile-3.png" alt="">
+                </div>
+            </div>
+
+            <div class="changelog-entry">
+                <div class="cl-date">1 June 2026</div>
+                <h2>The Plan</h2>
+                <p>It took a whole month of thinking (and studying for finals), but I finally completed the plan for this website.</p>
+                <p>A few early ideas I had were to have the GitHub page somehow contain the database, or use MongoDB or a similar database website to store the data, and users would log in to submit attendance or update other information. Then I remembered: managing user accounts and keeping data safe and private on a PUBLIC GitHub site is the worst idea ever. I didn't want to deal with users, but I wanted some way for officers to securely submit sessions and update the roster if this ever did become the official roster.</p>
+                <p>Then I had a thought. Is there a way for a public website to access a private Google Sheet? If so, users could safely be added to the sheet using the same Google accounts they use to update the official roster.</p>
+                <p>And wouldn't you know it, there is a way! Here's how it all works:</p>
+                <div class="cl-images">
+                    <img src="images/2026-08-19-flowchart.png" alt="">
+                </div>
+                <p><strong>The User</strong> (on a Google account)is added to the list of members who can submit the <strong>Google Form</strong> (Did you know that's a thing? Adding individual users who can submit forms? I didn't). They input the attendance information (session name, date, host dropdown, attendees, counted) and submit the form.</p>
+                <p><strong>The Spreadsheet</strong> gets a new row added when the form is submitted. A notification is sent to the <strong>Google Apps Script</strong> "on form submission" to process the data:<br>
+                    • Check if all soldiers exist (and all names spelled correctly)<br>
+                    • If not, halt the process and flag it in the sheet and website<br>
+                    • Update the date of the most recent session for each soldier<br>
+                    • If the points are counted (✅), add a point to each soldier<br>
+                    • If they aren't counted (🟡), add a point to the host only<br>
+                    • If the session title contains a regiment name, add regiment points to all<br>
+                    • Compare each soldier's new point count to the rank key<br>
+                    • If a soldier has enough points to rank up, add to rankup list<br>
+                    • Review all sessions and update sessions hosted in the past 30 days per officer<br>
+                    • Mark the session as processed in the sheet
+                </p>
+                <p><strong>The Website</strong> is basically a pretty front-end version of the spreadsheet. It accesses the session data, the soldier data, and the rank key to calculate and display the information in a user-friendly way.</p>
+            </div>
+
+            <div class="changelog-entry">
                 <div class="cl-date">2 May 2026</div>
                 <h2>First Brainstorm</h2>
-                <p>The idea of making this website came to me during an overnight programming competition at my university. I learned that GitHub could host static websites for free! I couldn't stop thinking about it, so I wrote it down in an idea document:</p>
+                <p>The idea of making this website came to me during an overnight programming competition at my university. I learned that GitHub could host static websites for free and I couldn't stop thinking about it, so I wrote it down in what is now my website idea document:</p>
                 <div class="cl-images">
                     <img src="images/2026-04-idea.png" alt="A screenshot of the words 'Ohhhhh it would be so fun to have a TRoR website with a database of how long the person has been a part of TRoR, when they ranked up, and other fun statistics. Points gained over time would be a really fun graph to show.'">
                 </div>
-                <p>And the rest is history!</p>
+                <p>And the rest is history! Thank you so much for reading. If you're a member of TRoR and you've gotten this far, ping me in the server with just the phrase "Lemon :)"</p>
             </div>
 
             <div class="changelog-entry">
