@@ -175,7 +175,9 @@
                 <p>~ Canary 🍋❤️</p>
             </div>
             <div class="changelog-entry">
-                <h2>Coming Soon...</h2>
+                <div class="cl-date">28 August 2026</div>
+                <h2>Officer Guide</h2>
+                <p>The officer guide has been released! All officers can now access the guide to learn how to submit attendance on their own. If you need access to this guide, let me know and I'll send it over!</p>
                 <div class="cl-images">
                     <img src="images/officer-guide.png" alt="Officer Guide">
                 </div>
@@ -291,9 +293,26 @@
             </div>
 
             <div class="changelog-entry">
-                <div class="cl-date">1 June 2026</div>
+                <div class="cl-date">23 May 2026</div>
+                <h2>First Draft</h2>
+                <p>Everyone starts somewhere, right? This was the ugly phase of the website, where I just wanted a proof of concept to see if it'd even work.</p>
+                <div class="cl-images">
+                    <img src="images/2026-05-16-first-draft.png" alt="">
+                </div>
+                <p>Of course, I didn't want it looking like this forever. I started by using <a href="https://getbootstrap.com/" style="color: var(--amber)" target="_blank">Bootstrap</a>, which uses very a very clean, basic layout and is great for beginners. However, as I was working to make the design the way I wanted, I found that I wanted more control over how it looked. So a lot of the CSS styling was moved so I could have finer control over small details.</p>
+                <div class="cl-images">
+                    <img src="images/2026-05-16-new-style.png" alt="">
+                </div>
+                <p>This was also where I tried making the roster from three csv files (Soldiers, Sessions, and Ranks). It was a huge mess since csv's are difficult to work with in a text-based format, and I'd much rather use a spreadsheet. I'm very glad I was able to find a way to link the website to the Google Sheet.</p>
+                <div class="cl-images">
+                    <img src="images/2026-05-16-csv.png" alt="">
+                </div>
+            </div>
+
+            <div class="changelog-entry">
+                <div class="cl-date">16 May 2026</div>
                 <h2>The Plan</h2>
-                <p>It took a whole month of thinking (and studying for finals), but I finally completed the plan for this website.</p>
+                <p>Two weeks of thinking (and studying for finals) later, I finally completed the plan for this website.</p>
                 <p>A few early ideas I had were to have the GitHub page somehow contain the database, or use MongoDB or a similar database website to store the data, and users would log in to submit attendance or update other information. Then I remembered: managing user accounts and keeping data safe and private on a PUBLIC GitHub site is the worst idea ever. I didn't want to deal with users, but I wanted some way for officers to securely submit sessions and update the roster if this ever did become the official roster.</p>
                 <p>Then I had a thought. Is there a way for a public website to access a private Google Sheet? If so, users could safely be added to the sheet using the same Google accounts they use to update the official roster.</p>
                 <p>And wouldn't you know it, there is a way! Here's how it all works:</p>
