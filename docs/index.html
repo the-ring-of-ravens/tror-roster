@@ -283,12 +283,40 @@
                 <h2>Making Things Mobile-Friendly</h2>
                 <p>Mobile-first development is really hard. Since I'm imagining that most people access the website on their computers, I pushed off this update until the last possible minute. Don't do that. That's how you get problems like this:</p>
                 <div class="cl-images">
-                    <img src="images/2026-06-15-mobile-1.png" alt="">
+                    <img src="images/2026-06-15-mobile-1.png" alt="An image of the original website on a mobile device. The content extends past the edge of the page and looks bad.">
                 </div>
                 <p>That's what the website looked like on a mobile device. Yikes. You could scroll horizontally to see a large empty space, and the content was crushed together and all but unreadable. I made several changes to clamp down the information and keep it from escaping, and created a hamburger menu so mobile users can navigate through the tabs. That still didn't look too great but it was very late at night and I needed to sleep.</p>
                 <div class="cl-images">
-                    <img src="images/2026-06-15-mobile-2.png" alt="">
-                    <img src="images/2026-06-15-mobile-3.png" alt="">
+                    <img src="images/2026-06-15-mobile-2.png" alt="A better version of the website on mobile with a hamburger menu. Some content still goes off the page.">
+                    <img src="images/2026-06-15-mobile-3.png" alt="All content is now within the page and looks passable on mobile.">
+                </div>
+            </div>
+
+            <div class="changelog-entry">
+                <div class="cl-date">04 June 2026</div>
+                <h2>Colors Everywhere</h2>
+                <p>The website was looking really cool at this point, but it was a little boring with just the dark blue and gold color scheme. Time to add custom colors for each regiment! Now each soldier is decorated with their regiment color and the website has a bit more life!</p>
+                <div class="cl-images">
+                    <img src="images/2026-06-04-color-1.png" alt="Original screenshot showing the website without regiment colors.">
+                </div>
+                <div class="cl-images">
+                    <img src="images/2026-06-04-color-2.png" alt="Screenshot showing the regiment colors added to style.css.">
+                </div>
+                <div class="cl-images">
+                    <img src="images/2026-06-04-color-3.png" alt="Screenshot showing the website with regiment colors.">
+                </div>
+                <br>
+
+                <h2>Bug-Hunting: Single Quotes Cause Trouble</h2>
+                <p>We have several names that contain single quotes. I forgot about this early on, which caused issues with processing the names of certain soldiers (looking at you, Sky'dreader). The code took the names from the spreadsheet and inserted them directly into the HTML, which meant that when I tried clicking on a soldier's name, it would fail instead of opening the soldier pop-up.</p>
+                <div class="cl-images">
+                    <img src="images/2026-06-04-bug.png" alt="A syntax error preventing the soldier pop-up from opening.">
+                </div>
+                <div class="cl-images">
+                    <img src="images/2026-06-04-sky'dreader.png" alt="Sky'dreader's name failing to load in the soldier pop-up.">
+                </div>
+                <p>I fixed the issue by escaping the single quotes in the names before inserting them into the HTML, so now those names are clickable!</p><div class="cl-images">
+                    <img src="images/2026-06-04-sky'dreader-fixed.png" alt="Sky'dreader's name successfully loading in the soldier pop-up.">
                 </div>
             </div>
 
@@ -382,7 +410,7 @@
             'Brigadier', 'Captain', 'First Lieutenant', 'Lieutenant',
             'Command Sergeant Major', 'Sergeant Major',
             'Chief Warrant Officer 5', 'Chief Warrant Officer 4', 'Chief Warrant Officer 3',
-            'Chief Warrant Officer 2', 'Warrant Officer 1',
+            'Warrant Officer 2', 'Warrant Officer 1',
             'Master Gunnery Sergeant', 'Gunnery Sergeant', 'Senior Cornet',
             'Paladin Sergeant', 'Paladin Corporal', 'Cornet First Class', 'Cornet', 'Junior Cornet',
             'Exarch Lieutenant', 'Sergeant First Class', 'Sergeant', 'Corporal', 'Specialist',
