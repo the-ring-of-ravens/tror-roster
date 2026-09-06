@@ -169,7 +169,7 @@
 
             <div class="changelog-entry">
                 <h2>A Note From the Developer</h2>
-                <p>Hello! Thanks for checking out this website! I created it to help visualize data from the Ring of Ravens. It is currently a passion project and not official, but it does remain up to date and is regularly being worked on.</p>
+                <p>Hello! Thanks for checking out this website! I created it to help visualize data from the Ring of Ravens. It is currently a passion project and not official, but it does remain up to date as of <span id="last-updated-text" style="color: #c8863a;">[last updated]</span> and is regularly being worked on.</p>
                 <p>If you find anything that needs to be fixed, or just want to let me know what you think, please reach out! I'd love to know your thoughts, and I'm always looking for ideas on how to make this site better.</p>
                 <p>Thanks again, and happy exploring!</p>
                 <p>~ Canary 🍋❤️</p>
@@ -372,11 +372,6 @@
                 </div>
                 <p>And the rest is history! Thank you so much for reading. If you're a member of TRoR and you've gotten this far, ping me in the server with just the phrase "Lemon :)"</p>
             </div>
-
-            <div class="changelog-entry">
-                <h2>Coming soon...</h2>
-                <p>The changelog is currently in the works! Check back soon to read about all the changes and updates I've made to this website!</p>
-            </div>
         </div>
 
     </main>
@@ -443,9 +438,10 @@
         ];
 
         const SESSION_TYPES = [
-            { key: 'bootcamp', label: 'Bootcamp' },
-            { key: 'airshow', label: 'Airshow' },
-            { key: 'recruitment', label: 'Recruitment' },
+            { key: 'bootcamp', label: 'Bootcamp', keywords: ['bootcamp'] },
+            { key: 'airshow', label: 'Airshow', keywords: ['airshow'] },
+            { key: 'recruitment', label: 'Recruitment', keywords: ['recruitment'] },
+            { key: 'rp', label: 'Roleplay', keywords: ['rp', 'roleplay'] },
         ];
 
         function parseDate(val) {
@@ -697,23 +693,36 @@
 
             document.querySelectorAll('#session-type-pills .pill').forEach(p =>
                 p.addEventListener('click', () => {
-                    activeSessionTypes.has(p.dataset.type) ? activeSessionTypes.delete(p.dataset.type) : activeSessionTypes.add(p.dataset.type);
-                    activeSessionRegiments.clear(); // types and regiments are mutually exclusive
+                    const wasActive = activeSessionTypes.has(p.dataset.type);
+                    activeSessionTypes.clear(); // type row is single-select
+                    if (!wasActive) activeSessionTypes.add(p.dataset.type);
+
+                    if (p.dataset.type !== 'rp') {
+                        activeSessionRegiments.clear(); // bootcamp/airshow/recruitment are mutually exclusive with regiments, rp is not
+                    }
                     renderSessionPills(); renderSessions();
                 }));
             document.querySelectorAll('#session-regiment-pills .pill').forEach(p =>
                 p.addEventListener('click', () => {
                     activeSessionRegiments.has(p.dataset.reg) ? activeSessionRegiments.delete(p.dataset.reg) : activeSessionRegiments.add(p.dataset.reg);
-                    activeSessionTypes.clear(); // types and regiments are mutually exclusive
-                    renderSessionPills();
-                    renderSessions();
+                    activeSessionTypes.delete('bootcamp');
+                    activeSessionTypes.delete('airshow');
+                    activeSessionTypes.delete('recruitment'); // regiments clear the mutually-exclusive types, but leave 'rp' alone
+                    renderSessionPills(); renderSessions();
                 }));
         }
 
+        function matchesWholeWord(text, word) {
+            return new RegExp(`\\b${word}\\b`, 'i').test(text);
+        }
+
         function sessionMatchesFilters(s) {
-            const name = (s['Session Name'] || '').toLowerCase();
-            const typeOk = activeSessionTypes.size === 0 || [...activeSessionTypes].some(k => name.includes(k));
-            const regOk = activeSessionRegiments.size === 0 || [...activeSessionRegiments].some(k => name.includes(k));
+            const name = (s['Session Name'] || '');
+            const typeOk = activeSessionTypes.size === 0 || [...activeSessionTypes].some(k => {
+                const type = SESSION_TYPES.find(t => t.key === k);
+                return type.keywords.some(kw => matchesWholeWord(name, kw));
+            });
+            const regOk = activeSessionRegiments.size === 0 || [...activeSessionRegiments].some(k => matchesWholeWord(name, k));
             return typeOk && regOk;
         }
 
@@ -1743,6 +1752,15 @@
                 fetchSheet('regiment ranks'),
                 fetchSheet('officerRankups'),
             ]);
+
+            const lastSessionDate = sessions
+                .map(s => parseDate(s['Session Date']))
+                .filter(Boolean)
+                .reduce((max, d) => (!max || d > max) ? d : max, null);
+
+            if (lastSessionDate) {
+                document.getElementById('last-updated-text').textContent = formatDate(lastSessionDate);
+            }
 
             // Warn about unresolved sessions
             const unresolved = sessions.filter(s => {
