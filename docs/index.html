@@ -1759,7 +1759,8 @@
                 .reduce((max, d) => (!max || d > max) ? d : max, null);
 
             if (lastSessionDate) {
-                document.getElementById('last-updated-text').textContent = formatDate(lastSessionDate);
+                document.getElementById('last-updated-text').textContent =
+                    lastSessionDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
             }
 
             // Warn about unresolved sessions
