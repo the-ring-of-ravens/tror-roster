@@ -360,7 +360,7 @@
             <div class="changelog-entry">
                 <div class="cl-date">16 May 2026</div>
                 <h2>The Plan</h2>
-                <p>Two weeks of thinking (and studying for finals) later, I finally completed the plan for this website.</p>
+                <p>After two weeks of thinking (and studying for finals), I finally completed the plan for this website.</p>
                 <p>A few early ideas I had were to have the GitHub page somehow contain the database, or use MongoDB or a similar database website to store the data, and users would log in to submit attendance or update other information. Then I remembered: managing user accounts and keeping data safe and private on a PUBLIC GitHub site is the worst idea ever. I didn't want to deal with users, but I wanted some way for officers to securely submit sessions and update the roster if this ever did become the official roster.</p>
                 <p>Then I had a thought. Is there a way for a public website to access a private Google Sheet? If so, users could safely be added to the sheet using the same Google accounts they use to update the official roster.</p>
                 <p>And wouldn't you know it, there is a way! Here's how it all works:</p>
@@ -419,19 +419,11 @@
         // ── Data stores ──
         let soldiers = [], sessions = [], ranks = [], regimentRanks = [], officerRankups = [];
 
+        // ── Dynamic Constants (will be filled out on load) ──
+        let  RANK_ORDER = [];
+        let REGIMENT_TITLES = {};
+        
         // ── Constants ──
-        const RANK_ORDER = [
-            'General of the Army', 'Brigadier General', 'Colonel', 'Lieutenant Colonel', 'Major',
-            'Brigadier', 'Captain', 'First Lieutenant', 'Lieutenant',
-            'Command Sergeant Major', 'Sergeant Major',
-            'Chief Warrant Officer 5', 'Chief Warrant Officer 4', 'Chief Warrant Officer 3',
-            'Warrant Officer 2', 'Warrant Officer 1',
-            'Master Gunnery Sergeant', 'Gunnery Sergeant', 'Senior Cornet',
-            'Paladin Sergeant', 'Paladin Corporal', 'Cornet First Class', 'Cornet', 'Junior Cornet',
-            'Exarch Lieutenant', 'Sergeant First Class', 'Sergeant', 'Corporal', 'Specialist',
-            'Private First Class', 'Private Second Class', 'Private', 'Trainee',
-        ];
-
         const REGIMENTS = [
             { name: 'Airforce', key: 'airforce', motto: 'FLY OR DIE!', color: '#d4873a', border: '#8a4a1a', bg: '#2a1a08' },
             { name: 'Archery', key: 'archery', motto: 'WE BRING DEATH UNDER OUR FIRE!', color: '#d44a4a', border: '#8a2a2a', bg: '#2a0d0d' },
@@ -439,14 +431,6 @@
             { name: 'Restoration', key: 'restoration', motto: 'RESTORE THE FAITH IN ALL!', color: '#4ab870', border: '#2a6a40', bg: '#0d2010' },
             { name: 'Shield', key: 'shield', motto: 'LET IRON STRIKE IRON!', color: '#9b6bd4', border: '#4a2a8a', bg: '#1a1030' },
         ];
-
-        const REGIMENT_TITLES = {
-            navy: ['Admiral', 'Vice Admiral', 'Rear Admiral', 'Commodore', 'Commander'],
-            airforce: ['Air Chief Master Sergeant', 'Air Chief Command', 'Wing Master Sergeant'],
-            archery: ['Javelin Marshal', 'Crossbow Lieutenant'],
-            restoration: ['Surgeon General', 'Division Surgeon', 'Medical Command'],
-            shield: ['Diamond Boss', 'Crystal Boss', 'Quartz Boss', 'Obsidian Boss'],
-        };
 
         const STATUSES = [
             { key: 'active', color: '#4ab870', label: 'Active' },
@@ -612,6 +596,23 @@
         function regimentTheme(regiment) {
             const r = REGIMENTS.find(r => r.name.toLowerCase() === (regiment || '').toLowerCase());
             return r ? { color: r.color, border: r.border, bg: r.bg } : { color: '#a9a9a9', border: '#8c8c8c', bg: 'var(--bg-card)' };
+        }
+
+        function buildRankOrder() {
+            return [...ranks].reverse().map(r => r.rank).filter(Boolean);
+        }
+
+        function buildRegimentTitles() {
+            const result = {};
+            REGIMENTS.forEach(r => {
+                const officerRows = regimentRanks.filter(rr =>
+                    (rr.regiment || '').toLowerCase() === r.key &&
+                    (rr.rank_points === '' || rr.rank_points === undefined)
+                );
+                // sheet lists these lowest -> highest; reverse so highest-ranking title comes first
+                result[r.key] = officerRows.map(rr => rr.rank).reverse();
+            });
+            return result;
         }
 
         let activeRegiments = new Set();
@@ -1772,6 +1773,9 @@
                 fetchSheet('regiment ranks'),
                 fetchSheet('officerRankups'),
             ]);
+
+            RANK_ORDER = buildRankOrder();
+            REGIMENT_TITLES = buildRegimentTitles();
 
             const lastSessionDate = sessions
                 .map(s => parseDate(s['Session Date']))
