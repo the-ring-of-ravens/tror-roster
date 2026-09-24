@@ -638,6 +638,11 @@
                 return `<span class="pill${on ? ' active' : ''}" style="${on ? `background:${t.color};border-color:${t.color}` : ''}" data-reg="${k}">${REGIMENTS.find(r => r.name.toLowerCase() === k).abbr}</span>`;
             }).join('');
 
+            document.getElementById('rank-pills').innerHTML = RANK_CATEGORIES.map(cat => {
+                const on = activeRankCategories.has(cat);
+                return `<span class="pill${on ? ' active' : ''}" style="${on ? 'background:var(--amber);border-color:var(--amber)' : ''}" data-rankcat="${cat}">${cat}</span>`;
+            }).join('');
+
             const statKeys = [['active', 'Active'], ['semi-active', 'Semi-Active'], ['inactive', 'Inactive'], ['on break', 'On Break'], ['retired', 'Retired'], ['memorial', 'Memorial']];
             document.getElementById('status-pills').innerHTML = statKeys.map(([k, label]) => {
                 const on = activeStatuses.has(k);
@@ -646,20 +651,11 @@
 
             document.querySelectorAll('#regiment-pills .pill').forEach(p =>
                 p.addEventListener('click', () => { activeRegiments.has(p.dataset.reg) ? activeRegiments.delete(p.dataset.reg) : activeRegiments.add(p.dataset.reg); renderPills(); renderSoldiers(); }));
+            document.querySelectorAll('#rank-pills .pill').forEach(p =>
+                p.addEventListener('click', () => { activeRankCategories.has(p.dataset.rankcat) ? activeRankCategories.delete(p.dataset.rankcat) : activeRankCategories.add(p.dataset.rankcat); renderPills(); renderSoldiers(); }));
             document.querySelectorAll('#status-pills .pill').forEach(p =>
                 p.addEventListener('click', () => { activeStatuses.has(p.dataset.status) ? activeStatuses.delete(p.dataset.status) : activeStatuses.add(p.dataset.status); renderPills(); renderSoldiers(); }));
-        }
-
-        document.getElementById('rank-pills').innerHTML = RANK_CATEGORIES.map(cat => {
-            const on = activeRankCategories.has(cat);
-            return `<span class="pill${on ? ' active' : ''}" style="${on ? 'background:var(--amber);border-color:var(--amber)' : ''}" data-rankcat="${cat}">${cat}</span>`;
-        }).join('');
-
-        document.querySelectorAll('#rank-pills .pill').forEach(p =>
-            p.addEventListener('click', () => {
-                activeRankCategories.has(p.dataset.rankcat) ? activeRankCategories.delete(p.dataset.rankcat) : activeRankCategories.add(p.dataset.rankcat);
-                renderPills(); renderSoldiers();
-            }));
+            }
 
         // ── Render soldiers table ──
         function renderSoldiers() {
