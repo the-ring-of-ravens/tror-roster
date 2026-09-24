@@ -426,11 +426,11 @@
         
         // ── Constants ──
         const REGIMENTS = [
-            { name: 'AF', key: 'airforce', motto: 'FLY OR DIE!', color: '#d4873a', border: '#8a4a1a', bg: '#2a1a08' },
-            { name: 'ARC', key: 'archery', motto: 'WE BRING DEATH UNDER OUR FIRE!', color: '#d44a4a', border: '#8a2a2a', bg: '#2a0d0d' },
-            { name: 'NV', key: 'navy', motto: 'FOR THE HONOR OF THE LAND AND WAVES!', color: '#4a8fd4', border: '#2a4a8a', bg: '#0d1a30' },
-            { name: 'RES', key: 'restoration', motto: 'RESTORE THE FAITH IN ALL!', color: '#4ab870', border: '#2a6a40', bg: '#0d2010' },
-            { name: 'ST', key: 'shield', motto: 'LET IRON STRIKE IRON!', color: '#9b6bd4', border: '#4a2a8a', bg: '#1a1030' },
+            { name: 'Airforce', abbr: 'AF', key: 'airforce', motto: 'FLY OR DIE!', color: '#d4873a', border: '#8a4a1a', bg: '#2a1a08' },
+            { name: 'Archery', abbr: 'ARC', key: 'archery', motto: 'WE BRING DEATH UNDER OUR FIRE!', color: '#d44a4a', border: '#8a2a2a', bg: '#2a0d0d' },
+            { name: 'Navy', abbr: 'NV', key: 'navy', motto: 'FOR THE HONOR OF THE LAND AND WAVES!', color: '#4a8fd4', border: '#2a4a8a', bg: '#0d1a30' },
+            { name: 'Restoration', abbr: 'RES', key: 'restoration', motto: 'RESTORE THE FAITH IN ALL!', color: '#4ab870', border: '#2a6a40', bg: '#0d2010' },
+            { name: 'Shield', abbr: 'ST', key: 'shield', motto: 'LET IRON STRIKE IRON!', color: '#9b6bd4', border: '#4a2a8a', bg: '#1a1030' },
         ];
 
         const RANK_CATEGORIES = ['REG', 'SOV', 'WO', 'NCO', 'CO'];
@@ -522,6 +522,13 @@
                 if (pts >= parseInt(r.rank_points)) return r.rank;
             }
             return ranks[0]?.rank ?? '—';
+        }
+
+        // ── Derive rank category from soldier ──
+        function getRankCategory(soldier) {
+            const rankName = getRank(soldier);
+            const match = ranks.find(r => r.rank === rankName);
+            return match ? (match.ranking || '').toUpperCase() : '';
         }
 
         function getRegimentRank(soldier) {
@@ -628,7 +635,7 @@
             document.getElementById('regiment-pills').innerHTML = REGIMENTS.map(r => r.name.toLowerCase()).filter((v, i, a) => a.indexOf(v) === i).map(k => {
                 const t = regimentTheme(k);
                 const on = activeRegiments.has(k);
-                return `<span class="pill${on ? ' active' : ''}" style="${on ? `background:${t.color};border-color:${t.color}` : ''}" data-reg="${k}">${REGIMENTS.find(r => r.name.toLowerCase() === k).name}</span>`;
+                return `<span class="pill${on ? ' active' : ''}" style="${on ? `background:${t.color};border-color:${t.color}` : ''}" data-reg="${k}">${REGIMENTS.find(r => r.name.toLowerCase() === k).abbr}</span>`;
             }).join('');
 
             const statKeys = [['active', 'Active'], ['semi-active', 'Semi-Active'], ['inactive', 'Inactive'], ['on break', 'On Break'], ['retired', 'Retired'], ['memorial', 'Memorial']];
@@ -1373,12 +1380,6 @@
                 if (soldier.title && soldier.title.trim()) return soldier.title.trim();
                 const rankName = getRank(soldier);
                 return ranks.find(r => r.rank === rankName)?.abbreviation || rankName;
-            }
-
-            function getRankCategory(soldier) {
-                const rankName = getRank(soldier);
-                const match = ranks.find(r => r.rank === rankName);
-                return match ? (match.ranking || '').toUpperCase() : '';
             }
 
             function statusCounts(memberList) {
