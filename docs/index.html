@@ -1654,6 +1654,43 @@
             return parts.join(', ');
         }
 
+        let timebadges = [];
+
+        function monthsSince(date) {
+            const now = new Date();
+            let m = (now.getFullYear() - date.getFullYear()) * 12 + (now.getMonth() - date.getMonth());
+            if (now.getDate() < date.getDate()) m--;
+            return m;
+        }
+
+        // ── Find badges from badges tab (time-based) ──
+        function calculateTimeBadges(){
+            const join = parseDate(soldier.join_date);
+            if (!join) return [];
+            const served = monthsSince(join);
+            return timeBadges
+                .map(b => ({
+                    label: (b.name || '').toString().trim(),
+                    months: parseInt(b.months) || 0,
+                    description: b.description || '',
+                }))
+                .filter(b => b.label && !isNaN(b.months) && served >= b.months)
+                .sort((a, b) => a.months - b.months)
+        }
+
+        // ── Find badges from ranks tab (points-based) ──
+        function calculatePointsBadges(){
+            const idx = RANK_ORDER.indexOf(getRank(soldier));
+            if (idx === -1) return []; // unknown title, no rank badges
+            return ranks
+            .filter (r => (r.badge || '').toString().trim())
+            .filter (r => {
+                const badgeIdx = RANK_ORDER.indexOf(r.rank);
+                return badgeIdx !== -1 && idx <= badgeIdx;
+            })
+            .map (r => ({ label: r.badge.toString().trim(), description: r.description || '' }));
+        }
+
         // ── Drawer: open soldier ──
         function openSoldier(encodedName) {
             const name = decodeURIComponent(encodedName);
@@ -1666,6 +1703,9 @@
             const hosted = attended.filter(ss => (ss['Host'] || '').toLowerCase().trim() === name.toLowerCase().trim());
             const attendedOnly = attended.filter(ss => (ss['Host'] || '').toLowerCase().trim() !== name.toLowerCase().trim());
             const theme = regimentTheme(s.regiment);
+            const earnedBadges = [...calculateTimeBadges(), ...calculatePointsBadges()];
+
+            const badgeHtml = earnedBadges.map(b => `<span class="badge" ${b.description ? `title="${b.description}"` : ''}>${b.label}</span>`).join(' ');
 
             const content = `
             <div style="height:3px; background:${theme.color}; margin:-0.5rem -1.5rem 1.5rem;"></div>
@@ -1673,9 +1713,7 @@
             <div class="rank-line" style="color:${theme.color}">${rank} · ${s.regiment || 'GA'}</div>
             ${badge(createStatus(s))}
             <br>
-            <span class = "badge" title="test">🎖️ T1 Veteran</span>
-            <br>
-            <span class = "badge" title="test">★ CO Completion</span>
+            ${badgeHtml}
 
             <div class="drawer-section">
                 <h3>Points History</h3>
@@ -1802,6 +1840,7 @@
                 fetchSheet('ranks'),
                 fetchSheet('regiment ranks'),
                 fetchSheet('officerRankups'),
+                fetchSheet('badges'),
             ]);
 
             RANK_ORDER = buildRankOrder();
