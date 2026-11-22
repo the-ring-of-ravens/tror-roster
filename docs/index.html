@@ -1654,7 +1654,7 @@
             return parts.join(', ');
         }
 
-        let timebadges = [];
+        let timeBadges = [];
 
         function monthsSince(date) {
             const now = new Date();
@@ -1664,14 +1664,14 @@
         }
 
         // ── Find badges from badges tab (time-based) ──
-        function calculateTimeBadges(){
+        function calculateTimeBadges(soldier){
             const join = parseDate(soldier.join_date);
             if (!join) return [];
             const served = monthsSince(join);
             return timeBadges
                 .map(b => ({
                     label: (b.name || '').toString().trim(),
-                    months: parseInt(b.months) || 0,
+                    months: parseInt(b['duration (months)']),
                     description: b.description || '',
                 }))
                 .filter(b => b.label && !isNaN(b.months) && served >= b.months)
@@ -1679,7 +1679,7 @@
         }
 
         // ── Find badges from ranks tab (points-based) ──
-        function calculatePointsBadges(){
+        function calculatePointsBadges(soldier){
             const idx = RANK_ORDER.indexOf(getRank(soldier));
             if (idx === -1) return []; // unknown title, no rank badges
             return ranks
@@ -1703,7 +1703,7 @@
             const hosted = attended.filter(ss => (ss['Host'] || '').toLowerCase().trim() === name.toLowerCase().trim());
             const attendedOnly = attended.filter(ss => (ss['Host'] || '').toLowerCase().trim() !== name.toLowerCase().trim());
             const theme = regimentTheme(s.regiment);
-            const earnedBadges = [...calculateTimeBadges(), ...calculatePointsBadges()];
+            const earnedBadges = [...calculateTimeBadges(s), ...calculatePointsBadges(s)];
 
             const badgeHtml = earnedBadges.map(b => `<span class="badge" ${b.description ? `title="${b.description}"` : ''}>${b.label}</span>`).join(' ');
 
@@ -1834,7 +1834,7 @@
 
         // ── Init ──
         async function init() {
-            [soldiers, sessions, ranks, regimentRanks, officerRankups] = await Promise.all([
+            [soldiers, sessions, ranks, regimentRanks, officerRankups, timeBadges] = await Promise.all([
                 fetchSheet('soldiers'),
                 fetchSheet('sessions'),
                 fetchSheet('ranks'),
