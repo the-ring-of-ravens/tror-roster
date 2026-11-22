@@ -1672,7 +1672,7 @@
                 .map(b => ({
                     label: (b.name || '').toString().trim(),
                     months: parseInt(b['duration (months)']),
-                    description: b.description || '',
+                    description: `Member for ${parseInt(b['duration (months)'])} months`,
                 }))
                 .filter(b => b.label && !isNaN(b.months) && served >= b.months)
                 .sort((a, b) => a.months - b.months)
