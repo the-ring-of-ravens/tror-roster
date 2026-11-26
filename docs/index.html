@@ -177,6 +177,21 @@
             </div>
 
             <div class="changelog-entry">
+                <div class="cl-date">25 November 2026</div>
+                <h2>Badges</h2>
+                <p>Badges are now added to each soldier's profile! Now you can see what you've earned, specifically how long you've been in the Ravens and how many points you've gained.</p>
+                <div class="cl-images">
+                    <img src="images/2026-11-25-badges.png" alt="Badges added to Brimstone's soldier tab.">
+                </div>
+                <h2>Bug Hunting: Semi-Active Scandal!</h2>
+                <p>While demoing the site to Puma, I encountered the strangest bug where they were listed as semi-active when they had attended a session just 11 days prior.</p>
+                <div class="cl-images">
+                    <img src="images\2026-11-25-puma-semi-active.png" alt="An image of Puma being semi-active, the last session hosted on 14 November 2026.">
+                </div>
+                <p>I'm still not sure what went wrong, but I think it has something to do with comparing the last session date to the join date. I adjusted the code so that it just checks if there is a last session date instead of comparing it with the join date, and the bug has magically disappeared!</p>
+            </div>
+
+            <div class="changelog-entry">
                 <div class="cl-date">23 September 2026</div>
                 <h2>Rank Tags</h2>
                 <p>Rank tags have been added to the soldier tab! Now you can filter soldiers by their rank (REG, SOV, WO, NCO, CO). This is compatible with the existing regiment and status filters!</p>
