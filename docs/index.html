@@ -592,8 +592,7 @@
 
 
             // get the join date & last session date, keep the most recent
-            let lastActive = soldier.join_date;
-            lastActive = soldier.last_session > lastActive ? soldier.last_session : lastActive;
+            let lastActive = soldier.last_session ? soldier.last_session : soldier.join_date;
 
             // 6 months of no session = semi-active, 12 months = inactive
             if (lastActive) {
